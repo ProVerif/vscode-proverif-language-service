@@ -1,0 +1,10 @@
+free c: channel.
+
+free Cocks: bitstring[private].
+free RSA: bitstring[private].
+
+query attacker(RSA).
+query attacker(Cocks)
+
+process
+    out(c, RSA); 0

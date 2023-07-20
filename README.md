@@ -8,6 +8,8 @@ Use in combination with https://github.com/georgio/proverif-vscode to get syntax
 
 Ensure you have `ProVerif` installed, and it is in your `$PATH` (i.e. when entering `proverif` in your console, the tool executes).
 
+You can install the extension by downloading the `vsix` of the [latest release](https://github.com/famoser/vscode-proverif-language-service/releases) and dragging the file inside the extension panel in VSCode. 
+
 ## Functionality
 
 Under the hood, this language server simply invokes `proverif` over the currently edited file. 

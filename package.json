@@ -16,6 +16,22 @@
 		"onLanguage:pv"
 	],
 	"main": "./client/out/extension",
+    "contributes": {
+        "languages": [
+            {
+                "id": "pv",
+                "aliases": [
+                    "ProVerif",
+                    "pv"
+                ],
+                "extensions": [
+                    ".pv",
+                    ".pvl",
+                    ".pcv"
+                ]
+            }
+        ]
+    },
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -b",

@@ -1,15 +1,15 @@
 {
-	"name": "lsp-sample-server",
-	"description": "Example implementation of a language server in node.",
+	"name": "vscode-proverif-language-service-server",
+	"description": "A simple ProVerif language server",
 	"version": "1.0.0",
-	"author": "Microsoft Corporation",
+	"author": "Florian Moser",
 	"license": "MIT",
 	"engines": {
 		"node": "*"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/Microsoft/vscode-extension-samples"
+		"url": "https://github.com/famoser/vscode-proverif-language-service"
 	},
 	"dependencies": {
 		"vscode-languageserver": "^8.1.0",

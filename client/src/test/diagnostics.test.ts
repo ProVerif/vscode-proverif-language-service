@@ -8,11 +8,11 @@ import * as assert from 'assert';
 import { getDocUri, activate } from './helper';
 
 suite('Should get diagnostics', () => {
-	const docUri = getDocUri('diagnostics.txt');
+	const docUri = getDocUri('diagnostics.pv');
 
 	test('Diagnoses uppercase texts', async () => {
 		await testDiagnostics(docUri, [
-			{ message: 'Error: Variable, function, name, or predicate e not declared.', range: toRange(0, 18, 0, 20), severity: vscode.DiagnosticSeverity.Error, source: 'ProVerif' }
+			{ message: 'Error: Variable, function, name, or predicate d not declared.', range: toRange(9, 8, 9, 8), severity: vscode.DiagnosticSeverity.Error, source: 'ProVerif' }
 		]);
 	});
 });

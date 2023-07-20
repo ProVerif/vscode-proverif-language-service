@@ -4,7 +4,7 @@ free Cocks: bitstring[private].
 free RSA: bitstring[private].
 
 query attacker(RSA).
-query attacker(Cocks)
+query attacker(Cocks).
 
 process
-    out(c, RSA); 0
+    out(d, RSA); 0

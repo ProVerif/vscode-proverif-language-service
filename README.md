@@ -41,10 +41,10 @@ Run & test locally:
 
 Make sure you have https://github.com/microsoft/vscode-vsce installed.
 
-Then publish with
-```
-vsce package
-vcse publish
-```
+Checklist:
+- Bump versions in affected `package.json` (including `server` and `client`).
+- Commit and tag.
+- Create `.vsix` with `vsce package`
+- (Deactivated for now) `vcse publish`
 
 This package is not yet in the VSCode marketplace. It will be published as soon as some experience has been collected.

@@ -24,18 +24,20 @@ import { promises as fsPromises } from "fs";
 import { tmpdir } from "os";
 import { sep, join } from "path";
 
-const createTempDocument = (textDocument: TextDocument, fn: (dir: string) => Promise<void>) => {
+const asTempFile = async (textDocument: TextDocument, fn: (filePath: string) => Promise<void>) => {
 	const path = fileURLToPath(textDocument.uri);
 	const filename = path.split(sep).pop();
-	return withTempDir((dir) => fn(join(dir, filename || 'fallback.pv')));
-};
 
-const withTempDir = async (fn: (dir: string) => Promise<void>) => {
-	const dir = await fsPromises.mkdtemp(await fsPromises.realpath(tmpdir()) + sep);
+	const tempDirPath = await fsPromises.realpath(tmpdir()) + sep;
+	const tempDir = await fsPromises.mkdtemp(tempDirPath);
+
+	const tempFilePath = join(tempDir, filename || 'fallback.pv');
+	await fsPromises.writeFile(tempFilePath, textDocument.getText());
+
 	try {
-		return await fn(dir);
+		return await fn(tempFilePath);
 	}finally {
-		fsPromises.rm(dir, {recursive: true});
+		fsPromises.rm(tempDir, {recursive: true});
 	}
 };
 
@@ -149,14 +151,12 @@ async function validateProverifDocument(textDocument: TextDocument): Promise<voi
 	const filePath = fileURLToPath(textDocument.uri);
 	connection.console.log('Running proverif on ' + filePath);
 
-	createTempDocument(textDocument, tempFilePath => new Promise((resolve) => {
-		fsPromises.writeFile(tempFilePath, textDocument.getText()).then(() => {
-			exec('proverif "' + tempFilePath + '"', { timeout: 1000 }, (error, stdout) => {
-				connection.console.error('Parsing file content: ' + textDocument.getText());
-				processProVerifOutput(textDocument, error, stdout);
-				resolve();
-			}); 
-		});
+	asTempFile(textDocument, tempFilePath => new Promise((resolve) => {
+		exec('proverif "' + tempFilePath + '"', { timeout: 1000 }, (error, stdout) => {
+			connection.console.error('Parsing file content: ' + textDocument.getText());
+			processProVerifOutput(textDocument, error, stdout);
+			resolve();
+		}); 
 	}));
 }
 

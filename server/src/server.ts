@@ -106,21 +106,14 @@ const getRangeFromPositionString = (positionString: string): Range|undefined => 
 	return undefined;
 };
 
-const processProVerifOutput = (textDocument: TextDocument, error: ExecException | null, stdout: string): void => {
-	connection.console.error(stdout);
-	if (!error) {
-		// if execution successful, nothing to diagnose
-		connection.sendDiagnostics({ uri: textDocument.uri, diagnostics: [] });
-		return;
-	}
-
+const parseDiagnostic = (error: ExecException, stdout: string): Diagnostic|undefined => {
 	// syntax errors in stdout
 	const lines = stdout.split(/\n/);
 	while (lines.length > 0 && !lines[0].startsWith('File "')) {
 		lines.shift();
 	}
 	if (lines.length < 2) {
-		connection.console.error('Different error than expected: ' + error);
+		connection.console.error('Unknown error: ' + error);
 		return;
 	}
 
@@ -128,20 +121,28 @@ const processProVerifOutput = (textDocument: TextDocument, error: ExecException 
 	const errorLine = lines[1];
 	const range = getRangeFromPositionString(positionLine);
 	if (!range) {
-		connection.console.error('Cannot parse location of error: ' + positionLine);
+		connection.console.error('Failed to parse error location: ' + positionLine);
 		return;
 	}
 
-	const diagnostic: Diagnostic = {
+	return {
 		severity: DiagnosticSeverity.Error,
 		range,
 		message: errorLine,
 		source: 'ProVerif'
 	};
+};
 
-	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics: [diagnostic] });
+const processProVerifOutput = (textDocument: TextDocument, error: ExecException | null, stdout: string): void => {
+	const diagnostics: Diagnostic[] = [];
+	if (error) {
+		const diagnostic = parseDiagnostic(error, stdout);
+		if (diagnostic) {
+			diagnostics.push(diagnostic);
+		}
+	}
 
-	return;
+	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
 };
 
 async function validateProverifDocument(textDocument: TextDocument): Promise<void> {

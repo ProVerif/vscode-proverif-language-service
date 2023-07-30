@@ -25,5 +25,7 @@ Checklist:
 - Commit and tag.
 - `vsce package` to create the `.vsix` 
 - `vsce publish` to publish the new version to the marketplace
+- Upload the extension to GitHub
+- Upload the extension to https://open-vsx.org/
 
 If you are doing this for the first time on your machine, you need to login with `vsce login florianalexandermoser` with an authentication token from [here](https://famoser.visualstudio.com/_usersSettings/tokens). 

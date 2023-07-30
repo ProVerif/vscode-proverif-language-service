@@ -8,7 +8,7 @@
 		"type": "git",
 		"url": "https://github.com/famoser/vscode-proverif-language-service"
 	},
-	"publisher": "famoser",
+	"publisher": "florianalexandermoser",
 	"engines": {
 		"vscode": "^1.75.0"
 	},

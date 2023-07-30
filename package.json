@@ -1,7 +1,7 @@
 {
 	"name": "vscode-proverif-language-service",
-    "displayName": "ProVerif",
-	"description": "ProVerif Language Service",
+    "displayName": "ProVerif Language Service",
+	"description": "ProVerif Syntax Checker",
 	"author": "Florian Moser",
 	"icon": "img/icon.png",
 	"license": "MIT",

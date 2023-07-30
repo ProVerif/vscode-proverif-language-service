@@ -23,7 +23,7 @@ Make sure you have https://github.com/microsoft/vscode-vsce installed.
 Checklist:
 - Bump versions in affected `package.json` (including `server` and `client`).
 - Commit and tag.
-- Create `.vsix` with `vsce package`
-- `vcse publish`
+- `vsce package` to create the `.vsix` 
+- `vsce publish` to publish the new version to the marketplace
 
 If you are doing this for the first time on your machine, you need to login with `vsce login florianalexandermoser` with an authentication token from [here](https://famoser.visualstudio.com/_usersSettings/tokens). 

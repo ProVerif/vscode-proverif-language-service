@@ -1,9 +1,11 @@
 {
 	"name": "vscode-proverif-language-service",
-	"description": "A very dumb language server for ProVerif",
+    "displayName": "ProVerif",
+	"description": "ProVerif Language Service",
 	"author": "Florian Moser",
+	"icon": "img/icon.png",
 	"license": "MIT",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/famoser/vscode-proverif-language-service"

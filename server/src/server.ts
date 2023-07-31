@@ -34,7 +34,7 @@ const asTempFile = async (uri: DocumentUri, content: string, appendFileEnding: u
 
 	const tempFilePath = join(tempDir, filename);
 	await fsPromises.writeFile(tempFilePath, content);
-	connection.console.info('Stored temporary file at ' + tempFilePath);
+	connection.console.info('Stored temporary file at ' + tempFilePath + ' with content\n' + content);
 
 	try {
 		return await fn(tempFilePath);
@@ -151,20 +151,32 @@ const processProVerifOutput = (textDocument: TextDocument, error: ExecException 
 
 async function validateProverifDocument(textDocument: TextDocument): Promise<void> {
 	const filePath = fileURLToPath(textDocument.uri);
-	connection.console.log('Running proverif on ' + filePath);
+	connection.console.log('Processing ' + filePath);
 
-	let uri = textDocument.uri;
 	let content = textDocument.getText();
 	let appendFileEnding: string|undefined = undefined;
-	if (uri.endsWith('.pvl')) {
+	if (textDocument.uri.endsWith('.pvl')) {
 		content += '\nprocess\n\t0';
-		uri = uri.substring(0, uri.length-1);
 		appendFileEnding = '.pv';
+		
+		connection.console.log('Transformed .pvl to standalone .pv.');
 	}
 
-	asTempFile(uri, content, appendFileEnding, tempFilePath => new Promise((resolve) => {
-		exec('proverif "' + tempFilePath + '"', { timeout: 1000 }, (error, stdout) => {
-			connection.console.info('Parsing file content: ' + textDocument.getText());
+	const libs: string[] = [];
+	const matches = content.matchAll(/\(\* -lib (.+)\.pvl/g);
+	for (const match of matches) {
+		libs.push(match[1]);
+
+		connection.console.log(`Found depending library ${match[1]}.pvl.`);
+	}
+
+	asTempFile(textDocument.uri, content, appendFileEnding, tempFilePath => new Promise((resolve) => {
+		const folder = filePath.split(sep).slice(0, -1).join(sep);
+		const libArguments = libs.map(lib => '-lib ' + folder + sep + lib).join(" ");
+		const proverifInvocation = `proverif ${libArguments} ${tempFilePath}`;
+		connection.console.info('Invoking ' + proverifInvocation);
+
+		exec(proverifInvocation, { timeout: 1000 }, (error, stdout) => {
 			processProVerifOutput(textDocument, error, stdout);
 			resolve();
 		}); 

@@ -32,4 +32,4 @@ jobs:
         run: npm run compile
 
       - name: Run Unit Tests
-        run: npm run test
+        run: xvfb-run -a npm run test

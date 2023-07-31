@@ -14,6 +14,7 @@ import {
 } from 'vscode-languageserver/node';
 
 import {
+	DocumentUri,
 	TextDocument
 } from 'vscode-languageserver-textdocument';
 
@@ -24,15 +25,16 @@ import { promises as fsPromises } from "fs";
 import { tmpdir } from "os";
 import { sep, join } from "path";
 
-const asTempFile = async (textDocument: TextDocument, fn: (filePath: string) => Promise<void>) => {
-	const path = fileURLToPath(textDocument.uri);
-	const filename = path.split(sep).pop();
+const asTempFile = async (uri: DocumentUri, content: string, appendFileEnding: undefined|string, fn: (filePath: string) => Promise<void>) => {
+	const path = fileURLToPath(uri);
+	const filename = (path.split(sep).pop() || 'fallback.pv') + (appendFileEnding ?? '');
 
 	const tempDirPath = await fsPromises.realpath(tmpdir()) + sep;
 	const tempDir = await fsPromises.mkdtemp(tempDirPath);
 
-	const tempFilePath = join(tempDir, filename || 'fallback.pv');
-	await fsPromises.writeFile(tempFilePath, textDocument.getText());
+	const tempFilePath = join(tempDir, filename);
+	await fsPromises.writeFile(tempFilePath, content);
+	connection.console.info('Stored temporary file at ' + tempFilePath);
 
 	try {
 		return await fn(tempFilePath);
@@ -151,9 +153,18 @@ async function validateProverifDocument(textDocument: TextDocument): Promise<voi
 	const filePath = fileURLToPath(textDocument.uri);
 	connection.console.log('Running proverif on ' + filePath);
 
-	asTempFile(textDocument, tempFilePath => new Promise((resolve) => {
+	let uri = textDocument.uri;
+	let content = textDocument.getText();
+	let appendFileEnding: string|undefined = undefined;
+	if (uri.endsWith('.pvl')) {
+		content += '\nprocess\n\t0';
+		uri = uri.substring(0, uri.length-1);
+		appendFileEnding = '.pv';
+	}
+
+	asTempFile(uri, content, appendFileEnding, tempFilePath => new Promise((resolve) => {
 		exec('proverif "' + tempFilePath + '"', { timeout: 1000 }, (error, stdout) => {
-			connection.console.error('Parsing file content: ' + textDocument.getText());
+			connection.console.info('Parsing file content: ' + textDocument.getText());
 			processProVerifOutput(textDocument, error, stdout);
 			resolve();
 		}); 

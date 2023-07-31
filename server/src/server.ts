@@ -21,11 +21,11 @@ import {
 import  { ExecException, exec } from "child_process";
 import { fileURLToPath } from "url";
 
-import { promises as fsPromises } from "fs";
+import { promises as fsPromises, existsSync } from "fs";
 import { tmpdir } from "os";
 import { sep, join } from "path";
 
-const asTempFile = async (uri: DocumentUri, content: string, appendFileEnding: undefined|string, fn: (filePath: string) => Promise<void>) => {
+const asTempFile = async <T>(uri: DocumentUri, content: string, appendFileEnding: undefined|string, fn: (filePath: string) => Promise<T>) => {
 	const path = fileURLToPath(uri);
 	const filename = (path.split(sep).pop() || 'fallback.pv') + (appendFileEnding ?? '');
 
@@ -137,7 +137,7 @@ const parseDiagnostic = (error: ExecException, stdout: string): Diagnostic|undef
 	};
 };
 
-const processProVerifOutput = (textDocument: TextDocument, error: ExecException | null, stdout: string): void => {
+const processProVerifOutput = (error: ExecException | null, stdout: string) => {	
 	const diagnostics: Diagnostic[] = [];
 	if (error) {
 		const diagnostic = parseDiagnostic(error, stdout);
@@ -146,13 +146,10 @@ const processProVerifOutput = (textDocument: TextDocument, error: ExecException 
 		}
 	}
 
-	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
+	return { diagnostics };
 };
 
-async function validateProverifDocument(textDocument: TextDocument): Promise<void> {
-	const filePath = fileURLToPath(textDocument.uri);
-	connection.console.log('Processing ' + filePath);
-
+const readDocument = (textDocument: TextDocument) => {
 	let content = textDocument.getText();
 	let appendFileEnding: string|undefined = undefined;
 	if (textDocument.uri.endsWith('.pvl')) {
@@ -162,25 +159,60 @@ async function validateProverifDocument(textDocument: TextDocument): Promise<voi
 		connection.console.log('Transformed .pvl to standalone .pv.');
 	}
 
-	const libs: string[] = [];
-	const matches = content.matchAll(/\(\* -lib (.+)\.pvl/g);
-	for (const match of matches) {
-		libs.push(match[1]);
+	return { content, appendFileEnding };
+};
 
-		connection.console.log(`Found depending library ${match[1]}.pvl.`);
+const parseLibraryDependencies = (filePath: string, content: string) => {
+	const diagnostics: Diagnostic[] = [];
+	
+	const folder = filePath.split(sep).slice(0, -1).join(sep);
+
+	const libs: string[] = [];
+	const matches = content.matchAll(/\(\* +-lib (.+)\.pvl/g);
+	for (const match of matches) {
+		const expectedFilename = match[1] + '.pvl';
+		const expectedLocation = folder + sep + expectedFilename;
+		if (existsSync(expectedLocation)) {
+			libs.push(expectedLocation);
+		} else {
+			const linesUntilError = content.substring(0, match.index).split(/\r?\n/);
+			const matchingLine = linesUntilError.pop();
+			const endError = (matchingLine?.length ?? 0) + match[0].length;
+			diagnostics.push({
+				severity: DiagnosticSeverity.Warning,
+				range: Range.create(linesUntilError.length, endError - expectedFilename.length, linesUntilError.length, endError),
+				message: 'Library not found at '+expectedLocation,
+				source: 'ProVerif Language Service'
+			});
+		}
 	}
 
-	asTempFile(textDocument.uri, content, appendFileEnding, tempFilePath => new Promise((resolve) => {
-		const folder = filePath.split(sep).slice(0, -1).join(sep);
-		const libArguments = libs.map(lib => '-lib ' + folder + sep + lib).join(" ");
+	const libArguments = libs.map(lib => '-lib ' + lib).join(" ");
+
+	return { libArguments, diagnostics };
+};
+
+async function validateProverifDocument(textDocument: TextDocument): Promise<void> {
+	const filePath = fileURLToPath(textDocument.uri);
+	connection.console.log('Processing ' + filePath);
+
+	const { content, appendFileEnding } = readDocument(textDocument);
+	const { libArguments, diagnostics: libraryDiagnostics } = parseLibraryDependencies(filePath, content);
+
+
+	const proverifDiagnostics = await asTempFile<Diagnostic[]>(textDocument.uri, content, appendFileEnding, tempFilePath => new Promise((resolve) => {
 		const proverifInvocation = `proverif ${libArguments} ${tempFilePath}`;
 		connection.console.info('Invoking ' + proverifInvocation);
 
 		exec(proverifInvocation, { timeout: 1000 }, (error, stdout) => {
-			processProVerifOutput(textDocument, error, stdout);
-			resolve();
+			const { diagnostics: proverifDiagnostics } = processProVerifOutput(error, stdout);
+			resolve(proverifDiagnostics);
 		}); 
 	}));
+
+
+	const diagnostics = libraryDiagnostics.concat(proverifDiagnostics);
+	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
 }
 
 // functionality extension points:

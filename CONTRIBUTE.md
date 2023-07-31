@@ -29,3 +29,10 @@ Checklist:
 - Upload the extension to https://open-vsx.org/
 
 If you are doing this for the first time on your machine, you need to login with `vsce login florianalexandermoser` with an authentication token from [here](https://famoser.visualstudio.com/_usersSettings/tokens). 
+
+## Development path
+
+To make the extension more powerful, following features should be considered:
+
+- [ ] Integrate with [VSCode testing](https://code.visualstudio.com/api/extension-guides/testing) to show output of proverif nicely
+- [ ] Add go to definition functionality (likely needs proper parser (and therefore grammar) of ProVerif) 

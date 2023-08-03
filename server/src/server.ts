@@ -87,10 +87,6 @@ const getDocumentSettings = (resource: string): Thenable<ProVerifSettings> => {
 	return result;
 };
 
-// Only keep settings for open documents
-
-// The content of a text document has changed. This event is emitted
-// when the text document first opened or when its content has changed.
 documents.onDidChangeContent(async change => {
     const filePath = fileURLToPath(change.document.uri);
     connection.console.log('Processing ' + filePath);

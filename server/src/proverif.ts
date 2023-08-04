@@ -49,7 +49,11 @@ const getRangeFromPositionString = (positionString: string): Range | undefined =
     return undefined;
 };
 
-const parseDiagnostic = (connection: Connection, error: ExecException, stdout: string): Diagnostic | undefined => {
+export const parseDiagnostic = (connection: Connection, content: string, libraryDependecies: LibraryDependency[], error: ExecException|null, stdout: string): Diagnostic[] => {
+    if (!error) {
+        return [];
+    }
+
     // syntax errors in stdout
     const lines = stdout.split(/\n/);
     while (lines.length > 0 && !lines[0].startsWith('File "')) {
@@ -57,35 +61,43 @@ const parseDiagnostic = (connection: Connection, error: ExecException, stdout: s
     }
     if (lines.length < 2) {
         connection.console.error('Unknown error: ' + error);
-        return;
+        return [];
     }
 
     const positionLine = lines[0];
     const errorLine = lines[1];
+
+    // check if error in library (not in actual file)
+    const matchFile = positionLine.match(/File "(.+)\.pvl"/);
+    if (matchFile) {
+        const matchingDependencies = libraryDependecies.filter(entry => entry.fullPath === matchFile[1]+LIB_FILE_ENDING);
+        const diagnostics = [];
+        for (const matchingDependency of matchingDependencies) {
+            const range = libraryMatchToRange(content, matchingDependency.match);
+            diagnostics.push({
+                severity: DiagnosticSeverity.Warning,
+                range,
+                message: errorLine,
+                source: 'ProVerif Language Service'
+            });
+        }
+
+        return diagnostics;
+    }
+
     const range = getRangeFromPositionString(positionLine);
     if (!range) {
         connection.console.error('Failed to parse error location: ' + positionLine);
-        return;
+        return [];
     }
 
-    return {
+    const parsingError = {
         severity: DiagnosticSeverity.Error,
         range,
         message: errorLine,
         source: 'ProVerif'
     };
-};
-
-export const processOutput = (connection: Connection, error: ExecException | null, stdout: string) => {
-    const diagnostics: Diagnostic[] = [];
-    if (error) {
-        const diagnostic = parseDiagnostic(connection, error, stdout);
-        if (diagnostic) {
-            diagnostics.push(diagnostic);
-        }
-    }
-
-    return {diagnostics};
+    return [parsingError];
 };
 
 export const readDocument = (connection: Connection, textDocument: TextDocument) => {
@@ -101,11 +113,19 @@ export const readDocument = (connection: Connection, textDocument: TextDocument)
     return {content, appendFileEnding};
 };
 
+const libraryMatchToRange = (content: string, match: RegExpMatchArray) => {
+    const linesUntilError = content.substring(0, match.index).split(/\r?\n/);
+    const matchingLine = linesUntilError.pop();
+    const endError = (matchingLine?.length ?? 0) + match[0].length;
+    return Range.create(linesUntilError.length, endError - match[1].length - LIB_FILE_ENDING.length, linesUntilError.length, endError);
+};
+
 const LIB_ARGUMENT_PREFIX = '-lib ';
 const LIB_FILE_ENDING = '.pvl';
 const LIB_REGEX_MATCH = /\(\* +-lib (.+)\.pvl/g;
 export const parseLibraryDependencies = (connection: Connection, filePath: string, content: string) => {
     const diagnostics: Diagnostic[] = [];
+    const libraryDependecies: LibraryDependency[] = [];
 
     const folder = filePath.split(sep).slice(0, -1).join(sep);
     const libs: Set<string> = new Set();
@@ -113,16 +133,15 @@ export const parseLibraryDependencies = (connection: Connection, filePath: strin
     for (const match of matches) {
         const expectedFilename = match[1] + LIB_FILE_ENDING;
         const expectedLocation = folder + sep + expectedFilename;
+        libraryDependecies.push({ match, fullPath: expectedLocation });
         if (existsSync(expectedLocation)) {
             libs.add(expectedLocation);
             connection.console.log(`Found library at ${expectedLocation}.`);
         } else {
-            const linesUntilError = content.substring(0, match.index).split(/\r?\n/);
-            const matchingLine = linesUntilError.pop();
-            const endError = (matchingLine?.length ?? 0) + match[0].length;
+            const range = libraryMatchToRange(content, match);
             diagnostics.push({
                 severity: DiagnosticSeverity.Warning,
-                range: Range.create(linesUntilError.length, endError - expectedFilename.length, linesUntilError.length, endError),
+                range,
                 message: 'Library not found at ' + expectedLocation,
                 source: 'ProVerif Language Service'
             });
@@ -131,5 +150,10 @@ export const parseLibraryDependencies = (connection: Connection, filePath: strin
 
     const libArguments = Array.from(libs).map(lib => LIB_ARGUMENT_PREFIX + lib).join(" ");
 
-    return {libArguments, diagnostics};
+    return {libArguments, diagnostics, libraryDependecies};
 };
+
+type LibraryDependency = {
+    match: RegExpMatchArray,
+    fullPath: string,
+}

@@ -3,7 +3,7 @@
 	"description": "VSCode part of a ProVerif language server",
 	"author": "Florian Moser",
 	"license": "MIT",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"publisher": "famoser",
 	"repository": {
 		"type": "git",

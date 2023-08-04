@@ -101,15 +101,17 @@ export const readDocument = (connection: Connection, textDocument: TextDocument)
     return {content, appendFileEnding};
 };
 
+const LIB_ARGUMENT_PREFIX = '-lib ';
+const LIB_FILE_ENDING = '.pvl';
+const LIB_REGEX_MATCH = /\(\* +-lib (.+)\.pvl/g;
 export const parseLibraryDependencies = (connection: Connection, filePath: string, content: string) => {
     const diagnostics: Diagnostic[] = [];
 
     const folder = filePath.split(sep).slice(0, -1).join(sep);
-
-    const matches = content.matchAll(/\(\* +-lib (.+)\.pvl/g);
     const libs: Set<string> = new Set();
+    const matches = content.matchAll(LIB_REGEX_MATCH);
     for (const match of matches) {
-        const expectedFilename = match[1] + '.pvl';
+        const expectedFilename = match[1] + LIB_FILE_ENDING;
         const expectedLocation = folder + sep + expectedFilename;
         if (existsSync(expectedLocation)) {
             libs.add(expectedLocation);

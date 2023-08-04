@@ -18,7 +18,7 @@ import {TextDocument} from 'vscode-languageserver-textdocument';
 import {exec} from "child_process";
 import {fileURLToPath} from "url";
 import {asTempFile} from "./files";
-import {parseLibraryDependencies, processOutput, readDocument} from "./proverif";
+import {parseDiagnostic, parseLibraryDependencies, readDocument} from "./proverif";
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -95,14 +95,14 @@ documents.onDidChangeContent(async change => {
 	const proverifBinary = settings.proverifPath ? settings.proverifPath : 'proverif';
 
     const {content, appendFileEnding} = readDocument(connection, change.document);
-    const {libArguments, diagnostics: libraryDiagnostics} = parseLibraryDependencies(connection, filePath, content);
+    const {libArguments, diagnostics: libraryDiagnostics, libraryDependecies} = parseLibraryDependencies(connection, filePath, content);
 
     const proverifDiagnostics = await asTempFile<Diagnostic[]>(change.document.uri, content, appendFileEnding, tempFilePath => new Promise((resolve) => {
         const proverifInvocation = `${proverifBinary} ${libArguments} ${tempFilePath}`;
         connection.console.info('Invoking ' + proverifInvocation);
 
         exec(proverifInvocation, {timeout: 1000}, (error, stdout) => {
-            const {diagnostics: proverifDiagnostics} = processOutput(connection, error, stdout);
+            const proverifDiagnostics = parseDiagnostic(connection, content, libraryDependecies, error, stdout);
             resolve(proverifDiagnostics);
         });
     }));

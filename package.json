@@ -15,7 +15,8 @@
 		"vscode": "^1.75.0"
 	},
 	"activationEvents": [
-		"onLanguage:pv"
+		"onLanguage:pv",
+		"onCommand:workbench.action.tasks.runTask"
 	],
 	"main": "./client/out/extension",
 	"contributes": {
@@ -42,7 +43,12 @@
 					"description": "Set a custom path to the proverif binary. Empty string will lookup proverif in PATH."
 				}
 			}
-		}
+		},
+		"taskDefinitions": [
+			{
+				"type": "ProVerif"
+			}
+		]
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

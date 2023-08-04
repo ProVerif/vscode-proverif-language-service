@@ -15,6 +15,15 @@ Run & test locally:
 - In the [Extension Development Host](https://code.visualstudio.com/api/get-started/your-first-extension#:~:text=Then%2C%20inside%20the%20editor%2C%20press%20F5.%20This%20will%20compile%20and%20run%20the%20extension%20in%20a%20new%20Extension%20Development%20Host%20window.) instance of VSCode, open a document with a ProVerif extension.
 - Enter ProVerif code, and observe how syntax errors are highlighted.
 
+## How it works
+
+Under the hood, this language server simply invokes `proverif` over the currently edited file.
+Syntax errors found by `proverif` are written to `stdout`, which this extension parses and sends to VSCode.
+For a `.pvl` file, the extension appends `process\n0` and parses it as a `.pv` file.
+
+This has the following limitations:
+- Only the first syntax error is shown (as only the first is output by `proverif`).
+- `proverif` is re-run on every keystroke with a timeout of 1s. This should suffice to find syntax errors, while preventing many proverif invocations hogging the CPU (as if no syntax error is found, `proverif` will start executing the proof).
 
 ## Publish
 
@@ -34,6 +43,8 @@ If you are doing this for the first time on your machine, you need to login with
 
 To make the extension more powerful, following features should be considered:
 
-- [ ] Add [custom task](https://code.visualstudio.com/api/extension-guides/task-provider) to automatically include libraries when invoking proverif.
+- [x] Parse ProVerif output and show it to the user.
+- [x] Add support for libraries (.pvl).
+- [x] Add [custom task](https://code.visualstudio.com/api/extension-guides/task-provider) to automatically include libraries when invoking proverif.
 - [ ] Integrate with [VSCode testing](https://code.visualstudio.com/api/extension-guides/testing) to show output of proverif nicely.
 - [ ] Add go to definition functionality (likely needs proper parser (and therefore grammar) of ProVerif).

@@ -106,13 +106,13 @@ export const parseLibraryDependencies = (connection: Connection, filePath: strin
 
     const folder = filePath.split(sep).slice(0, -1).join(sep);
 
-    const libs: string[] = [];
     const matches = content.matchAll(/\(\* +-lib (.+)\.pvl/g);
+    const libs: Set<string> = new Set();
     for (const match of matches) {
         const expectedFilename = match[1] + '.pvl';
         const expectedLocation = folder + sep + expectedFilename;
         if (existsSync(expectedLocation)) {
-            libs.push(expectedLocation);
+            libs.add(expectedLocation);
             connection.console.log(`Found library at ${expectedLocation}.`);
         } else {
             const linesUntilError = content.substring(0, match.index).split(/\r?\n/);
@@ -127,7 +127,7 @@ export const parseLibraryDependencies = (connection: Connection, filePath: strin
         }
     }
 
-    const libArguments = libs.map(lib => '-lib ' + lib).join(" ");
+    const libArguments = Array.from(libs).map(lib => LIB_ARGUMENT_PREFIX + lib).join(" ");
 
     return {libArguments, diagnostics};
 };

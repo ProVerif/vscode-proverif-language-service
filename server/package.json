@@ -12,6 +12,7 @@
 		"url": "https://github.com/famoser/vscode-proverif-language-service"
 	},
 	"dependencies": {
+		"antlr4-c3": "^3.1.1",
 		"antlr4ts": "^0.5.0-alpha.4",
 		"vscode-languageserver": "^8.1.0",
 		"vscode-languageserver-textdocument": "^1.0.8"
@@ -25,7 +26,7 @@
 		"ts-mocha": "^10.0.0"
 	},
 	"scripts": {
-		"grammar": "antlr4ts -o grammar/parser-proverif -Xexact-output-dir -visitor grammar/ProverifParser.g4 grammar/ProverifLexer.g4",
+		"grammar": "antlr4ts -o src/parser-proverif -Xexact-output-dir -visitor grammar/ProverifParser.g4 grammar/ProverifLexer.g4",
 		"test": "ts-mocha tests/**/*.test.ts"
 	}
 }

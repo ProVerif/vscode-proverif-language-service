@@ -94,12 +94,9 @@ const parseDiagnostic = (connection: Connection, content: string, libraryDepende
         return [];
     }
 
-    const parsingError = {
-        severity: DiagnosticSeverity.Error,
-        range,
-        message: errorLine,
-        source: 'ProVerif'
-    };
+    const severity = errorLine.startsWith("Warning:") ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error;
+
+    const parsingError = {severity, range, message: errorLine, source: 'ProVerif'};
     return [parsingError];
 };
 

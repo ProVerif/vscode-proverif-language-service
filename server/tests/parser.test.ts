@@ -1,8 +1,8 @@
 import {expect} from "chai";
 
 import {CharStreams, CommonTokenStream} from "antlr4ts";
-import {ProverifLexer} from "../grammar/parser-proverif/ProverifLexer";
-import {ProverifParser} from "../grammar/parser-proverif/ProverifParser";
+import {ProverifLexer} from "../src/parser-proverif/ProverifLexer";
+import {ProverifParser} from "../src/parser-proverif/ProverifParser";
 
 describe('parser', function () {
 

@@ -1,7 +1,7 @@
 import {expect} from "chai";
 
 import {CharStreams, CommonTokenStream} from "antlr4ts";
-import {ProverifLexer} from "../grammar/parser-proverif/ProverifLexer";
+import {ProverifLexer} from "../src/parser-proverif/ProverifLexer";
 
 describe('lexer', function () {
     const TOKEN_TYPE_EOF = -1;

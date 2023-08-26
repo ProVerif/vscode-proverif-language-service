@@ -123,7 +123,7 @@ const libraryMatchToRange = (content: string, match: RegExpMatchArray) => {
     return Range.create(linesUntilError.length, endError - match[1].length - LIB_FILE_ENDING.length, linesUntilError.length, endError);
 };
 
-const LIB_ARGUMENT_PREFIX = '-lib ';
+const LIB_ARGUMENT_PREFIX = '-lib';
 const LIB_FILE_ENDING = '.pvl';
 const LIB_REGEX_MATCH = /\(\* +-lib (.+)\.pvl/g;
 const parseLibraryDependencies = (connection: Connection, filePath: string, content: string) => {
@@ -151,7 +151,7 @@ const parseLibraryDependencies = (connection: Connection, filePath: string, cont
         }
     }
 
-    const libArguments = Array.from(libs).map(lib => LIB_ARGUMENT_PREFIX + lib).join(" ");
+    const libArguments = Array.from(libs).map(lib => `${LIB_ARGUMENT_PREFIX} "${lib}"`).join(" ");
 
     return {libArguments, diagnostics, libraryDependecies};
 };
@@ -164,7 +164,7 @@ export const invokeProverif = async (connection: _Connection, proverifBinary: st
     const {libArguments, diagnostics: libraryDiagnostics, libraryDependecies} = parseLibraryDependencies(connection, filePath, content);
 
     const proverifDiagnostics = await asTempFile<Diagnostic[]>(change.document.uri, content, appendFileEnding, tempFilePath => new Promise((resolve) => {
-        const proverifInvocation = `${proverifBinary} ${libArguments} ${tempFilePath}`;
+        const proverifInvocation = `${proverifBinary} ${libArguments} "${tempFilePath}"`;
         connection.console.info('Invoking ' + proverifInvocation);
 
         exec(proverifInvocation, {timeout: 1000}, (error, stdout) => {

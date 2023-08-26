@@ -33,8 +33,7 @@ jobs:
 
       - name: Test server
         working-directory: server
-        run: 
-          - npm run test
+        run: npm run test
 
       # deactive as does not work on CI
       # - name: Run Unit Tests

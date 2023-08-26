@@ -31,5 +31,10 @@ jobs:
       - name: Build Code
         run: npm run compile
 
+      - name: Test server
+        working-directory: server
+        run: 
+          - npm run test
+
       - name: Run Unit Tests
         run: xvfb-run -a npm run test

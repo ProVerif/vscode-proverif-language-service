@@ -1,5 +1,2 @@
 # temp folder created by antlr vscode extension
 .antlr
-
-# folder containing the created parser using antlrts-cli
-parser-proverif

@@ -52,7 +52,7 @@ const getRangeFromPositionString = (positionString: string): Range | undefined =
     return undefined;
 };
 
-const parseDiagnostic = (connection: Connection, content: string, libraryDependecies: LibraryDependency[], error: ExecException|null, stdout: string): Diagnostic[] => {
+const parseDiagnostic = (connection: Connection, content: string, libraryMode: boolean, libraryDependecies: LibraryDependency[], error: ExecException|null, stdout: string): Diagnostic[] => {
     if (!error) {
         return [];
     }
@@ -94,6 +94,11 @@ const parseDiagnostic = (connection: Connection, content: string, libraryDepende
         return [];
     }
 
+    if (libraryMode && errorLine === 'Error: Lemma not used because there is no matching query.') {
+        connection.console.info('Ignore error message which is not relevant in library: ' + errorLine);
+        return [];
+    }
+
     const severity = errorLine.startsWith("Warning:") ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error;
 
     const parsingError = {severity, range, message: errorLine, source: 'ProVerif'};
@@ -103,14 +108,15 @@ const parseDiagnostic = (connection: Connection, content: string, libraryDepende
 const readDocument = (connection: Connection, textDocument: TextDocument) => {
     let content = textDocument.getText();
     let appendFileEnding: string | undefined = undefined;
-    if (textDocument.uri.endsWith('.pvl')) {
+    const libraryMode = textDocument.uri.endsWith('.pvl');
+    if (libraryMode) {
         content += '\nprocess\n\t0';
         appendFileEnding = '.pv';
 
         connection.console.log('Transformed .pvl to standalone .pv.');
     }
 
-    return {content, appendFileEnding};
+    return {content, appendFileEnding, libraryMode};
 };
 
 const libraryMatchToRange = (content: string, match: RegExpMatchArray) => {
@@ -157,7 +163,7 @@ export const invokeProverif = async (connection: _Connection, proverifBinary: st
     const filePath = fileURLToPath(change.document.uri);
     connection.console.log('Processing ' + filePath);
 
-    const {content, appendFileEnding} = readDocument(connection, change.document);
+    const {content, appendFileEnding, libraryMode} = readDocument(connection, change.document);
     const {libArguments, diagnostics: libraryDiagnostics, libraryDependecies} = parseLibraryDependencies(connection, filePath, content);
 
     const proverifDiagnostics = await asTempFile<Diagnostic[]>(change.document.uri, content, appendFileEnding, tempFilePath => new Promise((resolve) => {
@@ -165,7 +171,7 @@ export const invokeProverif = async (connection: _Connection, proverifBinary: st
         connection.console.info('Invoking ' + proverifInvocation);
 
         exec(proverifInvocation, {timeout: 1000}, (error, stdout) => {
-            const proverifDiagnostics = parseDiagnostic(connection, content, libraryDependecies, error, stdout);
+            const proverifDiagnostics = parseDiagnostic(connection, content, libraryMode, libraryDependecies, error, stdout);
             resolve(proverifDiagnostics);
         });
     }));

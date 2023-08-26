@@ -1,8 +1,11 @@
-import {Connection, Diagnostic, DiagnosticSeverity, Range} from "vscode-languageserver/node";
+import {Connection, Diagnostic, DiagnosticSeverity, Range, TextDocumentChangeEvent, _Connection} from "vscode-languageserver/node";
 import {ExecException} from "child_process";
 import {TextDocument} from "vscode-languageserver-textdocument";
 import {sep} from "path";
 import {existsSync} from "fs";
+import {exec} from "child_process";
+import {fileURLToPath} from "url";
+import {asTempFile} from "./files";
 
 const getRangeFromPositionString = (positionString: string): Range | undefined => {
     //
@@ -49,7 +52,7 @@ const getRangeFromPositionString = (positionString: string): Range | undefined =
     return undefined;
 };
 
-export const parseDiagnostic = (connection: Connection, content: string, libraryDependecies: LibraryDependency[], error: ExecException|null, stdout: string): Diagnostic[] => {
+const parseDiagnostic = (connection: Connection, content: string, libraryDependecies: LibraryDependency[], error: ExecException|null, stdout: string): Diagnostic[] => {
     if (!error) {
         return [];
     }
@@ -100,7 +103,7 @@ export const parseDiagnostic = (connection: Connection, content: string, library
     return [parsingError];
 };
 
-export const readDocument = (connection: Connection, textDocument: TextDocument) => {
+const readDocument = (connection: Connection, textDocument: TextDocument) => {
     let content = textDocument.getText();
     let appendFileEnding: string | undefined = undefined;
     if (textDocument.uri.endsWith('.pvl')) {
@@ -123,7 +126,7 @@ const libraryMatchToRange = (content: string, match: RegExpMatchArray) => {
 const LIB_ARGUMENT_PREFIX = '-lib ';
 const LIB_FILE_ENDING = '.pvl';
 const LIB_REGEX_MATCH = /\(\* +-lib (.+)\.pvl/g;
-export const parseLibraryDependencies = (connection: Connection, filePath: string, content: string) => {
+const parseLibraryDependencies = (connection: Connection, filePath: string, content: string) => {
     const diagnostics: Diagnostic[] = [];
     const libraryDependecies: LibraryDependency[] = [];
 
@@ -151,6 +154,28 @@ export const parseLibraryDependencies = (connection: Connection, filePath: strin
     const libArguments = Array.from(libs).map(lib => LIB_ARGUMENT_PREFIX + lib).join(" ");
 
     return {libArguments, diagnostics, libraryDependecies};
+};
+
+export const invokeProverif = async (connection: _Connection, proverifBinary: string, change: TextDocumentChangeEvent<TextDocument>) => {
+    const filePath = fileURLToPath(change.document.uri);
+    connection.console.log('Processing ' + filePath);
+
+    const {content, appendFileEnding} = readDocument(connection, change.document);
+    const {libArguments, diagnostics: libraryDiagnostics, libraryDependecies} = parseLibraryDependencies(connection, filePath, content);
+
+    const proverifDiagnostics = await asTempFile<Diagnostic[]>(change.document.uri, content, appendFileEnding, tempFilePath => new Promise((resolve) => {
+        const proverifInvocation = `${proverifBinary} ${libArguments} ${tempFilePath}`;
+        connection.console.info('Invoking ' + proverifInvocation);
+
+        exec(proverifInvocation, {timeout: 1000}, (error, stdout) => {
+            const proverifDiagnostics = parseDiagnostic(connection, content, libraryDependecies, error, stdout);
+            resolve(proverifDiagnostics);
+        });
+    }));
+
+
+    const diagnostics = libraryDiagnostics.concat(proverifDiagnostics);
+    await connection.sendDiagnostics({uri: change.document.uri, diagnostics});
 };
 
 type LibraryDependency = {

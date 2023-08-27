@@ -1,0 +1,8 @@
+Most of the code is published under the MIT license; written originally either by Microsoft Corporation or Florian Moser.
+Any contributor to this project contributes under the MIT license.
+
+Some of the code used here is originally written by Alessio Stralla and published under the Apache license.
+The code originates from an articles series about how to implement the go to definition functionality. 
+Repositories: 
+- https://github.com/Strumenta/article-antlr4-c3
+- https://github.com/Strumenta/article-lsp-go-to-definition

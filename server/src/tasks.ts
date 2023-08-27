@@ -1,4 +1,4 @@
-import {DocumentUri, TextDocument} from "vscode-languageserver-textdocument";
+import {TextDocument} from "vscode-languageserver-textdocument";
 import {fileURLToPath} from "url";
 import {parseLibraryDependencies, ParseLibraryDependenciesResult} from "./tasks/parse_library_dependencies";
 import {getDocumentSettings, ProVerifSettings} from "./utils/settings";
@@ -9,9 +9,6 @@ import {parseProverif, ParseProverifResult} from "./tasks/parse_proverif";
 import {createSymbolTable, CreateSymbolTableResult} from "./tasks/create_symbol_table";
 import {TextDocumentIdentifier} from "vscode-languageserver";
 import {Connection} from "vscode-languageserver/node";
-import {AbstractParseTreeVisitor} from "antlr4ts/tree";
-import {ScopedSymbol, SymbolTable} from "antlr4-c3";
-import {ProverifParserVisitor} from "./parser-proverif/ProverifParserVisitor";
 
 export type ParseResult = ParseProverifResult & CreateSymbolTableResult;
 

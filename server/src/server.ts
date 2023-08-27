@@ -1,7 +1,3 @@
-/* --------------------------------------------------------------------------------------------
- * Copyright (c) Microsoft Corporation. All rights reserved.
- * Licensed under the MIT License. See License.txt in the project root for license information.
- * ------------------------------------------------------------------------------------------ */
 import {
     createConnection,
     DidChangeConfigurationNotification,
@@ -82,14 +78,5 @@ connection.onDefinition(async (params) => {
     return [definitionLink];
 });
 
-
-// functionality extension points:
-// - override connection.onCompletion to return keywords, variables, ...; with onCompletionResolve item.data to show help
-// - introduce refactoring for free c: channel to replace with channel c
-
-// Make the text document manager listen on the connection
-// for open, change and close text document events
 documents.listen(connection);
-
-// Listen on the connection
 connection.listen();

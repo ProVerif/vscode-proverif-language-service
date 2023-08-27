@@ -43,8 +43,24 @@ If you are doing this for the first time on your machine, you need to login with
 
 To make the extension more powerful, following features should be considered:
 
+Execute ProVerif:
 - [x] Parse ProVerif output and show it to the user.
 - [x] Add support for libraries (.pvl).
 - [x] Add [custom task](https://code.visualstudio.com/api/extension-guides/task-provider) to automatically include libraries when invoking proverif.
+- [x] Introduce proper caching / cache invalidation
+
+Go to definition:
+- [x] PoC of how to implement grammar
+- [ ] Fully implement grammar, symbol table, over libraries 
+- [ ] Add go to definition functionality; see https://tomassetti.me/integrating-code-completion-in-visual-studio-code/
+- [ ] Invalidate cache of consumers when library stored
+
+Refactorings:
+- [ ] Introduce refactoring for free c: channel to replace with channel c
+- [ ] Introduce rename refactorings
+
+Code completion:
+- [ ] Override connection.onCompletion to return keywords, variables, ...; see https://tomassetti.me/code-completion-with-antlr4-c3/#chapter12
+
+Integrate Testing output:
 - [ ] Integrate with [VSCode testing](https://code.visualstudio.com/api/extension-guides/testing) to show output of proverif nicely.
-- [ ] Add go to definition functionality (likely needs proper parser (and therefore grammar) of ProVerif).

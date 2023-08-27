@@ -1,5 +1,3 @@
-import {DocumentUri} from "vscode-languageserver-textdocument";
-import {fileURLToPath} from "url";
 import {join, sep} from "path";
 import {promises as fsPromises} from "fs";
 import {tmpdir} from "os";

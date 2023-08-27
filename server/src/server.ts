@@ -51,9 +51,9 @@ connection.onInitialized(() => {
     }
 });
 
-connection.onDidChangeConfiguration(async _ => taskExecutor?.invalidateSettings());
-documents.onDidClose(event => taskExecutor?.invalidateDocument(event.document));
-documents.onDidChangeContent(async event => taskExecutor?.invalidateDocumentContent(event.document));
+connection.onDidChangeConfiguration(async _ => taskExecutor?.markSettingsChanged());
+documents.onDidClose(event => taskExecutor?.closeDocument(event.document));
+documents.onDidChangeContent(async event => taskExecutor?.markDocumentContentChanged(event.document));
 
 connection.onDefinition(async (params) => {
     const parseResult = await taskExecutor?.getParseResult(params.textDocument);

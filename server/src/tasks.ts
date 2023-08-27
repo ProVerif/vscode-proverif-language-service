@@ -31,45 +31,27 @@ export class TaskExecutor {
         private hasConfigurationCapability: boolean) {
     }
 
-    private parseLibraryDependenciesCached = (document: TextDocument) => {
-        const content = document.getText();
-        const path = fileURLToPath(document.uri);
-
-        const cache = this.documentCache.get(document) ?? {};
-        cache.document = document;
-
-        if (!cache.parseLibraryDependenciesResult) {
-            cache.parseLibraryDependenciesResult = parseLibraryDependencies(path, content);
-            this.connection.console.log("Found " + cache.parseLibraryDependenciesResult.libraryDependencyTokens.length + " dependencies.");
-        }
-
-        this.documentCache.set(document, cache);
-
-        return {content, path, cache};
-    };
-
-    public invalidateSettings = async () => {
+    public markSettingsChanged = async () => {
         const cachedDocuments = Array.from(this.documentCache.keys());
-        const processingDocuments = cachedDocuments.map(document => this.invalidateDocumentSettings(document));
+        const processingDocuments = cachedDocuments.map(document => this.markDocumentSettingsChanged(document));
         await Promise.all(processingDocuments);
     };
 
-    private invalidateDocumentSettings = async (document: TextDocumentIdentifier) => {
+    private markDocumentSettingsChanged = async (document: TextDocumentIdentifier) => {
         const cache = this.documentCache.get(document) ?? {};
         cache.settings = undefined;
         this.documentCache.set(document, cache);
 
         if (cache.document) {
-            await this.invokeProverifCached(cache.document);
+            await this.invoke(cache.document);
         }
     };
 
-
-    public invalidateDocument = async (document: TextDocumentIdentifier) => {
+    public closeDocument = async (document: TextDocumentIdentifier) => {
         this.documentCache.delete(document);
     };
 
-    public invalidateDocumentContent = async (document: TextDocument) => {
+    public markDocumentContentChanged = async (document: TextDocument) => {
         const cache = this.documentCache.get(document) ?? {};
         cache.parseLibraryDependenciesResult = undefined;
         cache.invokeProverifResult = undefined;
@@ -77,11 +59,28 @@ export class TaskExecutor {
         cache.createSymbolTableResult = undefined;
         this.documentCache.set(document, cache);
 
-        await this.invokeProverifCached(document);
+        await this.invoke(document);
     };
 
-    public invokeProverifCached = async (document: TextDocument) => {
-        const {content, path,} = this.parseLibraryDependenciesCached(document);
+    public getParseResult = async (identification: TextDocumentIdentifier): Promise<ParseResult | undefined> => {
+        const cache = this.documentCache.get(identification) ?? {};
+        if (cache.document) {
+            await this.parse(cache.document);
+
+            if (cache.createSymbolTableResult && cache.parseProverifResult) {
+                return {
+                    symbolTable: cache.createSymbolTableResult.symbolTable,
+                    parser: cache.parseProverifResult.parser,
+                    proverifFileContext: cache.parseProverifResult.proverifFileContext
+                };
+            }
+        }
+
+        return undefined;
+    };
+
+    private invoke = async (document: TextDocument) => {
+        const {content, path,} = this.parseLibraryDependencies(document);
         const cache = this.documentCache.get(document) ?? {};
 
         if (!cache.invokeProverifResult || !cache.settings) {
@@ -102,25 +101,8 @@ export class TaskExecutor {
         this.documentCache.set(document, cache);
     };
 
-    public getParseResult = async (identification: TextDocumentIdentifier): Promise<ParseResult | undefined> => {
-        const cache = this.documentCache.get(identification) ?? {};
-        if (cache.document) {
-            await this.parseProverifCached(cache.document);
-
-            if (cache.createSymbolTableResult && cache.parseProverifResult) {
-                return {
-                    symbolTable: cache.createSymbolTableResult.symbolTable,
-                    parser: cache.parseProverifResult.parser,
-                    proverifFileContext: cache.parseProverifResult.proverifFileContext
-                };
-            }
-        }
-
-        return undefined;
-    };
-
-    public parseProverifCached = async (document: TextDocument) => {
-        const {content, path,} = this.parseLibraryDependenciesCached(document);
+    private parse = async (document: TextDocument) => {
+        const {content, path,} = this.parseLibraryDependencies(document);
         const cache = this.documentCache.get(document) ?? {};
 
         if (!cache.parseProverifResult) {
@@ -132,5 +114,22 @@ export class TaskExecutor {
         }
 
         this.documentCache.set(document, cache);
+    };
+
+    private parseLibraryDependencies = (document: TextDocument) => {
+        const content = document.getText();
+        const path = fileURLToPath(document.uri);
+
+        const cache = this.documentCache.get(document) ?? {};
+        cache.document = document;
+
+        if (!cache.parseLibraryDependenciesResult) {
+            cache.parseLibraryDependenciesResult = parseLibraryDependencies(path, content);
+            this.connection.console.log("Found " + cache.parseLibraryDependenciesResult.libraryDependencyTokens.length + " dependencies.");
+        }
+
+        this.documentCache.set(document, cache);
+
+        return {content, path, cache};
     };
 }

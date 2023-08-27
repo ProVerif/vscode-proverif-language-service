@@ -5,10 +5,13 @@ import { ParseTreeListener } from "antlr4ts/tree/ParseTreeListener";
 
 import { ProverifFileContext } from "./ProverifParser";
 import { DeclarationContext } from "./ProverifParser";
+import { ChannelDeclarationContext } from "./ProverifParser";
+import { FreeDeclarationContext } from "./ProverifParser";
 import { ProcessContext } from "./ProverifParser";
 import { PtermContext } from "./ProverifParser";
-import { Identifier_sequenceContext } from "./ProverifParser";
-import { Type_idContext } from "./ProverifParser";
+import { IdentifierSequenceContext } from "./ProverifParser";
+import { IdentifierContext } from "./ProverifParser";
+import { TypeIdContext } from "./ProverifParser";
 import { ExpressionContext } from "./ProverifParser";
 import { ParenthesizedExpressionContext } from "./ProverifParser";
 import { LiteralConstantContext } from "./ProverifParser";
@@ -42,6 +45,28 @@ export interface ProverifParserListener extends ParseTreeListener {
 	exitDeclaration?: (ctx: DeclarationContext) => void;
 
 	/**
+	 * Enter a parse tree produced by `ProverifParser.channelDeclaration`.
+	 * @param ctx the parse tree
+	 */
+	enterChannelDeclaration?: (ctx: ChannelDeclarationContext) => void;
+	/**
+	 * Exit a parse tree produced by `ProverifParser.channelDeclaration`.
+	 * @param ctx the parse tree
+	 */
+	exitChannelDeclaration?: (ctx: ChannelDeclarationContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `ProverifParser.freeDeclaration`.
+	 * @param ctx the parse tree
+	 */
+	enterFreeDeclaration?: (ctx: FreeDeclarationContext) => void;
+	/**
+	 * Exit a parse tree produced by `ProverifParser.freeDeclaration`.
+	 * @param ctx the parse tree
+	 */
+	exitFreeDeclaration?: (ctx: FreeDeclarationContext) => void;
+
+	/**
 	 * Enter a parse tree produced by `ProverifParser.process`.
 	 * @param ctx the parse tree
 	 */
@@ -64,26 +89,37 @@ export interface ProverifParserListener extends ParseTreeListener {
 	exitPterm?: (ctx: PtermContext) => void;
 
 	/**
-	 * Enter a parse tree produced by `ProverifParser.identifier_sequence`.
+	 * Enter a parse tree produced by `ProverifParser.identifierSequence`.
 	 * @param ctx the parse tree
 	 */
-	enterIdentifier_sequence?: (ctx: Identifier_sequenceContext) => void;
+	enterIdentifierSequence?: (ctx: IdentifierSequenceContext) => void;
 	/**
-	 * Exit a parse tree produced by `ProverifParser.identifier_sequence`.
+	 * Exit a parse tree produced by `ProverifParser.identifierSequence`.
 	 * @param ctx the parse tree
 	 */
-	exitIdentifier_sequence?: (ctx: Identifier_sequenceContext) => void;
+	exitIdentifierSequence?: (ctx: IdentifierSequenceContext) => void;
 
 	/**
-	 * Enter a parse tree produced by `ProverifParser.type_id`.
+	 * Enter a parse tree produced by `ProverifParser.identifier`.
 	 * @param ctx the parse tree
 	 */
-	enterType_id?: (ctx: Type_idContext) => void;
+	enterIdentifier?: (ctx: IdentifierContext) => void;
 	/**
-	 * Exit a parse tree produced by `ProverifParser.type_id`.
+	 * Exit a parse tree produced by `ProverifParser.identifier`.
 	 * @param ctx the parse tree
 	 */
-	exitType_id?: (ctx: Type_idContext) => void;
+	exitIdentifier?: (ctx: IdentifierContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `ProverifParser.typeId`.
+	 * @param ctx the parse tree
+	 */
+	enterTypeId?: (ctx: TypeIdContext) => void;
+	/**
+	 * Exit a parse tree produced by `ProverifParser.typeId`.
+	 * @param ctx the parse tree
+	 */
+	exitTypeId?: (ctx: TypeIdContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `ProverifParser.expression`.

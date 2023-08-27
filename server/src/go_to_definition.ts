@@ -19,9 +19,6 @@ const getLocation = async (name: string, scope: BaseSymbol): Promise<LocationLin
 };
 
 const getScope = async (context: ParseTree, symbolTable: SymbolTable): Promise<BaseSymbol | undefined> => {
-    if (!context) {
-        return undefined;
-    }
     const scope = await symbolTable.symbolWithContext(context);
     if (scope) {
         return scope;

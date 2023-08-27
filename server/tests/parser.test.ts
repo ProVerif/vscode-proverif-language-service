@@ -5,7 +5,6 @@ import {ProverifLexer} from "../src/parser-proverif/ProverifLexer";
 import {ProverifParser} from "../src/parser-proverif/ProverifParser";
 
 describe('parser', function () {
-
     const getParser = (input: string) => {
         const charStream = CharStreams.fromString(input);
         const lexer = new ProverifLexer(charStream);

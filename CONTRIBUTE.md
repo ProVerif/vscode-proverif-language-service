@@ -2,7 +2,7 @@
 
 Contributions welcome! Be aware of the automated tests (and keep them running).
 
-Heavily inspired by the [language server example](https://code.visualstudio.com/api/language-extensions/language-server-extension-guide) published by Microsoft. 
+Inspired by the [language server example](https://code.visualstudio.com/api/language-extensions/language-server-extension-guide) published by Microsoft, and an article series by [tomassetti](https://tomassetti.me/go-to-definition-in-the-language-server-protocol/). 
 
 Run & test locally:
 

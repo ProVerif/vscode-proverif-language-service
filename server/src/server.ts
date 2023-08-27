@@ -13,7 +13,7 @@ import {
 } from 'vscode-languageserver/node';
 import {TextDocument} from 'vscode-languageserver-textdocument';
 import {
-    invalidateDocument, invalidateDocumentContent, invalidateSettings,
+    getParseResult, invalidateDocument, invalidateDocumentContent, invalidateSettings,
 } from "./tasks";
 import {getDefinitionLink} from "./go_to_definition";
 
@@ -51,6 +51,18 @@ connection.onDidChangeConfiguration(async _ => invalidateSettings(connection, ha
 documents.onDidClose(event => invalidateDocument(event.document));
 documents.onDidChangeContent(async event => invalidateDocumentContent(connection, hasConfigurationCapability, event.document));
 
+connection.onDefinition(async (params) => {
+    const parseResult = await getParseResult(connection, params.textDocument);
+    if (!parseResult) {
+        return undefined;
+    }
+
+    const definitionLink = await getDefinitionLink(parseResult, params.position);
+    if (!definitionLink) {
+        return undefined;
+    }
+    return [definitionLink];
+});
 
 
 // functionality extension points:

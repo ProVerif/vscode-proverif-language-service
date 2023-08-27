@@ -93,6 +93,23 @@ export const invokeProverifCached = async (connection: Connection, hasConfigurat
     documentCache.set(document, cache);
 };
 
+export const getParseResult = async (connection: Connection, identification: TextDocumentIdentifier): Promise<ParseResult|undefined> => {
+    const cache = documentCache.get(identification) ?? {};
+    if (cache.document) {
+        await parseProverifCached(connection, cache.document);
+
+        if (cache.createSymbolTableResult  && cache.parseProverifResult) {
+            return {
+                symbolTable: cache.createSymbolTableResult.symbolTable,
+                parser: cache.parseProverifResult.parser,
+                proverifFileContext: cache.parseProverifResult.proverifFileContext
+            };
+        }
+    }
+
+    return undefined;
+};
+
 const parseProverifCached = async (connection: Connection, document: TextDocument) => {
     const { content, path, } = parseLibraryDependenciesCached(connection, document);
     const cache = documentCache.get(document) ?? {};

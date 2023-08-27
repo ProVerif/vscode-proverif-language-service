@@ -53,8 +53,15 @@ connection.onInitialized(() => {
 
 type DocumentCache = { settings?: ProVerifSettings, parseLibraryDependenciesResult?: ParseLibraryDependenciesResult, invokeProverifResult?: InvokeProverifResult }
 const documentCache: Map<TextDocument, DocumentCache> = new Map();
-connection.onDidChangeConfiguration(change => {
-    Array.from(documentCache.keys()).forEach(document => reparse(document));
+connection.onDidChangeConfiguration(_ => {
+    connection.console.log("Configuration has changed");
+    Array.from(documentCache.keys()).forEach(document => {
+        const cache = documentCache.get(document) ?? { };
+        cache.settings = undefined;
+        documentCache.set(document, cache);
+        
+        reparse(document);
+    });
 });
 
 documents.onDidClose(e => {
@@ -65,6 +72,8 @@ documents.onDidChangeContent(async change => {
     const cache = documentCache.get(change.document) ?? { };
     cache.parseLibraryDependenciesResult = undefined;
     cache.invokeProverifResult = undefined;
+    documentCache.set(change.document, cache);
+
     await reparse(change.document);
 });
 
@@ -83,9 +92,10 @@ const reparse = async (document: TextDocument) => {
         connection.console.log("Found " + cache.parseLibraryDependenciesResult.libraryDependencyTokens.length + " dependencies.");
     }
 
-    if (!cache.invokeProverifResult) {
+    if (!cache.invokeProverifResult || !cache.settings) {
         if (!cache.settings) {
             cache.settings = await getDocumentSettings(connection, document, hasConfigurationCapability);
+            cache.invokeProverifResult = undefined;
         }
 
         const proverifBinary = cache.settings.proverifPath ? cache.settings.proverifPath : 'proverif';
@@ -95,6 +105,8 @@ const reparse = async (document: TextDocument) => {
 
     const diagnostics = cache.parseLibraryDependenciesResult.diagnostics.concat(cache.invokeProverifResult.diagnostics ?? []);
     await sendDiagnostics(connection, document, diagnostics);
+
+    documentCache.set(document, cache);
 };
 
 // functionality extension points:

@@ -9,7 +9,7 @@ export type ProVerifSettings = {
 }
 
 const defaultSettings: ProVerifSettings = {proverifPath: undefined};
-export const getDocumentSettings = async (connection: Connection, document: TextDocument, hasConfigurationCapability: boolean): Promise<ProVerifSettings> => {
+export const getDocumentSettings = async (connection: Connection, hasConfigurationCapability: boolean, document: TextDocument): Promise<ProVerifSettings> => {
     if (!hasConfigurationCapability) {
         return defaultSettings;
     }

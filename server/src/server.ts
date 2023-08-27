@@ -12,7 +12,14 @@ import {
     TextDocumentSyncKind
 } from 'vscode-languageserver/node';
 import {TextDocument} from 'vscode-languageserver-textdocument';
-import {invokeProverif} from "./invoke_proverif";
+import {invokeProverif, InvokeProverifResult} from "./invoke_proverif";
+import {parseLibraryDependencies, ParseLibraryDependenciesResult} from "./parse_library_dependencies";
+import doc = Mocha.reporters.doc;
+import {fileURLToPath} from "url";
+import {text} from "stream/consumers";
+import {getDocumentSettings, ProVerifSettings} from "./settings";
+import {logMessages} from "./log";
+import {sendDiagnostics} from "./diagnostics";
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -23,69 +30,72 @@ const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 
 let hasConfigurationCapability = false;
 connection.onInitialize((params: InitializeParams) => {
-	const capabilities = params.capabilities;
-	hasConfigurationCapability = !!(
-		capabilities.workspace && !!capabilities.workspace.configuration
-	);
+    const capabilities = params.capabilities;
+    hasConfigurationCapability = !!(
+        capabilities.workspace && !!capabilities.workspace.configuration
+    );
 
     const result: InitializeResult = {
         capabilities: {
-            textDocumentSync: TextDocumentSyncKind.Incremental,
-        }
+            textDocumentSync: TextDocumentSyncKind.Full,
+        },
+        definitionProvider: true
     };
 
     return result;
 });
 
 connection.onInitialized(() => {
-	if (hasConfigurationCapability) {
-		connection.client.register(DidChangeConfigurationNotification.type, undefined);
-	}
+    if (hasConfigurationCapability) {
+        connection.client.register(DidChangeConfigurationNotification.type, undefined);
+    }
 });
 
-
-interface ProVerifSettings {
-	proverifPath?: string;
-}
-
-// Please note that this is not the case when using this server with the client provided in this example
-// but could happen with other clients.
-const defaultSettings: ProVerifSettings = { proverifPath: undefined };
-let globalSettings: ProVerifSettings = defaultSettings;
-const documentSettings: Map<string, Thenable<ProVerifSettings>> = new Map();
+type DocumentCache = { settings?: ProVerifSettings, parseLibraryDependenciesResult?: ParseLibraryDependenciesResult, invokeProverifResult?: InvokeProverifResult }
+const documentCache: Map<TextDocument, DocumentCache> = new Map();
 connection.onDidChangeConfiguration(change => {
-	if (hasConfigurationCapability) {
-		documentSettings.clear();
-	} else {
-		globalSettings = <ProVerifSettings>(
-			(change.settings.proverif || defaultSettings)
-		);
-	}
-});
-documents.onDidClose(e => {
-	documentSettings.delete(e.document.uri);
+    Array.from(documentCache.keys()).forEach(document => reparse(document));
 });
 
-const getDocumentSettings = (resource: string): Thenable<ProVerifSettings> => {
-	if (!hasConfigurationCapability) {
-		return Promise.resolve(globalSettings);
-	}
-	let result = documentSettings.get(resource);
-	if (!result) {
-		result = connection.workspace.getConfiguration({
-			scopeUri: resource,
-			section: 'proverif'
-		});
-		documentSettings.set(resource, result);
-	}
-	return result;
-};
+documents.onDidClose(e => {
+    documentCache.delete(e.document);
+});
 
 documents.onDidChangeContent(async change => {
-	const settings = await getDocumentSettings(change.document.uri);
-	const proverifBinary = settings.proverifPath ? settings.proverifPath : 'proverif';
-	await invokeProverif(connection, proverifBinary, change);
+    const cache = documentCache.get(change.document) ?? { };
+    cache.parseLibraryDependenciesResult = undefined;
+    cache.invokeProverifResult = undefined;
+    await reparse(change.document);
 });
+
+connection.onDefinition((params) => {
+    return undefined;
+});
+
+const reparse = async (document: TextDocument) => {
+    const content = document.getText();
+    const path = fileURLToPath(document.uri);
+
+    const cache = documentCache.get(document) ?? { };
+
+    if (!cache.parseLibraryDependenciesResult) {
+        cache.parseLibraryDependenciesResult = parseLibraryDependencies(path, content);
+        connection.console.log("Found " + cache.parseLibraryDependenciesResult.libraryDependencyTokens.length + " dependencies.");
+    }
+
+    if (!cache.invokeProverifResult) {
+        if (!cache.settings) {
+            cache.settings = await getDocumentSettings(connection, document, hasConfigurationCapability);
+        }
+
+        const proverifBinary = cache.settings.proverifPath ? cache.settings.proverifPath : 'proverif';
+        cache.invokeProverifResult = await invokeProverif(path, content, cache.parseLibraryDependenciesResult.libraryDependencyTokens, proverifBinary);
+        logMessages(connection, cache.invokeProverifResult.messages);
+    }
+
+    const diagnostics = cache.parseLibraryDependenciesResult.diagnostics.concat(cache.invokeProverifResult.diagnostics ?? []);
+    await sendDiagnostics(connection, document, diagnostics);
+};
 
 // functionality extension points:
 // - override connection.onCompletion to return keywords, variables, ...; with onCompletionResolve item.data to show help

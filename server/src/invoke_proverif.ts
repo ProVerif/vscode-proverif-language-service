@@ -1,11 +1,16 @@
-import {Connection, Diagnostic, DiagnosticSeverity, Range, TextDocumentChangeEvent, _Connection} from "vscode-languageserver/node";
+import {Diagnostic, DiagnosticSeverity, Range} from "vscode-languageserver/node";
 import {ExecException} from "child_process";
-import {TextDocument} from "vscode-languageserver-textdocument";
-import {sep} from "path";
-import {existsSync} from "fs";
 import {exec} from "child_process";
-import {fileURLToPath} from "url";
 import {asTempFile} from "./files";
+import {LibraryDependencyToken, libraryDependencyTokenToRange} from "./parse_library_dependencies";
+import {createInfoMessage, createSingleErrorMessage, Message} from "./log";
+
+export type InvokeProverifResult = {
+    libraryMode: boolean
+    invocation: string
+    diagnostics?: Diagnostic[]
+    messages?: Message[]
+}
 
 const getRangeFromPositionString = (positionString: string): Range | undefined => {
     //
@@ -52,9 +57,12 @@ const getRangeFromPositionString = (positionString: string): Range | undefined =
     return undefined;
 };
 
-const parseDiagnostic = (connection: Connection, content: string, libraryMode: boolean, libraryDependecies: LibraryDependency[], error: ExecException|null, stdout: string): Diagnostic[] => {
+const parseDiagnostics = (content: string, libraryMode: boolean, libraryDependencyTokens: LibraryDependencyToken[], error: ExecException | null, stdout: string): {
+    messages?: Message[]
+    diagnostics?: Diagnostic[]
+} => {
     if (!error) {
-        return [];
+        return {diagnostics: []};
     }
 
     // syntax errors in stdout
@@ -63,20 +71,19 @@ const parseDiagnostic = (connection: Connection, content: string, libraryMode: b
         lines.shift();
     }
     if (lines.length < 2) {
-        connection.console.error('Unknown error: ' + error);
-        return [];
+        return createSingleErrorMessage('Unknown error: ' + error);
     }
 
     const positionLine = lines[0];
     const errorLine = lines[1];
 
-    // check if error in library (not in actual file)
-    const matchFile = positionLine.match(/File "(.+)\.pvl"/);
+    // check if error in own file or dependency
+    const matchFile = positionLine.match(/File "(.+)"/);
     if (matchFile) {
-        const matchingDependencies = libraryDependecies.filter(entry => entry.fullPath === matchFile[1]+LIB_FILE_ENDING);
+        const matchingDependencies = libraryDependencyTokens.filter(token => token.path === matchFile[1]);
         const diagnostics = [];
         for (const matchingDependency of matchingDependencies) {
-            const range = libraryMatchToRange(content, matchingDependency.match);
+            const range = libraryDependencyTokenToRange(content, matchingDependency);
             diagnostics.push({
                 severity: DiagnosticSeverity.Warning,
                 range,
@@ -85,103 +92,54 @@ const parseDiagnostic = (connection: Connection, content: string, libraryMode: b
             });
         }
 
-        return diagnostics;
+        if (diagnostics.length) {
+            return {diagnostics};
+        }
     }
 
     const range = getRangeFromPositionString(positionLine);
     if (!range) {
-        connection.console.error('Failed to parse error location: ' + positionLine);
-        return [];
+        return createSingleErrorMessage('Failed to parse error location: ' + positionLine);
     }
 
     if (libraryMode && errorLine === 'Error: Lemma not used because there is no matching query.') {
-        connection.console.info('Ignore error message which is not relevant in library: ' + errorLine);
-        return [];
+        const message = createInfoMessage('Ignore error message which is not relevant in library: ' + errorLine);
+        return {messages: [message], diagnostics: []};
     }
 
     const severity = errorLine.startsWith("Warning:") ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error;
 
     const parsingError = {severity, range, message: errorLine, source: 'ProVerif'};
-    return [parsingError];
-};
-
-const readDocument = (connection: Connection, textDocument: TextDocument) => {
-    let content = textDocument.getText();
-    let appendFileEnding: string | undefined = undefined;
-    const libraryMode = textDocument.uri.endsWith('.pvl');
-    if (libraryMode) {
-        content += '\nprocess\n\t0';
-        appendFileEnding = '.pv';
-
-        connection.console.log('Transformed .pvl to standalone .pv.');
-    }
-
-    return {content, appendFileEnding, libraryMode};
-};
-
-const libraryMatchToRange = (content: string, match: RegExpMatchArray) => {
-    const linesUntilError = content.substring(0, match.index).split(/\r?\n/);
-    const matchingLine = linesUntilError.pop();
-    const endError = (matchingLine?.length ?? 0) + match[0].length;
-    return Range.create(linesUntilError.length, endError - match[1].length - LIB_FILE_ENDING.length, linesUntilError.length, endError);
+    return {diagnostics: [parsingError]};
 };
 
 const LIB_ARGUMENT_PREFIX = '-lib';
-const LIB_FILE_ENDING = '.pvl';
-const LIB_REGEX_MATCH = /\(\* +-lib (.+)\.pvl/g;
-const parseLibraryDependencies = (connection: Connection, filePath: string, content: string) => {
-    const diagnostics: Diagnostic[] = [];
-    const libraryDependecies: LibraryDependency[] = [];
-
-    const folder = filePath.split(sep).slice(0, -1).join(sep);
-    const libs: Set<string> = new Set();
-    const matches = content.matchAll(LIB_REGEX_MATCH);
-    for (const match of matches) {
-        const expectedFilename = match[1] + LIB_FILE_ENDING;
-        const expectedLocation = folder + sep + expectedFilename;
-        libraryDependecies.push({ match, fullPath: expectedLocation });
-        if (existsSync(expectedLocation)) {
-            libs.add(expectedLocation);
-            connection.console.log(`Found library at ${expectedLocation}.`);
-        } else {
-            const range = libraryMatchToRange(content, match);
-            diagnostics.push({
-                severity: DiagnosticSeverity.Warning,
-                range,
-                message: 'Library not found at ' + expectedLocation,
-                source: 'ProVerif Language Service'
-            });
-        }
+export const invokeProverif = async (path: string, content: string, libraryDependencyTokens: LibraryDependencyToken[], proverifBinary: string): Promise<InvokeProverifResult> => {
+    let appendFileEnding: string | undefined = undefined;
+    const libraryMode = path.endsWith('.pvl');
+    if (libraryMode) {
+        content += '\nprocess\n\t0';
+        appendFileEnding = '.pv';
     }
 
-    const libArguments = Array.from(libs).map(lib => `${LIB_ARGUMENT_PREFIX} "${lib}"`).join(" ");
+    const invocationResult = await asTempFile<{
+        invocation: string,
+        messages?: Message[],
+        diagnostics?: Diagnostic[]
+    }>(path, content, appendFileEnding, tempFilePath => new Promise((resolve) => {
+        const libs = new Set(libraryDependencyTokens.filter(token => token.exists).map(token => token.path));
+        const libArguments = Array.from(libs).map(lib => `${LIB_ARGUMENT_PREFIX} "${lib}"`).join(" ");
+        const invocation = `${proverifBinary} ${libArguments} "${tempFilePath}"`;
 
-    return {libArguments, diagnostics, libraryDependecies};
-};
-
-export const invokeProverif = async (connection: _Connection, proverifBinary: string, change: TextDocumentChangeEvent<TextDocument>) => {
-    const filePath = fileURLToPath(change.document.uri);
-    connection.console.log('Processing ' + filePath);
-
-    const {content, appendFileEnding, libraryMode} = readDocument(connection, change.document);
-    const {libArguments, diagnostics: libraryDiagnostics, libraryDependecies} = parseLibraryDependencies(connection, filePath, content);
-
-    const proverifDiagnostics = await asTempFile<Diagnostic[]>(change.document.uri, content, appendFileEnding, tempFilePath => new Promise((resolve) => {
-        const proverifInvocation = `${proverifBinary} ${libArguments} "${tempFilePath}"`;
-        connection.console.info('Invoking ' + proverifInvocation);
-
-        exec(proverifInvocation, {timeout: 1000}, (error, stdout) => {
-            const proverifDiagnostics = parseDiagnostic(connection, content, libraryMode, libraryDependecies, error, stdout);
-            resolve(proverifDiagnostics);
+        exec(invocation, {timeout: 1000}, (error, stdout) => {
+            const result = parseDiagnostics(content, libraryMode, libraryDependencyTokens, error, stdout);
+            resolve({ invocation, ...result });
         });
     }));
 
-
-    const diagnostics = libraryDiagnostics.concat(proverifDiagnostics);
-    await connection.sendDiagnostics({uri: change.document.uri, diagnostics});
+    return {
+        libraryMode,
+        ...invocationResult,
+    };
 };
 
-type LibraryDependency = {
-    match: RegExpMatchArray,
-    fullPath: string,
-}

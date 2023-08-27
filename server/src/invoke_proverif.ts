@@ -76,6 +76,10 @@ const parseDiagnostics = (content: string, libraryMode: boolean, libraryDependen
 
     const positionLine = lines[0];
     const errorLine = lines[1];
+    if (libraryMode && errorLine === 'Error: Lemma not used because there is no matching query.') {
+        const message = createInfoMessage('Ignore error message which is not relevant in library: ' + errorLine);
+        return {messages: [message], diagnostics: []};
+    }
 
     // check if error in own file or dependency
     const matchFile = positionLine.match(/File "(.+)"/);
@@ -100,11 +104,6 @@ const parseDiagnostics = (content: string, libraryMode: boolean, libraryDependen
     const range = getRangeFromPositionString(positionLine);
     if (!range) {
         return createSingleErrorMessage('Failed to parse error location: ' + positionLine);
-    }
-
-    if (libraryMode && errorLine === 'Error: Lemma not used because there is no matching query.') {
-        const message = createInfoMessage('Ignore error message which is not relevant in library: ' + errorLine);
-        return {messages: [message], diagnostics: []};
     }
 
     const severity = errorLine.startsWith("Warning:") ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error;

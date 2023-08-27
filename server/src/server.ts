@@ -13,7 +13,7 @@ import {
 } from 'vscode-languageserver/node';
 import {TextDocument} from 'vscode-languageserver-textdocument';
 import {
-    getParseResult, invalidateDocument, invalidateDocumentContent, invalidateSettings,
+    TaskExecutor,
 } from "./tasks";
 import {getDefinitionLink} from "./go_to_definition";
 
@@ -24,12 +24,16 @@ const connection = createConnection(ProposedFeatures.all);
 // Create a simple text document manager.
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 
+let taskExecutor: TaskExecutor|undefined = undefined;
+
 let hasConfigurationCapability = false;
 connection.onInitialize((params: InitializeParams) => {
     const capabilities = params.capabilities;
     hasConfigurationCapability = !!(
         capabilities.workspace && !!capabilities.workspace.configuration
     );
+
+    taskExecutor = new TaskExecutor(connection, hasConfigurationCapability);
 
     const result: InitializeResult = {
         capabilities: {
@@ -47,12 +51,12 @@ connection.onInitialized(() => {
     }
 });
 
-connection.onDidChangeConfiguration(async _ => invalidateSettings(connection, hasConfigurationCapability));
-documents.onDidClose(event => invalidateDocument(event.document));
-documents.onDidChangeContent(async event => invalidateDocumentContent(connection, hasConfigurationCapability, event.document));
+connection.onDidChangeConfiguration(async _ => taskExecutor?.invalidateSettings());
+documents.onDidClose(event => taskExecutor?.invalidateDocument(event.document));
+documents.onDidChangeContent(async event => taskExecutor?.invalidateDocumentContent(event.document));
 
 connection.onDefinition(async (params) => {
-    const parseResult = await getParseResult(connection, params.textDocument);
+    const parseResult = await taskExecutor?.getParseResult(params.textDocument);
     if (!parseResult) {
         return undefined;
     }

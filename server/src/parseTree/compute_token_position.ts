@@ -1,5 +1,3 @@
-// code mostly unchanged from [Code Completion with antlr4-c3](https://tomassetti.me/code-completion-with-antlr4-c3/), published on the Strumenta blog.
-
 import {ParseTree, TerminalNode} from "antlr4ts/tree";
 import {ParserRuleContext, Token, TokenStream} from "antlr4ts";
 

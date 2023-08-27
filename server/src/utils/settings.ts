@@ -1,6 +1,3 @@
-
-// Please note that this is not the case when using this server with the client provided in this example
-// but could happen with other clients.
 import {TextDocument} from "vscode-languageserver-textdocument";
 import {Connection} from "vscode-languageserver/node";
 

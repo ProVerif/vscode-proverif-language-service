@@ -1,9 +1,9 @@
 import {Diagnostic, DiagnosticSeverity, Range} from "vscode-languageserver/node";
 import {ExecException} from "child_process";
 import {exec} from "child_process";
-import {asTempFile} from "./files";
+import {asTempFile} from "../utils/files";
 import {LibraryDependencyToken, libraryDependencyTokenToRange} from "./parse_library_dependencies";
-import {createInfoMessage, createSingleErrorMessage, Message} from "./log";
+import {createInfoMessage, createSingleErrorMessage, Message} from "../utils/log";
 
 export type InvokeProverifResult = {
     libraryMode: boolean

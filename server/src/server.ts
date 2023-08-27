@@ -12,16 +12,12 @@ import {
     TextDocumentSyncKind
 } from 'vscode-languageserver/node';
 import {TextDocument} from 'vscode-languageserver-textdocument';
-import {invokeProverif, InvokeProverifResult} from "./invoke_proverif";
-import {parseLibraryDependencies, ParseLibraryDependenciesResult} from "./parse_library_dependencies";
-import doc = Mocha.reporters.doc;
-import {fileURLToPath} from "url";
-import {text} from "stream/consumers";
-import {getDocumentSettings, ProVerifSettings} from "./settings";
-import {logMessages} from "./log";
-import {sendDiagnostics} from "./diagnostics";
+import {
+    invalidateDocument, invalidateDocumentContent, invalidateSettings,
+} from "./tasks";
+import {getDefinitionLink} from "./go_to_definition";
 
-// Create a connection for the server, using Node's IPC as a transport.
+// Create a connection for the server, using Node's IPC as transport.
 // Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all);
 
@@ -51,63 +47,11 @@ connection.onInitialized(() => {
     }
 });
 
-type DocumentCache = { settings?: ProVerifSettings, parseLibraryDependenciesResult?: ParseLibraryDependenciesResult, invokeProverifResult?: InvokeProverifResult }
-const documentCache: Map<TextDocument, DocumentCache> = new Map();
-connection.onDidChangeConfiguration(_ => {
-    connection.console.log("Configuration has changed");
-    Array.from(documentCache.keys()).forEach(document => {
-        const cache = documentCache.get(document) ?? { };
-        cache.settings = undefined;
-        documentCache.set(document, cache);
-        
-        reparse(document);
-    });
-});
+connection.onDidChangeConfiguration(async _ => invalidateSettings(connection, hasConfigurationCapability));
+documents.onDidClose(event => invalidateDocument(event.document));
+documents.onDidChangeContent(async event => invalidateDocumentContent(connection, hasConfigurationCapability, event.document));
 
-documents.onDidClose(e => {
-    documentCache.delete(e.document);
-});
 
-documents.onDidChangeContent(async change => {
-    const cache = documentCache.get(change.document) ?? { };
-    cache.parseLibraryDependenciesResult = undefined;
-    cache.invokeProverifResult = undefined;
-    documentCache.set(change.document, cache);
-
-    await reparse(change.document);
-});
-
-connection.onDefinition((params) => {
-    return undefined;
-});
-
-const reparse = async (document: TextDocument) => {
-    const content = document.getText();
-    const path = fileURLToPath(document.uri);
-
-    const cache = documentCache.get(document) ?? { };
-
-    if (!cache.parseLibraryDependenciesResult) {
-        cache.parseLibraryDependenciesResult = parseLibraryDependencies(path, content);
-        connection.console.log("Found " + cache.parseLibraryDependenciesResult.libraryDependencyTokens.length + " dependencies.");
-    }
-
-    if (!cache.invokeProverifResult || !cache.settings) {
-        if (!cache.settings) {
-            cache.settings = await getDocumentSettings(connection, document, hasConfigurationCapability);
-            cache.invokeProverifResult = undefined;
-        }
-
-        const proverifBinary = cache.settings.proverifPath ? cache.settings.proverifPath : 'proverif';
-        cache.invokeProverifResult = await invokeProverif(path, content, cache.parseLibraryDependenciesResult.libraryDependencyTokens, proverifBinary);
-        logMessages(connection, cache.invokeProverifResult.messages);
-    }
-
-    const diagnostics = cache.parseLibraryDependenciesResult.diagnostics.concat(cache.invokeProverifResult.diagnostics ?? []);
-    await sendDiagnostics(connection, document, diagnostics);
-
-    documentCache.set(document, cache);
-};
 
 // functionality extension points:
 // - override connection.onCompletion to return keywords, variables, ...; with onCompletionResolve item.data to show help

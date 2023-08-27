@@ -62,17 +62,21 @@ export class ProverifParser extends Parser {
 	public static readonly Identifier = 32;
 	public static readonly RULE_proverifFile = 0;
 	public static readonly RULE_declaration = 1;
-	public static readonly RULE_process = 2;
-	public static readonly RULE_pterm = 3;
-	public static readonly RULE_identifier_sequence = 4;
-	public static readonly RULE_type_id = 5;
-	public static readonly RULE_expression = 6;
-	public static readonly RULE_parenthesizedExpression = 7;
-	public static readonly RULE_literalConstant = 8;
+	public static readonly RULE_channelDeclaration = 2;
+	public static readonly RULE_freeDeclaration = 3;
+	public static readonly RULE_process = 4;
+	public static readonly RULE_pterm = 5;
+	public static readonly RULE_identifierSequence = 6;
+	public static readonly RULE_identifier = 7;
+	public static readonly RULE_typeId = 8;
+	public static readonly RULE_expression = 9;
+	public static readonly RULE_parenthesizedExpression = 10;
+	public static readonly RULE_literalConstant = 11;
 	// tslint:disable:no-trailing-whitespace
 	public static readonly ruleNames: string[] = [
-		"proverifFile", "declaration", "process", "pterm", "identifier_sequence", 
-		"type_id", "expression", "parenthesizedExpression", "literalConstant",
+		"proverifFile", "declaration", "channelDeclaration", "freeDeclaration", 
+		"process", "pterm", "identifierSequence", "identifier", "typeId", "expression", 
+		"parenthesizedExpression", "literalConstant",
 	];
 
 	private static readonly _LITERAL_NAMES: Array<string | undefined> = [
@@ -122,25 +126,25 @@ export class ProverifParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 21;
+			this.state = 27;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la === ProverifParser.FREE || _la === ProverifParser.CHANNEL) {
 				{
 				{
-				this.state = 18;
+				this.state = 24;
 				this.declaration();
 				}
 				}
-				this.state = 23;
+				this.state = 29;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
-			this.state = 24;
+			this.state = 30;
 			this.match(ProverifParser.PROCESS);
-			this.state = 25;
+			this.state = 31;
 			this.process();
-			this.state = 26;
+			this.state = 32;
 			this.match(ProverifParser.EOF);
 			}
 		}
@@ -163,31 +167,21 @@ export class ProverifParser extends Parser {
 		let _localctx: DeclarationContext = new DeclarationContext(this._ctx, this.state);
 		this.enterRule(_localctx, 2, ProverifParser.RULE_declaration);
 		try {
-			this.state = 37;
+			this.state = 36;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case ProverifParser.CHANNEL:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 28;
-				this.match(ProverifParser.CHANNEL);
-				this.state = 29;
-				this.identifier_sequence();
-				this.state = 30;
-				this.match(ProverifParser.DOT);
+				this.state = 34;
+				this.channelDeclaration();
 				}
 				break;
 			case ProverifParser.FREE:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 32;
-				this.match(ProverifParser.FREE);
-				this.state = 33;
-				this.identifier_sequence();
-				this.state = 34;
-				this.match(ProverifParser.COLON);
 				this.state = 35;
-				this.type_id();
+				this.freeDeclaration();
 				}
 				break;
 			default:
@@ -209,44 +203,104 @@ export class ProverifParser extends Parser {
 		return _localctx;
 	}
 	// @RuleVersion(0)
+	public channelDeclaration(): ChannelDeclarationContext {
+		let _localctx: ChannelDeclarationContext = new ChannelDeclarationContext(this._ctx, this.state);
+		this.enterRule(_localctx, 4, ProverifParser.RULE_channelDeclaration);
+		try {
+			this.enterOuterAlt(_localctx, 1);
+			{
+			this.state = 38;
+			this.match(ProverifParser.CHANNEL);
+			this.state = 39;
+			this.identifierSequence();
+			this.state = 40;
+			this.match(ProverifParser.DOT);
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				_localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return _localctx;
+	}
+	// @RuleVersion(0)
+	public freeDeclaration(): FreeDeclarationContext {
+		let _localctx: FreeDeclarationContext = new FreeDeclarationContext(this._ctx, this.state);
+		this.enterRule(_localctx, 6, ProverifParser.RULE_freeDeclaration);
+		try {
+			this.enterOuterAlt(_localctx, 1);
+			{
+			this.state = 42;
+			this.match(ProverifParser.FREE);
+			this.state = 43;
+			this.identifierSequence();
+			this.state = 44;
+			this.match(ProverifParser.COLON);
+			this.state = 45;
+			this.typeId();
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				_localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return _localctx;
+	}
+	// @RuleVersion(0)
 	public process(): ProcessContext {
 		let _localctx: ProcessContext = new ProcessContext(this._ctx, this.state);
-		this.enterRule(_localctx, 4, ProverifParser.RULE_process);
+		this.enterRule(_localctx, 8, ProverifParser.RULE_process);
 		try {
-			this.state = 53;
+			this.state = 61;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case ProverifParser.IN:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 39;
+				this.state = 47;
 				this.match(ProverifParser.IN);
-				this.state = 40;
+				this.state = 48;
 				this.match(ProverifParser.LPAREN);
-				this.state = 41;
+				this.state = 49;
 				this.pterm();
-				this.state = 42;
+				this.state = 50;
 				this.match(ProverifParser.COMMA);
-				this.state = 43;
+				this.state = 51;
 				this.pterm();
-				this.state = 44;
+				this.state = 52;
 				this.match(ProverifParser.RPAREN);
 				}
 				break;
 			case ProverifParser.OUT:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 46;
+				this.state = 54;
 				this.match(ProverifParser.OUT);
-				this.state = 47;
+				this.state = 55;
 				this.match(ProverifParser.LPAREN);
-				this.state = 48;
+				this.state = 56;
 				this.pterm();
-				this.state = 49;
+				this.state = 57;
 				this.match(ProverifParser.COMMA);
-				this.state = 50;
+				this.state = 58;
 				this.pterm();
-				this.state = 51;
+				this.state = 59;
 				this.match(ProverifParser.RPAREN);
 				}
 				break;
@@ -271,39 +325,39 @@ export class ProverifParser extends Parser {
 	// @RuleVersion(0)
 	public pterm(): PtermContext {
 		let _localctx: PtermContext = new PtermContext(this._ctx, this.state);
-		this.enterRule(_localctx, 6, ProverifParser.RULE_pterm);
+		this.enterRule(_localctx, 10, ProverifParser.RULE_pterm);
 		let _la: number;
 		try {
-			this.state = 64;
+			this.state = 72;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case ProverifParser.Identifier:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 55;
-				this.match(ProverifParser.Identifier);
+				this.state = 63;
+				this.identifier();
 				}
 				break;
 			case ProverifParser.LPAREN:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 56;
+				this.state = 64;
 				this.match(ProverifParser.LPAREN);
-				this.state = 60;
+				this.state = 68;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				while (_la === ProverifParser.LPAREN || _la === ProverifParser.Identifier) {
 					{
 					{
-					this.state = 57;
+					this.state = 65;
 					this.pterm();
 					}
 					}
-					this.state = 62;
+					this.state = 70;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
-				this.state = 63;
+				this.state = 71;
 				this.match(ProverifParser.RPAREN);
 				}
 				break;
@@ -326,28 +380,28 @@ export class ProverifParser extends Parser {
 		return _localctx;
 	}
 	// @RuleVersion(0)
-	public identifier_sequence(): Identifier_sequenceContext {
-		let _localctx: Identifier_sequenceContext = new Identifier_sequenceContext(this._ctx, this.state);
-		this.enterRule(_localctx, 8, ProverifParser.RULE_identifier_sequence);
+	public identifierSequence(): IdentifierSequenceContext {
+		let _localctx: IdentifierSequenceContext = new IdentifierSequenceContext(this._ctx, this.state);
+		this.enterRule(_localctx, 12, ProverifParser.RULE_identifierSequence);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 66;
-			this.match(ProverifParser.Identifier);
-			this.state = 71;
+			this.state = 74;
+			this.identifier();
+			this.state = 79;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la === ProverifParser.COMMA) {
 				{
 				{
-				this.state = 67;
+				this.state = 75;
 				this.match(ProverifParser.COMMA);
-				this.state = 68;
-				this.match(ProverifParser.Identifier);
+				this.state = 76;
+				this.identifier();
 				}
 				}
-				this.state = 73;
+				this.state = 81;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -368,13 +422,38 @@ export class ProverifParser extends Parser {
 		return _localctx;
 	}
 	// @RuleVersion(0)
-	public type_id(): Type_idContext {
-		let _localctx: Type_idContext = new Type_idContext(this._ctx, this.state);
-		this.enterRule(_localctx, 10, ProverifParser.RULE_type_id);
+	public identifier(): IdentifierContext {
+		let _localctx: IdentifierContext = new IdentifierContext(this._ctx, this.state);
+		this.enterRule(_localctx, 14, ProverifParser.RULE_identifier);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 74;
+			this.state = 82;
+			this.match(ProverifParser.Identifier);
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				_localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return _localctx;
+	}
+	// @RuleVersion(0)
+	public typeId(): TypeIdContext {
+		let _localctx: TypeIdContext = new TypeIdContext(this._ctx, this.state);
+		this.enterRule(_localctx, 16, ProverifParser.RULE_typeId);
+		try {
+			this.enterOuterAlt(_localctx, 1);
+			{
+			this.state = 84;
 			this.match(ProverifParser.Identifier);
 			}
 		}
@@ -395,15 +474,15 @@ export class ProverifParser extends Parser {
 	// @RuleVersion(0)
 	public expression(): ExpressionContext {
 		let _localctx: ExpressionContext = new ExpressionContext(this._ctx, this.state);
-		this.enterRule(_localctx, 12, ProverifParser.RULE_expression);
+		this.enterRule(_localctx, 18, ProverifParser.RULE_expression);
 		try {
-			this.state = 78;
+			this.state = 88;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case ProverifParser.LPAREN:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 76;
+				this.state = 86;
 				this.parenthesizedExpression();
 				}
 				break;
@@ -411,7 +490,7 @@ export class ProverifParser extends Parser {
 			case ProverifParser.BooleanLiteral:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 77;
+				this.state = 87;
 				this.literalConstant();
 				}
 				break;
@@ -436,15 +515,15 @@ export class ProverifParser extends Parser {
 	// @RuleVersion(0)
 	public parenthesizedExpression(): ParenthesizedExpressionContext {
 		let _localctx: ParenthesizedExpressionContext = new ParenthesizedExpressionContext(this._ctx, this.state);
-		this.enterRule(_localctx, 14, ProverifParser.RULE_parenthesizedExpression);
+		this.enterRule(_localctx, 20, ProverifParser.RULE_parenthesizedExpression);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 80;
+			this.state = 90;
 			this.match(ProverifParser.LPAREN);
-			this.state = 81;
+			this.state = 91;
 			this.expression();
-			this.state = 82;
+			this.state = 92;
 			this.match(ProverifParser.RPAREN);
 			}
 		}
@@ -465,12 +544,12 @@ export class ProverifParser extends Parser {
 	// @RuleVersion(0)
 	public literalConstant(): LiteralConstantContext {
 		let _localctx: LiteralConstantContext = new LiteralConstantContext(this._ctx, this.state);
-		this.enterRule(_localctx, 16, ProverifParser.RULE_literalConstant);
+		this.enterRule(_localctx, 22, ProverifParser.RULE_literalConstant);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 84;
+			this.state = 94;
 			_la = this._input.LA(1);
 			if (!(_la === ProverifParser.Number || _la === ProverifParser.BooleanLiteral)) {
 			this._errHandler.recoverInline(this);
@@ -500,40 +579,43 @@ export class ProverifParser extends Parser {
 	}
 
 	public static readonly _serializedATN: string =
-		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03\"Y\x04\x02\t" +
+		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03\"c\x04\x02\t" +
 		"\x02\x04\x03\t\x03\x04\x04\t\x04\x04\x05\t\x05\x04\x06\t\x06\x04\x07\t" +
-		"\x07\x04\b\t\b\x04\t\t\t\x04\n\t\n\x03\x02\x07\x02\x16\n\x02\f\x02\x0E" +
-		"\x02\x19\v\x02\x03\x02\x03\x02\x03\x02\x03\x02\x03\x03\x03\x03\x03\x03" +
-		"\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x05\x03(\n\x03\x03\x04" +
-		"\x03\x04\x03\x04\x03\x04\x03\x04\x03\x04\x03\x04\x03\x04\x03\x04\x03\x04" +
-		"\x03\x04\x03\x04\x03\x04\x03\x04\x05\x048\n\x04\x03\x05\x03\x05\x03\x05" +
-		"\x07\x05=\n\x05\f\x05\x0E\x05@\v\x05\x03\x05\x05\x05C\n\x05\x03\x06\x03" +
-		"\x06\x03\x06\x07\x06H\n\x06\f\x06\x0E\x06K\v\x06\x03\x07\x03\x07\x03\b" +
-		"\x03\b\x05\bQ\n\b\x03\t\x03\t\x03\t\x03\t\x03\n\x03\n\x03\n\x02\x02\x02" +
-		"\v\x02\x02\x04\x02\x06\x02\b\x02\n\x02\f\x02\x0E\x02\x10\x02\x12\x02\x02" +
-		"\x03\x03\x02 !\x02V\x02\x17\x03\x02\x02\x02\x04\'\x03\x02\x02\x02\x06" +
-		"7\x03\x02\x02\x02\bB\x03\x02\x02\x02\nD\x03\x02\x02\x02\fL\x03\x02\x02" +
-		"\x02\x0EP\x03\x02\x02\x02\x10R\x03\x02\x02\x02\x12V\x03\x02\x02\x02\x14" +
-		"\x16\x05\x04\x03\x02\x15\x14\x03\x02\x02\x02\x16\x19\x03\x02\x02\x02\x17" +
-		"\x15\x03\x02\x02\x02\x17\x18\x03\x02\x02\x02\x18\x1A\x03\x02\x02\x02\x19" +
-		"\x17\x03\x02\x02\x02\x1A\x1B\x07\x1D\x02\x02\x1B\x1C\x05\x06\x04\x02\x1C" +
-		"\x1D\x07\x02\x02\x03\x1D\x03\x03\x02\x02\x02\x1E\x1F\x07\x1C\x02\x02\x1F" +
-		" \x05\n\x06\x02 !\x07\x05\x02\x02!(\x03\x02\x02\x02\"#\x07\x1B\x02\x02" +
-		"#$\x05\n\x06\x02$%\x07\x06\x02\x02%&\x05\f\x07\x02&(\x03\x02\x02\x02\'" +
-		"\x1E\x03\x02\x02\x02\'\"\x03\x02\x02\x02(\x05\x03\x02\x02\x02)*\x07\x1F" +
-		"\x02\x02*+\x07\t\x02\x02+,\x05\b\x05\x02,-\x07\b\x02\x02-.\x05\b\x05\x02" +
-		"./\x07\n\x02\x02/8\x03\x02\x02\x0201\x07\x1E\x02\x0212\x07\t\x02\x022" +
-		"3\x05\b\x05\x0234\x07\b\x02\x0245\x05\b\x05\x0256\x07\n\x02\x0268\x03" +
-		"\x02\x02\x027)\x03\x02\x02\x0270\x03\x02\x02\x028\x07\x03\x02\x02\x02" +
-		"9C\x07\"\x02\x02:>\x07\t\x02\x02;=\x05\b\x05\x02<;\x03\x02\x02\x02=@\x03" +
-		"\x02\x02\x02><\x03\x02\x02\x02>?\x03\x02\x02\x02?A\x03\x02\x02\x02@>\x03" +
-		"\x02\x02\x02AC\x07\n\x02\x02B9\x03\x02\x02\x02B:\x03\x02\x02\x02C\t\x03" +
-		"\x02\x02\x02DI\x07\"\x02\x02EF\x07\b\x02\x02FH\x07\"\x02\x02GE\x03\x02" +
-		"\x02\x02HK\x03\x02\x02\x02IG\x03\x02\x02\x02IJ\x03\x02\x02\x02J\v\x03" +
-		"\x02\x02\x02KI\x03\x02\x02\x02LM\x07\"\x02\x02M\r\x03\x02\x02\x02NQ\x05" +
-		"\x10\t\x02OQ\x05\x12\n\x02PN\x03\x02\x02\x02PO\x03\x02\x02\x02Q\x0F\x03" +
-		"\x02\x02\x02RS\x07\t\x02\x02ST\x05\x0E\b\x02TU\x07\n\x02\x02U\x11\x03" +
-		"\x02\x02\x02VW\t\x02\x02\x02W\x13\x03\x02\x02\x02\t\x17\'7>BIP";
+		"\x07\x04\b\t\b\x04\t\t\t\x04\n\t\n\x04\v\t\v\x04\f\t\f\x04\r\t\r\x03\x02" +
+		"\x07\x02\x1C\n\x02\f\x02\x0E\x02\x1F\v\x02\x03\x02\x03\x02\x03\x02\x03" +
+		"\x02\x03\x03\x03\x03\x05\x03\'\n\x03\x03\x04\x03\x04\x03\x04\x03\x04\x03" +
+		"\x05\x03\x05\x03\x05\x03\x05\x03\x05\x03\x06\x03\x06\x03\x06\x03\x06\x03" +
+		"\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03" +
+		"\x06\x05\x06@\n\x06\x03\x07\x03\x07\x03\x07\x07\x07E\n\x07\f\x07\x0E\x07" +
+		"H\v\x07\x03\x07\x05\x07K\n\x07\x03\b\x03\b\x03\b\x07\bP\n\b\f\b\x0E\b" +
+		"S\v\b\x03\t\x03\t\x03\n\x03\n\x03\v\x03\v\x05\v[\n\v\x03\f\x03\f\x03\f" +
+		"\x03\f\x03\r\x03\r\x03\r\x02\x02\x02\x0E\x02\x02\x04\x02\x06\x02\b\x02" +
+		"\n\x02\f\x02\x0E\x02\x10\x02\x12\x02\x14\x02\x16\x02\x18\x02\x02\x03\x03" +
+		"\x02 !\x02]\x02\x1D\x03\x02\x02\x02\x04&\x03\x02\x02\x02\x06(\x03\x02" +
+		"\x02\x02\b,\x03\x02\x02\x02\n?\x03\x02\x02\x02\fJ\x03\x02\x02\x02\x0E" +
+		"L\x03\x02\x02\x02\x10T\x03\x02\x02\x02\x12V\x03\x02\x02\x02\x14Z\x03\x02" +
+		"\x02\x02\x16\\\x03\x02\x02\x02\x18`\x03\x02\x02\x02\x1A\x1C\x05\x04\x03" +
+		"\x02\x1B\x1A\x03\x02\x02\x02\x1C\x1F\x03\x02\x02\x02\x1D\x1B\x03\x02\x02" +
+		"\x02\x1D\x1E\x03\x02\x02\x02\x1E \x03\x02\x02\x02\x1F\x1D\x03\x02\x02" +
+		"\x02 !\x07\x1D\x02\x02!\"\x05\n\x06\x02\"#\x07\x02\x02\x03#\x03\x03\x02" +
+		"\x02\x02$\'\x05\x06\x04\x02%\'\x05\b\x05\x02&$\x03\x02\x02\x02&%\x03\x02" +
+		"\x02\x02\'\x05\x03\x02\x02\x02()\x07\x1C\x02\x02)*\x05\x0E\b\x02*+\x07" +
+		"\x05\x02\x02+\x07\x03\x02\x02\x02,-\x07\x1B\x02\x02-.\x05\x0E\b\x02./" +
+		"\x07\x06\x02\x02/0\x05\x12\n\x020\t\x03\x02\x02\x0212\x07\x1F\x02\x02" +
+		"23\x07\t\x02\x0234\x05\f\x07\x0245\x07\b\x02\x0256\x05\f\x07\x0267\x07" +
+		"\n\x02\x027@\x03\x02\x02\x0289\x07\x1E\x02\x029:\x07\t\x02\x02:;\x05\f" +
+		"\x07\x02;<\x07\b\x02\x02<=\x05\f\x07\x02=>\x07\n\x02\x02>@\x03\x02\x02" +
+		"\x02?1\x03\x02\x02\x02?8\x03\x02\x02\x02@\v\x03\x02\x02\x02AK\x05\x10" +
+		"\t\x02BF\x07\t\x02\x02CE\x05\f\x07\x02DC\x03\x02\x02\x02EH\x03\x02\x02" +
+		"\x02FD\x03\x02\x02\x02FG\x03\x02\x02\x02GI\x03\x02\x02\x02HF\x03\x02\x02" +
+		"\x02IK\x07\n\x02\x02JA\x03\x02\x02\x02JB\x03\x02\x02\x02K\r\x03\x02\x02" +
+		"\x02LQ\x05\x10\t\x02MN\x07\b\x02\x02NP\x05\x10\t\x02OM\x03\x02\x02\x02" +
+		"PS\x03\x02\x02\x02QO\x03\x02\x02\x02QR\x03\x02\x02\x02R\x0F\x03\x02\x02" +
+		"\x02SQ\x03\x02\x02\x02TU\x07\"\x02\x02U\x11\x03\x02\x02\x02VW\x07\"\x02" +
+		"\x02W\x13\x03\x02\x02\x02X[\x05\x16\f\x02Y[\x05\x18\r\x02ZX\x03\x02\x02" +
+		"\x02ZY\x03\x02\x02\x02[\x15\x03\x02\x02\x02\\]\x07\t\x02\x02]^\x05\x14" +
+		"\v\x02^_\x07\n\x02\x02_\x17\x03\x02\x02\x02`a\t\x02\x02\x02a\x19\x03\x02" +
+		"\x02\x02\t\x1D&?FJQZ";
 	public static __ATN: ATN;
 	public static get _ATN(): ATN {
 		if (!ProverifParser.__ATN) {
@@ -589,15 +671,11 @@ export class ProverifFileContext extends ParserRuleContext {
 
 
 export class DeclarationContext extends ParserRuleContext {
-	public CHANNEL(): TerminalNode | undefined { return this.tryGetToken(ProverifParser.CHANNEL, 0); }
-	public identifier_sequence(): Identifier_sequenceContext {
-		return this.getRuleContext(0, Identifier_sequenceContext);
+	public channelDeclaration(): ChannelDeclarationContext | undefined {
+		return this.tryGetRuleContext(0, ChannelDeclarationContext);
 	}
-	public DOT(): TerminalNode | undefined { return this.tryGetToken(ProverifParser.DOT, 0); }
-	public FREE(): TerminalNode | undefined { return this.tryGetToken(ProverifParser.FREE, 0); }
-	public COLON(): TerminalNode | undefined { return this.tryGetToken(ProverifParser.COLON, 0); }
-	public type_id(): Type_idContext | undefined {
-		return this.tryGetRuleContext(0, Type_idContext);
+	public freeDeclaration(): FreeDeclarationContext | undefined {
+		return this.tryGetRuleContext(0, FreeDeclarationContext);
 	}
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
@@ -620,6 +698,77 @@ export class DeclarationContext extends ParserRuleContext {
 	public accept<Result>(visitor: ProverifParserVisitor<Result>): Result {
 		if (visitor.visitDeclaration) {
 			return visitor.visitDeclaration(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
+}
+
+
+export class ChannelDeclarationContext extends ParserRuleContext {
+	public CHANNEL(): TerminalNode { return this.getToken(ProverifParser.CHANNEL, 0); }
+	public identifierSequence(): IdentifierSequenceContext {
+		return this.getRuleContext(0, IdentifierSequenceContext);
+	}
+	public DOT(): TerminalNode { return this.getToken(ProverifParser.DOT, 0); }
+	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
+		super(parent, invokingState);
+	}
+	// @Override
+	public get ruleIndex(): number { return ProverifParser.RULE_channelDeclaration; }
+	// @Override
+	public enterRule(listener: ProverifParserListener): void {
+		if (listener.enterChannelDeclaration) {
+			listener.enterChannelDeclaration(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: ProverifParserListener): void {
+		if (listener.exitChannelDeclaration) {
+			listener.exitChannelDeclaration(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: ProverifParserVisitor<Result>): Result {
+		if (visitor.visitChannelDeclaration) {
+			return visitor.visitChannelDeclaration(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
+}
+
+
+export class FreeDeclarationContext extends ParserRuleContext {
+	public FREE(): TerminalNode { return this.getToken(ProverifParser.FREE, 0); }
+	public identifierSequence(): IdentifierSequenceContext {
+		return this.getRuleContext(0, IdentifierSequenceContext);
+	}
+	public COLON(): TerminalNode { return this.getToken(ProverifParser.COLON, 0); }
+	public typeId(): TypeIdContext {
+		return this.getRuleContext(0, TypeIdContext);
+	}
+	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
+		super(parent, invokingState);
+	}
+	// @Override
+	public get ruleIndex(): number { return ProverifParser.RULE_freeDeclaration; }
+	// @Override
+	public enterRule(listener: ProverifParserListener): void {
+		if (listener.enterFreeDeclaration) {
+			listener.enterFreeDeclaration(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: ProverifParserListener): void {
+		if (listener.exitFreeDeclaration) {
+			listener.exitFreeDeclaration(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: ProverifParserVisitor<Result>): Result {
+		if (visitor.visitFreeDeclaration) {
+			return visitor.visitFreeDeclaration(this);
 		} else {
 			return visitor.visitChildren(this);
 		}
@@ -671,7 +820,9 @@ export class ProcessContext extends ParserRuleContext {
 
 
 export class PtermContext extends ParserRuleContext {
-	public Identifier(): TerminalNode | undefined { return this.tryGetToken(ProverifParser.Identifier, 0); }
+	public identifier(): IdentifierContext | undefined {
+		return this.tryGetRuleContext(0, IdentifierContext);
+	}
 	public LPAREN(): TerminalNode | undefined { return this.tryGetToken(ProverifParser.LPAREN, 0); }
 	public RPAREN(): TerminalNode | undefined { return this.tryGetToken(ProverifParser.RPAREN, 0); }
 	public pterm(): PtermContext[];
@@ -711,14 +862,14 @@ export class PtermContext extends ParserRuleContext {
 }
 
 
-export class Identifier_sequenceContext extends ParserRuleContext {
-	public Identifier(): TerminalNode[];
-	public Identifier(i: number): TerminalNode;
-	public Identifier(i?: number): TerminalNode | TerminalNode[] {
+export class IdentifierSequenceContext extends ParserRuleContext {
+	public identifier(): IdentifierContext[];
+	public identifier(i: number): IdentifierContext;
+	public identifier(i?: number): IdentifierContext | IdentifierContext[] {
 		if (i === undefined) {
-			return this.getTokens(ProverifParser.Identifier);
+			return this.getRuleContexts(IdentifierContext);
 		} else {
-			return this.getToken(ProverifParser.Identifier, i);
+			return this.getRuleContext(i, IdentifierContext);
 		}
 	}
 	public COMMA(): TerminalNode[];
@@ -734,23 +885,23 @@ export class Identifier_sequenceContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ProverifParser.RULE_identifier_sequence; }
+	public get ruleIndex(): number { return ProverifParser.RULE_identifierSequence; }
 	// @Override
 	public enterRule(listener: ProverifParserListener): void {
-		if (listener.enterIdentifier_sequence) {
-			listener.enterIdentifier_sequence(this);
+		if (listener.enterIdentifierSequence) {
+			listener.enterIdentifierSequence(this);
 		}
 	}
 	// @Override
 	public exitRule(listener: ProverifParserListener): void {
-		if (listener.exitIdentifier_sequence) {
-			listener.exitIdentifier_sequence(this);
+		if (listener.exitIdentifierSequence) {
+			listener.exitIdentifierSequence(this);
 		}
 	}
 	// @Override
 	public accept<Result>(visitor: ProverifParserVisitor<Result>): Result {
-		if (visitor.visitIdentifier_sequence) {
-			return visitor.visitIdentifier_sequence(this);
+		if (visitor.visitIdentifierSequence) {
+			return visitor.visitIdentifierSequence(this);
 		} else {
 			return visitor.visitChildren(this);
 		}
@@ -758,29 +909,59 @@ export class Identifier_sequenceContext extends ParserRuleContext {
 }
 
 
-export class Type_idContext extends ParserRuleContext {
+export class IdentifierContext extends ParserRuleContext {
 	public Identifier(): TerminalNode { return this.getToken(ProverifParser.Identifier, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ProverifParser.RULE_type_id; }
+	public get ruleIndex(): number { return ProverifParser.RULE_identifier; }
 	// @Override
 	public enterRule(listener: ProverifParserListener): void {
-		if (listener.enterType_id) {
-			listener.enterType_id(this);
+		if (listener.enterIdentifier) {
+			listener.enterIdentifier(this);
 		}
 	}
 	// @Override
 	public exitRule(listener: ProverifParserListener): void {
-		if (listener.exitType_id) {
-			listener.exitType_id(this);
+		if (listener.exitIdentifier) {
+			listener.exitIdentifier(this);
 		}
 	}
 	// @Override
 	public accept<Result>(visitor: ProverifParserVisitor<Result>): Result {
-		if (visitor.visitType_id) {
-			return visitor.visitType_id(this);
+		if (visitor.visitIdentifier) {
+			return visitor.visitIdentifier(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
+}
+
+
+export class TypeIdContext extends ParserRuleContext {
+	public Identifier(): TerminalNode { return this.getToken(ProverifParser.Identifier, 0); }
+	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
+		super(parent, invokingState);
+	}
+	// @Override
+	public get ruleIndex(): number { return ProverifParser.RULE_typeId; }
+	// @Override
+	public enterRule(listener: ProverifParserListener): void {
+		if (listener.enterTypeId) {
+			listener.enterTypeId(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: ProverifParserListener): void {
+		if (listener.exitTypeId) {
+			listener.exitTypeId(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: ProverifParserVisitor<Result>): Result {
+		if (visitor.visitTypeId) {
+			return visitor.visitTypeId(this);
 		} else {
 			return visitor.visitChildren(this);
 		}

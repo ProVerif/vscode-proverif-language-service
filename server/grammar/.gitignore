@@ -1,2 +1,6 @@
 # temp folder created by antlr vscode extension
 .antlr
+
+# generated files useful for intellij
+*.interp
+*.tokens

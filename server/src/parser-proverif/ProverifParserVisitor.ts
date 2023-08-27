@@ -5,10 +5,13 @@ import { ParseTreeVisitor } from "antlr4ts/tree/ParseTreeVisitor";
 
 import { ProverifFileContext } from "./ProverifParser";
 import { DeclarationContext } from "./ProverifParser";
+import { ChannelDeclarationContext } from "./ProverifParser";
+import { FreeDeclarationContext } from "./ProverifParser";
 import { ProcessContext } from "./ProverifParser";
 import { PtermContext } from "./ProverifParser";
-import { Identifier_sequenceContext } from "./ProverifParser";
-import { Type_idContext } from "./ProverifParser";
+import { IdentifierSequenceContext } from "./ProverifParser";
+import { IdentifierContext } from "./ProverifParser";
+import { TypeIdContext } from "./ProverifParser";
 import { ExpressionContext } from "./ProverifParser";
 import { ParenthesizedExpressionContext } from "./ProverifParser";
 import { LiteralConstantContext } from "./ProverifParser";
@@ -37,6 +40,20 @@ export interface ProverifParserVisitor<Result> extends ParseTreeVisitor<Result> 
 	visitDeclaration?: (ctx: DeclarationContext) => Result;
 
 	/**
+	 * Visit a parse tree produced by `ProverifParser.channelDeclaration`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitChannelDeclaration?: (ctx: ChannelDeclarationContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `ProverifParser.freeDeclaration`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitFreeDeclaration?: (ctx: FreeDeclarationContext) => Result;
+
+	/**
 	 * Visit a parse tree produced by `ProverifParser.process`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -51,18 +68,25 @@ export interface ProverifParserVisitor<Result> extends ParseTreeVisitor<Result> 
 	visitPterm?: (ctx: PtermContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `ProverifParser.identifier_sequence`.
+	 * Visit a parse tree produced by `ProverifParser.identifierSequence`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitIdentifier_sequence?: (ctx: Identifier_sequenceContext) => Result;
+	visitIdentifierSequence?: (ctx: IdentifierSequenceContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `ProverifParser.type_id`.
+	 * Visit a parse tree produced by `ProverifParser.identifier`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitType_id?: (ctx: Type_idContext) => Result;
+	visitIdentifier?: (ctx: IdentifierContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `ProverifParser.typeId`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitTypeId?: (ctx: TypeIdContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `ProverifParser.expression`.

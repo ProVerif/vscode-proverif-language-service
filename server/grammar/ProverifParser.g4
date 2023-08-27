@@ -7,8 +7,16 @@ proverifFile
     ;
 
 declaration
-    : CHANNEL identifier_sequence DOT
-    | FREE identifier_sequence COLON type_id
+    : channelDeclaration
+    | freeDeclaration
+    ;
+
+channelDeclaration
+    : CHANNEL identifierSequence DOT
+    ;
+
+freeDeclaration
+    : FREE identifierSequence COLON typeId
     ;
 
 process
@@ -17,15 +25,17 @@ process
     ;
 
 pterm
-    : Identifier
+    : identifier
     | LPAREN pterm* RPAREN
     ;
 
-identifier_sequence
-    : Identifier (COMMA Identifier)*
+identifierSequence
+    : identifier (COMMA identifier)*
     ;
 
-type_id: Identifier ;
+identifier: Identifier ;
+
+typeId: Identifier ;
 
 expression
     : parenthesizedExpression

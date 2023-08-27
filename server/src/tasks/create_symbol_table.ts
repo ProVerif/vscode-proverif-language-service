@@ -27,6 +27,11 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<SymbolTable> implement
         return this.symbolTable;
     }
 
+    visitProverifFile = (ctx: ProverifFileContext) => {
+        this.scope.context = ctx;
+        return this.visitChildren(ctx);
+    };
+
     visitChannelDeclaration = (ctx: ChannelDeclarationContext) => {
         ctx.identifierSequence()?.children?.forEach(identifier => {
             if (identifier instanceof IdentifierContext) {

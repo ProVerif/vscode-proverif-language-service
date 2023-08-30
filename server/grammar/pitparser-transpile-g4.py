@@ -1,4 +1,4 @@
-with (open('pitparser.mly', 'r') as reader):
+with open('pitparser.mly', 'r') as reader:
     content = reader.read()
 
     body = content[content.find("%%") + 2:]  # cut off header
@@ -76,5 +76,9 @@ with (open('pitparser.mly', 'r') as reader):
             resultLines.append("    ;")
             resultLines.append("")
 
+    result = '\n'.join(resultLines)
+    # replace reserved keyword
+    result = result.replace(" options", " options_").replace("options_eq", "optionseq").replace("\noptions:", "\noptions_:")
+
     with open('ProverifParser.g4', 'w') as writer:
-        writer.writelines(line + '\n' for line in resultLines)
+        writer.write(result)

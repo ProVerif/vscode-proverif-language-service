@@ -20,40 +20,45 @@ seperators and operators
 */
 DOT: '.' ;
 COLON: ':' ;
-SEMICOLON: ';' ;
+SEMI: ';' ;
 
+UNDERSCORE: '_';
 COMMA: ',' ;
 LPAREN: '(';
 RPAREN: ')' ;
-LSQUARE: '[';
-RSQUARE: ']' ;
+LBRACE: '{';
+RBRACE: '}' ;
+LBRACKET: '[';
+RBRACKET: ']' ;
 
-BANG: '!' ;
+REPL: '!' ;
 
-ADD: '+' ;
-SUB: '-' ;
+SLASH: '/';
+POWER: '^';
+PLUS: '+' ;
+MINUX: '-' ;
 
 STAR: '*' ;
-HASH: '#' ;
+COUNT: '#' ;
 AT: '@' ;
 
-ASSIGNMENT: '<-' ;
-ASSIGNMENT_RANDOM: '<-R' ;
+LEFTARROW: '<-' ;
+RANDOM: '<-R' ;
 
-CONJUNCTION: '&&' ;
-DISJUNCTION: '||' ;
-CORRESPONDENCE: '==>' ;
+WEDGE: '&&' ;
+OR: '||' ;
+BEFORE: '==>' ;
 
 LESS: '<' ;
 GREATER: '>' ;
-LESS_EQUAL: '<=' ;
-GREATER_EQUAL: '>=' ;
-NOT_EQUAL: '<>' ;
+LEQ: '<=' ;
+GEQ: '>=' ;
+DIFF: '<>' ;
 EQUAL: '=' ;
 
-IMPLICATION: '->';
-EQUIVALENCE: '<->';
-EQUIVALENCE_VARIANT: '<=>';
+RED: '->';
+EQUIV: '<->';
+EQUIVEQ: '<=>';
 
 //KEYWORDS
 /*
@@ -83,7 +88,7 @@ ELSE: 'else';
 SUCHTHAT: 'suchthat';
 IN: 'in';
 NOT: 'not';
-OR_FAIL: 'or fail';
+ORTEXT: 'or';
 FAIL: 'fail';
 
 /**
@@ -102,9 +107,9 @@ declaration: equations
 */
 FUN: 'fun';
 LETFUN: 'letfun';
-REDUC: 'reduc';
+REDUCTION: 'reduc';
 EQUATION: 'equation';
-PRED: 'pred';
+PREDICATE: 'pred';
 ELIMTRUE: 'elimtrue';
 CLAUSES: 'clauses';
 
@@ -124,8 +129,7 @@ WEAKSECRET: 'weaksecret';
 declaration: tune resolution strategy
 */
 SELECT: 'select';
-NO_SELECT: 'noselect';
-NO_UNIF: 'nounif';
+NOUNIF: 'nounif' | 'noselect';
 
 /**
 declaration: cryptoverif compatability
@@ -134,7 +138,8 @@ PARAM: 'param'; // ignored by ProVerif
 PROBA: 'proba'; // ignored by ProVerif
 LETPROBA: 'letproba'; // ignored by ProVerif
 PROOF: 'proof'; // ignored by ProVerif
-DEF: 'def';
+IMPLEMENTATION: 'implementation'; // ignored by proverif
+DEFINE: 'def';
 EXPAND: 'expand';
 
 /**
@@ -142,17 +147,17 @@ destructors
 */
 // LET: 'let'; duplicate
 // IN: 'in'; duplicate
+FOR: 'for';
+DO: 'do';
 FORALL: 'forall';
 OTHERWISE: 'otherwise';
 
 /**
 query
 */
-PUBLIC_VARS: 'public vars';
+PUBLICVARS: 'public vars';
 SECRET: 'secret';
-PUTBEGIN_EVENT: 'putbegin event';
-PUTBEGIN_INJ_EVENT: 'putbegin inj-event';
-REAL_OR_RANDOM: 'real_or_random';
+PUTBEGIN: 'putbegin';
 
 /**
 queries
@@ -175,6 +180,11 @@ IGNORE_A_FEW_TIMES: 'ignoreAFewTimes';
 INDUCTION_ON: 'inductionOn';
 
 /**
+equivalence
+*/
+EQUIVALENCE: 'equivqlence';
+
+/**
 process
 */
 PROCESS: 'process' ;
@@ -182,20 +192,24 @@ YIELD: 'yield';
 FOREACH: 'foreach';
 // IN: 'in'; duplicate
 OUT: 'out' ;
-SYNC: 'sync';
+BARRIER: 'sync';
 
-Number
+INT
     : Digit+
     ;
 
-BooleanLiteral
-    : 'true'
-    | 'false'
-    ;
-
-Identifier
+IDENT
     : Letter (Letter | Digit | SpecialCharacter | Latin1AdditionalLetter)*
     ;
+
+TAG
+    : (AT | Letter) (AT | Letter | Digit | SpecialCharacter | Latin1AdditionalLetter)*
+    ;
+
+STRING
+    : '"' .*? '"'
+    ;
+
 
 fragment Digit
     : [0-9]

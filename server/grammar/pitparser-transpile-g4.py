@@ -28,9 +28,13 @@ with (open('pitparser.mly', 'r') as reader):
                 cleanedRuleContent = []
                 for content in ruleContent:
                     normalizedContent = content.strip("|").strip()
+                    # remove comments at end of line
                     if normalizedContent.find("/*") > 0 and normalizedContent.find("*/") == -1:
                         normalizedContent = normalizedContent[0: normalizedContent.rfind("/*")]
-                    if len(content) == 0:
+                    # remove unsupported tokens
+                    normalizedContent = normalizedContent.replace(" %prec", "")
+                    # remove empty lines
+                    if len(normalizedContent) == 0:
                         continue
                     cleanedRuleContent.append(normalizedContent)
                 rules[ruleName] = cleanedRuleContent
@@ -53,17 +57,23 @@ with (open('pitparser.mly', 'r') as reader):
     ]
     for rule in rules.keys():
         resultLines.append(rule.strip(":"))
-        for index, entry in enumerate(rules[rule]):
-            normalizedEntry = entry.strip("|").strip()
-            if normalizedEntry == "":
-                continue
-            if index == 0:
-                resultLines.append("    : " + normalizedEntry)
-            else:
-                resultLines.append("    | " + normalizedEntry)
+        if len(rules[rule]) == 1:
+            normalizedEntry = rules[rule][0].strip("|").strip()
+            resultLines[len(resultLines) - 1] += ": " + normalizedEntry + ";"
+            resultLines.append("")
+            continue
+        else:
+            for index, entry in enumerate(rules[rule]):
+                normalizedEntry = entry.strip("|").strip()
+                if normalizedEntry == "":
+                    continue
+                if index == 0:
+                    resultLines.append("    : " + normalizedEntry)
+                else:
+                    resultLines.append("    | " + normalizedEntry)
 
-        resultLines.append("    ;")
-        resultLines.append("")
+            resultLines.append("    ;")
+            resultLines.append("")
 
-        with open('ProverifParser.g4', 'w') as writer:
-            writer.writelines(line + '\n' for line in resultLines)
+    with open('ProverifParser.g4', 'w') as writer:
+        writer.writelines(line + '\n' for line in resultLines)

@@ -121,39 +121,27 @@ typeoptlist
     | typeopt SEMI typeoptlist
     ;
 
-typeoptions
-    : LBRACKET typeoptlist RBRACKET
-    ;
+typeoptions: LBRACKET typeoptlist RBRACKET;
 
-funopt
-    : IDENT EQUAL STRING
-    ;
+funopt: IDENT EQUAL STRING;
 
 funoptlist
     : funopt
     | funopt SEMI funoptlist
     ;
 
-functionoptions
-    : LBRACKET funoptlist RBRACKET
-    ;
+functionoptions: LBRACKET funoptlist RBRACKET;
 
-probaargs
-    : LPAREN dimlist RPAREN
-    ;
+probaargs: LPAREN dimlist RPAREN;
 
-dimlist
-    : nedimlist
-    ;
+dimlist: nedimlist;
 
 nedimlist
     : dimext
     | dimext COMMA nedimlist
     ;
 
-dimext
-    : dim
-    ;
+dimext: dim;
 
 dim
     : IDENT poweropt
@@ -166,26 +154,20 @@ poweropt
     | POWER MINUS INT
     ;
 
-letprobaargs
-    : LPAREN probaarglist RPAREN
-    ;
+letprobaargs: LPAREN probaarglist RPAREN;
 
-probaarglist
-    : neprobaarglist
-    ;
+probaarglist: neprobaarglist;
 
 neprobaarglist
     : vardim
     | vardim COMMA neprobaarglist
     ;
 
-vardim
-    : neidentseq COLON dimext
-    ;
+vardim: neidentseq COLON dimext;
 
 probaf
     : LPAREN probaflist RPAREN
-    | MINUS probaf  %prec UNARYMINUS
+    | MINUS probaf  UNARYMINUS
     | probaf PLUS /*ADD*/ probaf
     | probaf MINUS /*SUB*/ probaf
     | probaf STAR /*MUL*/ probaf
@@ -199,7 +181,7 @@ probaf
     | IDENT /*TIME*/ LPAREN OUT IDENT probaflistopt RPAREN
     | IDENT /*TIME*/ LPAREN OUT LBRACKET neidentseq RBRACKET IDENT probaflistopt RPAREN
     | IDENT /*TIME*/ LPAREN IN INT RPAREN
-    | OPTIMIF probaoptimcond THEN probaf ELSE probaf %prec OPTIMIF
+    | OPTIMIF probaoptimcond THEN probaf ELSE probaf OPTIMIF
     | IDENT
     | COUNT IDENT
     | BAR IDENT BAR
@@ -216,9 +198,7 @@ probaf
     | FLOAT
     ;
 
-identlist
-    : neidentseq
-    ;
+identlist: neidentseq;
 
 probaoptimcond
     : LPAREN probaoptimcond RPAREN
@@ -233,18 +213,14 @@ probaoptimcond
     | IDENT LPAREN probaoptimcond RPAREN
     ;
 
-probaflistopt
-    : COMMA probaflist
-    ;
+probaflistopt: COMMA probaflist;
 
 probaflist
     : probaf
     | probaf COMMA probaflist
     ;
 
-options
-    : LBRACKET optionseq RBRACKET
-    ;
+options: LBRACKET optionseq RBRACKET;
 
 singleoption
     : IDENT
@@ -272,22 +248,16 @@ onevartype
     | IDENT COLON typeid
     ;
 
-nevartype
-    : onevartype COMMA nevartype
-    ;
+nevartype: onevartype COMMA nevartype;
 
-forallvartype
-    : FORALL nevartype SEMI
-    ;
+forallvartype: FORALL nevartype SEMI;
 
 typeid
     : IDENT
     | CHANNEL
     ;
 
-typeidseq
-    : netypeidseq
-    ;
+typeidseq: netypeidseq;
 
 netypeidseq
     : typeid COMMA netypeidseq
@@ -317,9 +287,7 @@ netermseq
     | term
     ;
 
-termseq
-    : netermseq
-    ;
+termseq: netermseq;
 
 niseq
     : IDENT AMONG LPAREN netermseq RPAREN COMMA niseq
@@ -350,13 +318,9 @@ tquery
     | PUTBEGIN INJEVENT COLON neidentseq
     ;
 
-optpublicvars
-    : PUBLICVARS neidentseq
-    ;
+optpublicvars: PUBLICVARS neidentseq;
 
-optatident
-    : AT IDENT
-    ;
+optatident: AT IDENT;
 
 gterm
     : IDENT LPAREN gtermseq RPAREN optatident
@@ -392,9 +356,7 @@ negtermseq
     | gterm
     ;
 
-gtermseq
-    : negtermseq
-    ;
+gtermseq: negtermseq;
 
 nesbindingseq
     : REPL INT EQUAL gterm SEMI nesbindingseq
@@ -403,9 +365,7 @@ nesbindingseq
     | IDENT EQUAL gterm
     ;
 
-bindingseq
-    : nesbindingseq
-    ;
+bindingseq: nesbindingseq;
 
 tfnebindingseq
     : LET IDENT EQUAL gformat IN tfnebindingseq
@@ -416,9 +376,7 @@ tfnebindingseq
     | EVENT LPAREN gformatseq RPAREN optphase
     ;
 
-optphase
-    : PHASE INT
-    ;
+optphase: PHASE INT;
 
 nounif_value
     : SLASH INT
@@ -450,9 +408,7 @@ negformatseq
     | gformat
     ;
 
-gformatseq
-    : negformatseq
-    ;
+gformatseq: negformatseq;
 
 fnesbindingseq
     : REPL INT EQUAL gformat SEMI fnesbindingseq
@@ -461,29 +417,17 @@ fnesbindingseq
     | IDENT EQUAL gformat
     ;
 
-fbindingseq
-    : fnesbindingseq
-    ;
+fbindingseq: fnesbindingseq;
 
-optorfail
-    : ORTEXT FAIL
-    ;
+optorfail: ORTEXT FAIL;
 
-mayfailvartype
-    : neidentseq COLON typeid optorfail
-    ;
+mayfailvartype: neidentseq COLON typeid optorfail;
 
-nemayfailvartypeseq
-    : mayfailvartype COMMA nemayfailvartypeseq
-    ;
+nemayfailvartypeseq: mayfailvartype COMMA nemayfailvartypeseq;
 
-mayfailvartypeseq
-    : nemayfailvartypeseq
-    ;
+mayfailvartypeseq: nemayfailvartypeseq;
 
-forallmayfailvartype
-    : FORALL nemayfailvartypeseq SEMI
-    ;
+forallmayfailvartype: FORALL nemayfailvartypeseq SEMI;
 
 extended_equation
     : LET IDENT EQUAL term IN extended_equation
@@ -523,9 +467,7 @@ tclauses
     | forallmayfailvartype tclause DOT
     ;
 
-programoptions
-    : LBRACKET progoptlist RBRACKET
-    ;
+programoptions: LBRACKET progoptlist RBRACKET;
 
 progoptlist
     : progopt
@@ -537,26 +479,20 @@ progopt
     | IDENT LESS IDENT
     ;
 
-progbegin
-    : IDENT programoptions LBRACE
-    ;
+progbegin: IDENT programoptions LBRACE;
 
-progend
-    : RBRACE
-    ;
+progend: RBRACE;
 
-syncopt
-    : LBRACKET BARRIER COLON IDENT IDENT IDENT RBRACKET
-    ;
+syncopt: LBRACKET BARRIER COLON IDENT IDENT IDENT RBRACKET;
 
 tprocess
     : progbegin tprocess
     | LPAREN tprocess RPAREN
     | IDENT syncopt
     | IDENT LPAREN ptermseq RPAREN syncopt
-    | REPL tprocess %prec REPL
-    | REPL IDENT LEQ IDENT tprocess %prec REPL
-    | FOREACH IDENT LEQ IDENT DO tprocess %prec REPL
+    | REPL tprocess REPL
+    | REPL IDENT LEQ IDENT tprocess REPL
+    | FOREACH IDENT LEQ IDENT DO tprocess REPL
     | INT
     | YIELD
     | NEW IDENT newarg COLON typeid opttprocess
@@ -579,17 +515,11 @@ tprocess
     | BARRIER INT LBRACKET IDENT RBRACKET opttprocess
     ;
 
-opttprocess
-    : SEMI tprocess
-    ;
+opttprocess: SEMI tprocess;
 
-optinprocess
-    : IN tprocess
-    ;
+optinprocess: IN tprocess;
 
-optelseprocess
-    : ELSE tprocess
-    ;
+optelseprocess: ELSE tprocess;
 
 basicpattern
     : IDENT
@@ -615,9 +545,7 @@ nepatternseq
     | tpattern
     ;
 
-tpatternseq
-    : nepatternseq
-    ;
+tpatternseq: nepatternseq;
 
 pterm
     : IDENT LPAREN ptermseq RPAREN
@@ -648,26 +576,18 @@ pterm
     | LPAREN ptermseq RPAREN
     ;
 
-optelseterm
-    : ELSE pterm
-    ;
+optelseterm: ELSE pterm;
 
-optsuchthat
-    : SUCHTHAT pterm
-    ;
+optsuchthat: SUCHTHAT pterm;
 
-optargs
-    : LPAREN ptermseq RPAREN
-    ;
+optargs: LPAREN ptermseq RPAREN;
 
 neptermseq
     : pterm COMMA neptermseq
     | pterm
     ;
 
-ptermseq
-    : neptermseq
-    ;
+ptermseq: neptermseq;
 
 onepermut
     : TAG RED TAG

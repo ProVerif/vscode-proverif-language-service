@@ -194,7 +194,7 @@ BooleanLiteral
     ;
 
 Identifier
-    : Letter (Letter | Digit | SpecialCharacter | Latin1AdditionalLetters)*
+    : Letter (Letter | Digit | SpecialCharacter | Latin1AdditionalLetter)*
     ;
 
 fragment Digit
@@ -210,7 +210,7 @@ fragment SpecialCharacter
     | '_'
     ;
 
-fragment Latin1AdditionalLetters
+fragment Latin1AdditionalLetter
     : '\u00C0'..'\u00D6'
     | '\u00D8'..'\u00F6'
     | '\u00F8'..'\u00FF'

@@ -4,47 +4,47 @@ parser grammar ProverifParser;
 options { tokenVocab = ProverifLexer; }
 
 lib
-    : TYPE IDENT options DOT lib
-    | FUN IDENT LPAREN typeidseq RPAREN COLON typeid options DOT lib
-    | FUN IDENT LPAREN typeidseq RPAREN COLON typeid REDUCTION treducmayfail options DOT lib
-    | REDUCTION treduc options DOT lib
-    | CONST neidentseq COLON typeid options DOT lib
-    | EQUATION eqlist options DOT lib
-    | EVENT IDENT options DOT lib
-    | EVENT IDENT LPAREN typeidseq RPAREN options DOT lib
-    | PREDICATE IDENT LPAREN typeidseq RPAREN options DOT lib
-    | PREDICATE IDENT options DOT lib
+    : TYPE IDENT options_ DOT lib
+    | FUN IDENT LPAREN typeidseq RPAREN COLON typeid options_ DOT lib
+    | FUN IDENT LPAREN typeidseq RPAREN COLON typeid REDUCTION treducmayfail options_ DOT lib
+    | REDUCTION treduc options_ DOT lib
+    | CONST neidentseq COLON typeid options_ DOT lib
+    | EQUATION eqlist options_ DOT lib
+    | EVENT IDENT options_ DOT lib
+    | EVENT IDENT LPAREN typeidseq RPAREN options_ DOT lib
+    | PREDICATE IDENT LPAREN typeidseq RPAREN options_ DOT lib
+    | PREDICATE IDENT options_ DOT lib
     | TABLE IDENT LPAREN typeidseq RPAREN DOT lib
     | LET IDENT EQUAL tprocess DOT lib
     | LET IDENT LPAREN mayfailvartypeseq RPAREN EQUAL tprocess DOT lib
     | LETFUN IDENT EQUAL pterm DOT lib
     | LETFUN IDENT LPAREN mayfailvartypeseq RPAREN EQUAL pterm DOT lib
     | SET IDENT EQUAL settings DOT lib
-    | NOUNIF nevartype SEMI tfnebindingseq nounif_value options DOT lib
-    | NOUNIF tfnebindingseq nounif_value options DOT lib
-    | SELECT nevartype SEMI tfnebindingseq select_value options DOT lib
-    | SELECT tfnebindingseq select_value options DOT lib
-    | QUERY nevartype SEMI tqueryseq options DOT lib
-    | QUERY tqueryseq options DOT lib
+    | NOUNIF nevartype SEMI tfnebindingseq nounif_value options_ DOT lib
+    | NOUNIF tfnebindingseq nounif_value options_ DOT lib
+    | SELECT nevartype SEMI tfnebindingseq select_value options_ DOT lib
+    | SELECT tfnebindingseq select_value options_ DOT lib
+    | QUERY nevartype SEMI tqueryseq options_ DOT lib
+    | QUERY tqueryseq options_ DOT lib
     | NONINTERF nevartype SEMI niseq DOT lib
     | NONINTERF niseq DOT lib
     | WEAKSECRET IDENT DOT lib
     | NOT nevartype SEMI gterm DOT lib
     | NOT gterm DOT lib
-    | PARAM neidentseq options DOT lib
-    | PROBA IDENT probaargs options DOT lib
+    | PARAM neidentseq options_ DOT lib
+    | PROBA IDENT probaargs options_ DOT lib
     | LETPROBA IDENT letprobaargs EQUAL probaf DOT lib
     | PROOF LBRACE proof RBRACE lib
     | IMPLEMENTATION impllist DOT lib
     | ELIMTRUE nemayfailvartypeseq SEMI term DOT lib
     | ELIMTRUE term DOT lib
     | CHANNEL neidentseq DOT lib
-    | FREE neidentseq COLON typeid options DOT lib
+    | FREE neidentseq COLON typeid options_ DOT lib
     | CLAUSES tclauses lib
     | DEFINE IDENT LPAREN typeidseq RPAREN LBRACE lib RBRACE lib
     | EXPAND IDENT LPAREN typeidseq RPAREN DOT lib
-    | lemma nevartype SEMI tlemmaseq options DOT lib
-    | lemma tlemmaseq options DOT lib
+    | lemma nevartype SEMI tlemmaseq options_ DOT lib
+    | lemma tlemmaseq options_ DOT lib
     ;
 
 settings
@@ -220,7 +220,7 @@ probaflist
     | probaf COMMA probaflist
     ;
 
-options: LBRACKET optionseq RBRACKET;
+options_: LBRACKET optionseq RBRACKET;
 
 singleoption
     : IDENT
@@ -313,7 +313,7 @@ tqueryseq
 
 tquery
     : gterm optpublicvars
-    | SECRET IDENT optpublicvars options
+    | SECRET IDENT optpublicvars options_
     | PUTBEGIN EVENT COLON neidentseq
     | PUTBEGIN INJEVENT COLON neidentseq
     ;
@@ -498,15 +498,15 @@ tprocess
     | NEW IDENT newarg COLON typeid opttprocess
     | IDENT RANDOM typeid opttprocess
     | IF pterm THEN tprocess optelseprocess
-    | IN LPAREN pterm COMMA tpattern RPAREN options opttprocess
+    | IN LPAREN pterm COMMA tpattern RPAREN options_ opttprocess
     | OUT LPAREN pterm COMMA pterm RPAREN progend opttprocess
     | LET tpattern EQUAL pterm
     | LET tpattern EQUAL pterm IN tprocess optelseprocess
     | basicpattern LEFTARROW pterm opttprocess
-    | LET nevartype SUCHTHAT pterm options
-    | LET nevartype SUCHTHAT pterm options IN tprocess optelseprocess
+    | LET nevartype SUCHTHAT pterm options_
+    | LET nevartype SUCHTHAT pterm options_ IN tprocess optelseprocess
     | INSERT IDENT LPAREN ptermseq RPAREN opttprocess
-    | GET IDENT LPAREN tpatternseq RPAREN optsuchthat options optinprocess optelseprocess
+    | GET IDENT LPAREN tpatternseq RPAREN optsuchthat options_ optinprocess optelseprocess
     | tprocess BAR tprocess
     | EVENT IDENT LPAREN ptermseq RPAREN newarg opttprocess
     | EVENT IDENT newarg opttprocess
@@ -572,7 +572,7 @@ pterm
     | LET nevartype SUCHTHAT pterm IN pterm optelseterm
     | EVENT IDENT optargs newarg SEMI pterm
     | INSERT IDENT LPAREN ptermseq RPAREN SEMI pterm
-    | GET IDENT LPAREN tpatternseq RPAREN optsuchthat options IN pterm optelseterm
+    | GET IDENT LPAREN tpatternseq RPAREN optsuchthat options_ IN pterm optelseterm
     | LPAREN ptermseq RPAREN
     ;
 
@@ -598,4 +598,3 @@ permut
     : onepermut
     | onepermut SEMI permut
     ;
-

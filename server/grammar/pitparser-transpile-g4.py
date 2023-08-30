@@ -31,8 +31,9 @@ with (open('pitparser.mly', 'r') as reader):
                     # remove comments at end of line
                     if normalizedContent.find("/*") > 0 and normalizedContent.find("*/") == -1:
                         normalizedContent = normalizedContent[0: normalizedContent.rfind("/*")]
-                    # remove unsupported tokens
-                    normalizedContent = normalizedContent.replace(" %prec", "")
+                    # remove precedence declarations
+                    if normalizedContent.find("%prec") > 0:
+                        normalizedContent = normalizedContent[0: normalizedContent.find("%prec")]
                     # remove empty lines
                     if len(normalizedContent) == 0:
                         continue

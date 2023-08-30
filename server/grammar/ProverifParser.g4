@@ -167,7 +167,7 @@ vardim: neidentseq COLON dimext;
 
 probaf
     : LPAREN probaflist RPAREN
-    | MINUS probaf  UNARYMINUS
+    | MINUS probaf
     | probaf PLUS /*ADD*/ probaf
     | probaf MINUS /*SUB*/ probaf
     | probaf STAR /*MUL*/ probaf
@@ -181,7 +181,7 @@ probaf
     | IDENT /*TIME*/ LPAREN OUT IDENT probaflistopt RPAREN
     | IDENT /*TIME*/ LPAREN OUT LBRACKET neidentseq RBRACKET IDENT probaflistopt RPAREN
     | IDENT /*TIME*/ LPAREN IN INT RPAREN
-    | OPTIMIF probaoptimcond THEN probaf ELSE probaf OPTIMIF
+    | OPTIMIF probaoptimcond THEN probaf ELSE probaf
     | IDENT
     | COUNT IDENT
     | BAR IDENT BAR
@@ -490,9 +490,9 @@ tprocess
     | LPAREN tprocess RPAREN
     | IDENT syncopt
     | IDENT LPAREN ptermseq RPAREN syncopt
-    | REPL tprocess REPL
-    | REPL IDENT LEQ IDENT tprocess REPL
-    | FOREACH IDENT LEQ IDENT DO tprocess REPL
+    | REPL tprocess
+    | REPL IDENT LEQ IDENT tprocess
+    | FOREACH IDENT LEQ IDENT DO tprocess
     | INT
     | YIELD
     | NEW IDENT newarg COLON typeid opttprocess

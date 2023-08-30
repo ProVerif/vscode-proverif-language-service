@@ -32,11 +32,12 @@ LBRACKET: '[';
 RBRACKET: ']' ;
 
 REPL: '!' ;
+BAR: '|';
 
 SLASH: '/';
 POWER: '^';
 PLUS: '+' ;
-MINUX: '-' ;
+MINUS: '-' ;
 
 STAR: '*' ;
 COUNT: '#' ;
@@ -163,7 +164,7 @@ PUTBEGIN: 'putbegin';
 queries
 */
 // EVENT: 'event'; duplicate
-INJ_EVENT: 'inj-event';
+INJEVENT: 'inj-event';
 ATTACKER: 'attacker';
 MESS: 'mess';
 PHASE: 'phase';
@@ -193,9 +194,20 @@ FOREACH: 'foreach';
 // IN: 'in'; duplicate
 OUT: 'out' ;
 BARRIER: 'sync';
+OPTIMIF: 'optim-if';
+ISCST: 'is-cst';
 
 INT
     : Digit+
+    ;
+
+PROJECTION
+    : Digit+ '-proj-' IDENT+
+    ;
+
+FLOAT
+    : Digit+ '.' Digit*
+    | Digit+ ('.' Digit*)? ('e'|'E') ('+'|'-')? Digit*
     ;
 
 IDENT

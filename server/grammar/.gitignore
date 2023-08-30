@@ -2,5 +2,6 @@
 .antlr
 
 # generated files useful for intellij
+.gen
 *.interp
 *.tokens

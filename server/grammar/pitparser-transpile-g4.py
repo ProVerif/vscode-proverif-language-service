@@ -27,7 +27,7 @@ with open('pitparser.mly', 'r') as reader:
                 # remove control symbols & comments
                 cleanedRuleContent = []
                 for content in ruleContent:
-                    normalizedContent = content.strip("|").strip()
+                    normalizedContent = content.strip()
                     # remove comments at end of line
                     if normalizedContent.find("/*") > 0 and normalizedContent.find("*/") == -1:
                         normalizedContent = normalizedContent[0: normalizedContent.rfind("/*")]
@@ -66,8 +66,6 @@ with open('pitparser.mly', 'r') as reader:
         else:
             for index, entry in enumerate(rules[rule]):
                 normalizedEntry = entry.strip("|").strip()
-                if normalizedEntry == "":
-                    continue
                 if index == 0:
                     resultLines.append("    : " + normalizedEntry)
                 else:

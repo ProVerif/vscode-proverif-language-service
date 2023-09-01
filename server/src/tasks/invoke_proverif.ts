@@ -113,9 +113,8 @@ const parseDiagnostics = (content: string, libraryMode: boolean, libraryDependen
 };
 
 const LIB_ARGUMENT_PREFIX = '-lib';
-export const invokeProverif = async (path: string, content: string, libraryDependencyTokens: LibraryDependencyToken[], proverifBinary: string): Promise<InvokeProverifResult> => {
+export const invokeProverif = async (path: string, content: string, libraryMode: boolean, libraryDependencyTokens: LibraryDependencyToken[], proverifBinary: string): Promise<InvokeProverifResult> => {
     let appendFileEnding: string | undefined = undefined;
-    const libraryMode = path.endsWith('.pvl');
     if (libraryMode) {
         content += '\nprocess\n\t0';
         appendFileEnding = '.pv';

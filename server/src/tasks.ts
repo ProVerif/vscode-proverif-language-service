@@ -68,7 +68,7 @@ export class TaskExecutor {
             if (cache.parseProverifResult && cache.createSymbolTableResult) {
                 return {
                     parser: cache.parseProverifResult.parser,
-                    proverifFileContext: cache.parseProverifResult.proverifFileContext,
+                    parserTree: cache.parseProverifResult.parserTree,
                     symbolTable: cache.createSymbolTableResult.symbolTable
                 };
             }
@@ -78,7 +78,7 @@ export class TaskExecutor {
     };
 
     private invoke = async (document: TextDocument) => {
-        const {content, path,} = this.parseLibraryDependencies(document);
+        const {content, path, libraryMode,} = this.parseLibraryDependencies(document);
         const cache = this.documentCache.get(document.uri) ?? {};
 
         if (!cache.invokeProverifResult || !cache.settings) {
@@ -89,7 +89,7 @@ export class TaskExecutor {
 
             const libraryDependencyTokens = cache.parseLibraryDependenciesResult?.libraryDependencyTokens ?? [];
             const proverifBinary = cache.settings.proverifPath ? cache.settings.proverifPath : 'proverif';
-            cache.invokeProverifResult = await invokeProverif(path, content, libraryDependencyTokens, proverifBinary);
+            cache.invokeProverifResult = await invokeProverif(path, content, libraryMode, libraryDependencyTokens, proverifBinary);
             logMessages(this.connection, cache.invokeProverifResult.messages);
         }
 
@@ -100,15 +100,15 @@ export class TaskExecutor {
     };
 
     private parse = async (document: TextDocument) => {
-        const {content} = this.parseLibraryDependencies(document);
+        const {content, libraryMode} = this.parseLibraryDependencies(document);
         const cache = this.documentCache.get(document.uri) ?? {};
 
         if (!cache.parseProverifResult) {
-            cache.parseProverifResult = parseProverif(content);
+            cache.parseProverifResult = parseProverif(content, libraryMode);
         }
 
         if (!cache.createSymbolTableResult) {
-            cache.createSymbolTableResult = createSymbolTable(document, cache.parseProverifResult.proverifFileContext);
+            cache.createSymbolTableResult = createSymbolTable(cache.parseProverifResult.parserTree);
         }
 
         this.documentCache.set(document.uri, cache);
@@ -117,6 +117,7 @@ export class TaskExecutor {
     private parseLibraryDependencies = (document: TextDocument) => {
         const content = document.getText();
         const path = fileURLToPath(document.uri);
+        const libraryMode = path.endsWith('.pvl');
 
         const cache = this.documentCache.get(document.uri) ?? {};
         cache.document = document;
@@ -128,6 +129,6 @@ export class TaskExecutor {
 
         this.documentCache.set(document.uri, cache);
 
-        return {content, path};
+        return {content, path, libraryMode};
     };
 }

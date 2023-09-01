@@ -76,7 +76,7 @@ with open('pitparser.mly', 'r') as reader:
 
     result = '\n'.join(resultLines)
     # replace reserved keyword
-    result = result.replace(" options", " options_").replace("options_eq", "optionseq").replace("\noptions:", "\noptions_:")
+    result = result.replace(" options", " options_").replace("options_eq", "optionseq").replace("\noptions\n", "\noptions_\n")
 
     with open('ProverifParser.g4', 'w') as writer:
         writer.write(result)

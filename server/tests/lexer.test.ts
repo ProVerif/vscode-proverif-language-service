@@ -22,7 +22,7 @@ describe('lexer', function () {
 
         expect(tokens.length).to.equal(4);
         expect(tokens[0].type).to.equal(ProverifLexer.CHANNEL);
-        expect(tokens[1].type).to.equal(ProverifLexer.Identifier);
+        expect(tokens[1].type).to.equal(ProverifLexer.IDENT);
         expect(tokens[1].text).to.equal('internet');
         expect(tokens[2].type).to.equal(ProverifLexer.DOT);
         expect(tokens[3].type).to.equal(TOKEN_TYPE_EOF);
@@ -40,7 +40,7 @@ describe('lexer', function () {
         const tokens = getTokens(validIdentifier);
 
         expect(tokens.length).to.equal(2);
-        expect(tokens[0].type).to.equal(ProverifLexer.Identifier);
+        expect(tokens[0].type).to.equal(ProverifLexer.IDENT);
         expect(tokens[0].text).to.equal(validIdentifier);
         expect(tokens[1].type).to.equal(TOKEN_TYPE_EOF);
     });

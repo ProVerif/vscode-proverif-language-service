@@ -14,6 +14,7 @@ describe('parser', function () {
         const tokenStream = new CommonTokenStream(lexer);
         const parser = new ProverifParser(tokenStream);
         const parserTree = parser.all();
+        assert.isUndefined(parserTree.exception)
 
         const symbolTable = createSymbolTable(parserTree).symbolTable;
 
@@ -41,6 +42,27 @@ describe('parser', function () {
             if (definitionLink.originSelectionRange) {
                 expect(definitionLink.originSelectionRange.start).to.deep.equal({line: 1, character: 4});
                 expect(definitionLink.originSelectionRange.end).to.deep.equal({line: 1, character: 5});
+            }
+        }
+    });
+
+    it("override local scope variable", async () => {
+        const code = `channel c. process \nnew c:channel; \nout(c, c)`;
+
+        const parserResult = getParserResult(code);
+        const definitionLink = await getDefinitionLink({uri: 'dummy'}, parserResult, {line: 2, character: 5});
+
+        assert.isDefined(definitionLink);
+        if (definitionLink) {
+            expect(definitionLink.targetRange.start).to.deep.equal({line: 1, character: 4});
+            expect(definitionLink.targetRange.end).to.deep.equal({line: 1, character: 5});
+            expect(definitionLink.targetSelectionRange.start).to.deep.equal({line: 1, character: 4});
+            expect(definitionLink.targetSelectionRange.end).to.deep.equal({line: 1, character: 5});
+
+            assert.isDefined(definitionLink.originSelectionRange);
+            if (definitionLink.originSelectionRange) {
+                expect(definitionLink.originSelectionRange.start).to.deep.equal({line: 2, character: 4});
+                expect(definitionLink.originSelectionRange.end).to.deep.equal({line: 2, character: 5});
             }
         }
     });

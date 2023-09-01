@@ -73,6 +73,22 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         return this.visitChildren(ctx);
     };
 
+    private visitLibInternal = (ctx: LibContext) => {
+        const identifierList = ctx.neidentseq();
+        if (identifierList && (ctx.CONST() || ctx.CHANNEL() || ctx.FREE())) {
+            this.collectNeidentseqIDENTs(identifierList).forEach(identifier => {
+                this.registerVariable(identifier);
+            });
+        }
+
+        const identifier = ctx.IDENT();
+        if (identifier && (ctx.TYPE() || ctx.FUN() || ctx.EVENT() || ctx.PREDICATE() || ctx.TABLE() || ctx.LET() || ctx.LETFUN())) {
+            this.registerVariable(identifier);
+        }
+
+        return this.visitChildren(ctx);
+    };
+
     public visitTprocess = (ctx: TprocessContext) => {
         return this.withContext(ctx, () => {
             const tpattern = ctx.tpattern();
@@ -88,13 +104,13 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             }
 
             const identifier = ctx.IDENT();
-            if (identifier.length === 1 && (ctx.NEW() && ctx.RANDOM())) {
+            if (identifier.length === 1 && (ctx.NEW() || ctx.RANDOM())) {
                 this.registerVariable(identifier[0]);
             }
 
             const basicPattern = ctx.basicpattern();
             const basicPatternIdent = basicPattern?.IDENT();
-            if (basicPattern && (ctx.LEFTARROW() && basicPatternIdent)) {
+            if (ctx.LEFTARROW() && basicPatternIdent) {
                 this.registerVariable(basicPatternIdent);
             }
 
@@ -137,6 +153,10 @@ class ProverifSymbolTable {
 
     public findClosestSymbol(node: ParseTree): ParseTree | undefined {
         return this.findClosestSymbolInternal(node.text, node);
+    }
+
+    public getSymbols(): ProverifSymbol[] {
+        return this.symbols;
     }
 
     private findClosestSymbolInternal(name: string, context?: ParseTree): ParseTree | undefined {

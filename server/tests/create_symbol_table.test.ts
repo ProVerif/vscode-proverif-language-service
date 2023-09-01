@@ -1,10 +1,10 @@
 import {expect} from "chai";
 
 import {CharStreams, CommonTokenStream} from "antlr4ts";
+import {VariableSymbol} from "antlr4-c3";
 import {ProverifLexer} from "../src/parser-proverif/ProverifLexer";
 import {ProverifParser} from "../src/parser-proverif/ProverifParser";
 import {createSymbolTable} from "../src/tasks/create_symbol_table";
-import {VariableSymbol} from "antlr4-c3";
 
 describe('parser', function () {
     const getSymbolTable = (input: string) => {
@@ -12,16 +12,16 @@ describe('parser', function () {
         const lexer = new ProverifLexer(charStream);
         const tokenStream = new CommonTokenStream(lexer);
         const parser = new ProverifParser(tokenStream);
-        const proverifFileContext = parser.proverifFile();
-        const symbolTable = createSymbolTable({ uri: "mock"}, proverifFileContext).symbolTable;
+        const parserTree = parser.all();
+        const symbolTable = createSymbolTable(parserTree).symbolTable;
 
-        return  { symbolTable, proverifFileContext };
+        return  { symbolTable, parserTree };
     };
 
     it("creates appropriate symbols", async () => {
         const code = `channel c. channel d. process out(c, c)`;
 
-        const  {symbolTable, proverifFileContext } = getSymbolTable(code);
+        const  {symbolTable } = getSymbolTable(code);
 
         const variables = await symbolTable.getNestedSymbolsOfType(VariableSymbol);
         expect(variables.length).to.equal(2);

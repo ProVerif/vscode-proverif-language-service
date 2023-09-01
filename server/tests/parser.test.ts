@@ -17,10 +17,10 @@ describe('parser', function () {
 
         const parser = getParser(code);
 
-        const proverifFile = parser.proverifFile();
+        const parseTree = parser.all();
 
-        expect(proverifFile).not.to.be.undefined;
-        expect(proverifFile.children?.length).to.equal(4);
+        expect(parseTree).not.to.be.undefined;
+        expect(parseTree.children?.length).to.equal(4);
         expect(parser.numberOfSyntaxErrors).to.equal(0);
     });
 });

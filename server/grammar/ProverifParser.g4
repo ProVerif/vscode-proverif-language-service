@@ -230,7 +230,7 @@ probaflist
     | probaf COMMA probaflist
     ;
 
-options
+options_
     : LBRACKET optionseq RBRACKET
     | 
     ;

@@ -1,21 +1,19 @@
 import {CharStreams, CommonTokenStream} from "antlr4ts";
-import {
-    ProverifFileContext, ProverifParser
-} from '../parser-proverif/ProverifParser';
-import {TextDocumentIdentifier} from "vscode-languageserver";
+import {ProverifParser} from '../parser-proverif/ProverifParser';
 import {ProverifLexer} from "../parser-proverif/ProverifLexer";
+import {ParseTree} from "antlr4ts/tree";
 
 export type ParseProverifResult = {
     parser: ProverifParser
-    proverifFileContext: ProverifFileContext
+    parserTree: ParseTree
 }
 
-export const parseProverif = (content: string) => {
+export const parseProverif = (content: string, libraryMode: boolean) => {
     const input = CharStreams.fromString(content);
     const lexer = new ProverifLexer(input);
     const commonTokenStream = new CommonTokenStream(lexer);
     const parser = new ProverifParser(commonTokenStream);
-    const proverifFileContext = parser.proverifFile();
+    const parserTree = libraryMode ? parser.lib() : parser.all();
 
-    return { parser, proverifFileContext };
+    return { parser, parserTree };
 };

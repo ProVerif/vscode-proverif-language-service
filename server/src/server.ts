@@ -38,7 +38,7 @@ connection.onInitialize((params: InitializeParams) => {
     const result: InitializeResult = {
         capabilities: {
             textDocumentSync: TextDocumentSyncKind.Full,
-            // definitionProvider: true 
+            definitionProvider: true 
         },
     };
 
@@ -70,7 +70,7 @@ connection.onDefinition(async (params) => {
         return undefined;
     }
 
-    const definitionLink = await getDefinitionLink(parseResult, params.position);
+    const definitionLink = await getDefinitionLink(params.textDocument, parseResult, params.position);
     if (!definitionLink) {
         connection.console.log("Definition not found.");
         return undefined;

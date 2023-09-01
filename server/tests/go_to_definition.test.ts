@@ -1,4 +1,4 @@
-import {expect} from "chai";
+import {assert, expect} from "chai";
 
 import {CharStreams, CommonTokenStream} from "antlr4ts";
 import {ProverifLexer} from "../src/parser-proverif/ProverifLexer";
@@ -13,13 +13,13 @@ describe('parser', function () {
         const lexer = new ProverifLexer(charStream);
         const tokenStream = new CommonTokenStream(lexer);
         const parser = new ProverifParser(tokenStream);
-        const proverifFileContext = parser.proverifFile();
+        const parserTree = parser.all();
 
-        const symbolTable = createSymbolTable({ uri: "mock"}, proverifFileContext).symbolTable;
+        const symbolTable = createSymbolTable(parserTree).symbolTable;
 
         return {
             parser,
-            proverifFileContext,
+            parserTree,
             symbolTable
         };
     };
@@ -28,13 +28,20 @@ describe('parser', function () {
         const code = `channel c. channel d. process \nout(c, c)`;
 
         const parserResult = getParserResult(code);
-        const definitionLink = await getDefinitionLink(parserResult, {line: 1, character: 5});
+        const definitionLink = await getDefinitionLink({uri: 'dummy'}, parserResult, {line: 1, character: 5});
 
-        expect(definitionLink.targetRange.start).to.deep.equal({line:0, character:8});
-        expect(definitionLink.targetRange.end).to.deep.equal({line:0, character:9});
-        expect(definitionLink.targetSelectionRange.start).to.deep.equal({line:0, character:8});
-        expect(definitionLink.targetSelectionRange.end).to.deep.equal({line:0, character:9});
-        expect(definitionLink.originSelectionRange.start).to.deep.equal({line:1, character:4});
-        expect(definitionLink.originSelectionRange.end).to.deep.equal({line:1, character:5});
+        assert.isDefined(definitionLink);
+        if (definitionLink) {
+            expect(definitionLink.targetRange.start).to.deep.equal({line: 0, character: 8});
+            expect(definitionLink.targetRange.end).to.deep.equal({line: 0, character: 9});
+            expect(definitionLink.targetSelectionRange.start).to.deep.equal({line: 0, character: 8});
+            expect(definitionLink.targetSelectionRange.end).to.deep.equal({line: 0, character: 9});
+
+            assert.isDefined(definitionLink.originSelectionRange);
+            if (definitionLink.originSelectionRange) {
+                expect(definitionLink.originSelectionRange.start).to.deep.equal({line: 1, character: 4});
+                expect(definitionLink.originSelectionRange.end).to.deep.equal({line: 1, character: 5});
+            }
+        }
     });
 });

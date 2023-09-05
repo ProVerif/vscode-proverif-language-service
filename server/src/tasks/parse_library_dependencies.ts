@@ -1,10 +1,12 @@
 import {Diagnostic, DiagnosticSeverity, Range} from "vscode-languageserver/node";
 import {sep} from "path";
 import {existsSync} from "fs";
+import {Message} from "../utils/log";
 
 export type ParseLibraryDependenciesResult = {
-    diagnostics: Diagnostic[];
-    libraryDependencyTokens: LibraryDependencyToken[];
+    diagnostics: Diagnostic[]
+    libraryDependencyTokens: LibraryDependencyToken[]
+    messages?: Message[]
 }
 
 export type LibraryDependencyToken = {
@@ -32,7 +34,7 @@ export const parseLibraryDependencies = (filePath: string, content: string): Par
         const expectedFilename = match[1] + LIB_FILE_ENDING;
         const expectedLocation = folder + sep + expectedFilename;
         const exists = existsSync(expectedLocation);
-        const libraryDependencyToken = { match, path: expectedLocation, exists };
+        const libraryDependencyToken = {match, path: expectedLocation, exists};
         libraryDependencyTokens.push(libraryDependencyToken);
 
         if (!exists) {
@@ -46,5 +48,10 @@ export const parseLibraryDependencies = (filePath: string, content: string): Par
         }
     }
 
-    return {diagnostics, libraryDependencyTokens};
+    const foundLibrariesMessage: Message = {
+        severity: "info",
+        content: "Found " + libraryDependencyTokens.length + " dependencies."
+    };
+
+    return {diagnostics, libraryDependencyTokens, messages: [foundLibrariesMessage]};
 };

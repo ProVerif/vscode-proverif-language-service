@@ -7,6 +7,7 @@ import {createInfoMessage, createSingleErrorMessage, Message} from "../utils/log
 
 export type InvokeProverifResult = {
     libraryMode: boolean
+    proverifBinary: string
     invocation: string
     diagnostics?: Diagnostic[]
     messages?: Message[]
@@ -137,6 +138,7 @@ export const invokeProverif = async (path: string, content: string, libraryMode:
 
     return {
         libraryMode,
+        proverifBinary,
         ...invocationResult,
     };
 };

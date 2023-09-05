@@ -4,6 +4,8 @@ import {exec} from "child_process";
 import {asTempFile} from "../utils/files";
 import {LibraryDependencyToken, libraryDependencyTokenToRange} from "./parse_library_dependencies";
 import {createInfoMessage, createSingleErrorMessage, Message} from "../utils/log";
+import {fileURLToPath} from "url";
+import {TextDocumentIdentifier} from "vscode-languageserver";
 
 export type InvokeProverifResult = {
     libraryMode: boolean
@@ -85,7 +87,7 @@ const parseDiagnostics = (content: string, libraryMode: boolean, libraryDependen
     // check if error in own file or dependency
     const matchFile = positionLine.match(/File "(.+)"/);
     if (matchFile) {
-        const matchingDependencies = libraryDependencyTokens.filter(token => token.path === matchFile[1]);
+        const matchingDependencies = libraryDependencyTokens.filter(token => fileURLToPath(token.uri).endsWith(matchFile[1]));
         const diagnostics = [];
         for (const matchingDependency of matchingDependencies) {
             const range = libraryDependencyTokenToRange(content, matchingDependency);
@@ -114,19 +116,20 @@ const parseDiagnostics = (content: string, libraryMode: boolean, libraryDependen
 };
 
 const LIB_ARGUMENT_PREFIX = '-lib';
-export const invokeProverif = async (path: string, content: string, libraryMode: boolean, libraryDependencyTokens: LibraryDependencyToken[], proverifBinary: string): Promise<InvokeProverifResult> => {
+export const invokeProverif = async (documentIdentifier: TextDocumentIdentifier, content: string, libraryMode: boolean, libraryDependencyTokens: LibraryDependencyToken[], proverifBinary: string): Promise<InvokeProverifResult> => {
     let appendFileEnding: string | undefined = undefined;
     if (libraryMode) {
         content += '\nprocess\n\t0';
         appendFileEnding = '.pv';
     }
 
+    const path = fileURLToPath(documentIdentifier.uri);
     const invocationResult = await asTempFile<{
         invocation: string,
         messages?: Message[],
         diagnostics?: Diagnostic[]
     }>(path, content, appendFileEnding, tempFilePath => new Promise((resolve) => {
-        const libs = new Set(libraryDependencyTokens.filter(token => token.exists).map(token => token.path));
+        const libs = new Set(libraryDependencyTokens.filter(token => token.exists).map(token => fileURLToPath(token.uri)));
         const libArguments = Array.from(libs).map(lib => `${LIB_ARGUMENT_PREFIX} "${lib}"`).join(" ");
         const invocation = `${proverifBinary} ${libArguments} "${tempFilePath}"`;
 

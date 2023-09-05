@@ -60,7 +60,7 @@ const getRangeFromPositionString = (positionString: string): Range | undefined =
     return undefined;
 };
 
-const parseDiagnostics = (content: string, libraryMode: boolean, libraryDependencyTokens: LibraryDependencyToken[], error: ExecException | null, stdout: string): {
+const parseDiagnostics = (content: string, selfIsLibrary: boolean, libraryDependencyTokens: LibraryDependencyToken[], error: ExecException | null, stdout: string): {
     messages?: Message[]
     diagnostics?: Diagnostic[]
 } => {
@@ -79,7 +79,7 @@ const parseDiagnostics = (content: string, libraryMode: boolean, libraryDependen
 
     const positionLine = lines[0];
     const errorLine = lines[1];
-    if (libraryMode && errorLine === 'Error: Lemma not used because there is no matching query.') {
+    if (selfIsLibrary && errorLine === 'Error: Lemma not used because there is no matching query.') {
         const message = createInfoMessage('Ignore error message which is not relevant in library: ' + errorLine);
         return {messages: [message], diagnostics: []};
     }
@@ -116,9 +116,9 @@ const parseDiagnostics = (content: string, libraryMode: boolean, libraryDependen
 };
 
 const LIB_ARGUMENT_PREFIX = '-lib';
-export const invokeProverif = async (documentIdentifier: TextDocumentIdentifier, content: string, libraryMode: boolean, libraryDependencyTokens: LibraryDependencyToken[], proverifBinary: string): Promise<InvokeProverifResult> => {
+export const invokeProverif = async (documentIdentifier: TextDocumentIdentifier, content: string, selfIsLibrary: boolean, libraryDependencyTokens: LibraryDependencyToken[], proverifBinary: string): Promise<InvokeProverifResult> => {
     let appendFileEnding: string | undefined = undefined;
-    if (libraryMode) {
+    if (selfIsLibrary) {
         content += '\nprocess\n\t0';
         appendFileEnding = '.pv';
     }
@@ -134,13 +134,13 @@ export const invokeProverif = async (documentIdentifier: TextDocumentIdentifier,
         const invocation = `${proverifBinary} ${libArguments} "${tempFilePath}"`;
 
         exec(invocation, {timeout: 1000}, (error, stdout) => {
-            const result = parseDiagnostics(content, libraryMode, libraryDependencyTokens, error, stdout);
+            const result = parseDiagnostics(content, selfIsLibrary, libraryDependencyTokens, error, stdout);
             resolve({ invocation, ...result });
         });
     }));
 
     return {
-        libraryMode,
+        selfIsLibrary: selfIsLibrary,
         proverifBinary,
         ...invocationResult,
     };

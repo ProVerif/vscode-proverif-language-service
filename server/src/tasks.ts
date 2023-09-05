@@ -24,6 +24,57 @@ type DocumentCache = {
 }
 
 export class DocumentManager {
+    private taskExecutor: CachedTaskExecutor;
+
+    constructor(
+        private connection: Connection,
+        hasConfigurationCapability: boolean) {
+        this.taskExecutor = new CachedTaskExecutor(connection, hasConfigurationCapability);
+    }
+
+    public markSettingsChanged = async () => {
+        const processingDocuments = this.taskExecutor.allDocuments()
+            .map(async document => {
+                this.taskExecutor.markSettingsChanged(document);
+                await this.checkParsingErrors(document);
+            });
+        await Promise.all(processingDocuments);
+    };
+
+    public closeDocument = (document: TextDocumentIdentifier) => {
+        this.taskExecutor.forget(document);
+    };
+
+    public markDocumentContentChanged = async (document: TextDocument) => {
+        this.taskExecutor.markDocumentChanged(document, document);
+
+        await this.checkParsingErrors(document);
+    };
+
+    private checkParsingErrors = async (document: TextDocumentIdentifier) => {
+        const parseLibraryDependenciesResult = await this.taskExecutor.parseLibraryDependencies(document);
+        const invokeProverifResult = await this.taskExecutor.invoke(document);
+
+        const messages = joinOptionalLists(parseLibraryDependenciesResult?.messages, invokeProverifResult?.messages);
+        logMessages(this.connection, messages);
+
+        const diagnostics = joinOptionalLists(parseLibraryDependenciesResult?.diagnostics, invokeProverifResult?.diagnostics);
+        await sendDiagnostics(this.connection, document, diagnostics);
+    };
+
+    public getParseResult = async (identification: TextDocumentIdentifier): Promise<ParseResult | undefined> => {
+        const {parser, parserTree} = await this.taskExecutor.parse(identification);
+        const {symbolTable} = await this.taskExecutor.createSymbolTable(identification);
+
+        if (!parser || !parserTree || !symbolTable) {
+            return undefined;
+        }
+
+        return {parser, parserTree, symbolTable};
+    };
+}
+
+class CachedTaskExecutor {
     private documentCache: Map<string, DocumentCache> = new Map();
 
     constructor(
@@ -31,95 +82,74 @@ export class DocumentManager {
         private hasConfigurationCapability: boolean) {
     }
 
-    public markSettingsChanged = async () => {
-        const cachedDocuments = Array.from(this.documentCache.keys());
-        const processingDocuments = cachedDocuments.map(document => this.markDocumentSettingsChanged(document));
-        await Promise.all(processingDocuments);
+    public allDocuments = (): TextDocumentIdentifier[] => {
+        return Array.from(this.documentCache.keys()).map(key => ({uri: key}));
     };
 
-    private markDocumentSettingsChanged = async (documentUri: string) => {
-        const cache = this.documentCache.get(documentUri) ?? {};
-        cache.settings = undefined;
-        this.documentCache.set(documentUri, cache);
-
-        if (cache.document) {
-            await this.invoke(cache.document);
-        }
-    };
-
-    public closeDocument = async (document: TextDocumentIdentifier) => {
+    public forget = (document: TextDocumentIdentifier) => {
         this.documentCache.delete(document.uri);
     };
 
-    public markDocumentContentChanged = async (document: TextDocument) => {
-        let cache = this.documentCache.get(document.uri) ?? {};
+    public markSettingsChanged = (document: TextDocumentIdentifier) => {
+        const cache = this.documentCache.get(document.uri) ?? {};
+        cache.settings = undefined;
+        this.documentCache.set(document.uri, cache);
+    };
+
+    public markDocumentChanged = (documentIdentifier: TextDocumentIdentifier, document?: TextDocument) => {
+        const cache = this.documentCache.get(documentIdentifier.uri) ?? {};
+        cache.document = document;
         cache.parseLibraryDependenciesResult = undefined;
         cache.invokeProverifResult = undefined;
         cache.parseProverifResult = undefined;
         cache.createSymbolTableResult = undefined;
-        this.documentCache.set(document.uri, cache);
-
-        await this.invoke(document);
-
-        cache = this.documentCache.get(document.uri) ?? {};
-
-        const messages = joinOptionalLists(cache.parseLibraryDependenciesResult?.messages, cache.invokeProverifResult?.messages);
-        logMessages(this.connection, messages);
-
-        const diagnostics = joinOptionalLists(cache.parseLibraryDependenciesResult?.diagnostics, cache.invokeProverifResult?.diagnostics);
-        await sendDiagnostics(this.connection, document, diagnostics);
+        this.documentCache.set(documentIdentifier.uri, cache);
     };
 
-    public getParseResult = async (identification: TextDocumentIdentifier): Promise<ParseResult | undefined> => {
-        const cache = this.documentCache.get(identification.uri) ?? {};
-
-        if (!cache.document) {
-            return undefined;
-        }
-
-        await this.parse(cache.document);
-        if (!cache.parseProverifResult || !cache.createSymbolTableResult) {
-            return undefined;
-        }
-
-        // TODO: Add symbol tables of dependencies
-        return {
-            parser: cache.parseProverifResult.parser,
-            parserTree: cache.parseProverifResult.parserTree,
-            symbolTable: cache.createSymbolTableResult.symbolTable
-        };
-    };
-
-    private invoke = async (document: TextDocument) => {
-        const {content, libraryMode, libraryDependencyTokens} = this.parseLibraryDependencies(document);
+    public invoke = async (document: TextDocumentIdentifier) => {
+        const {selfIsLibrary, libraryDependencyTokens} = this.parseLibraryDependencies(document);
         const {proverifBinary} = await this.readSettings(document);
 
         const cache = this.documentCache.get(document.uri) ?? {};
 
-        if (!cache.invokeProverifResult || cache.invokeProverifResult.proverifBinary !== proverifBinary) {
-            cache.invokeProverifResult = await invokeProverif(document, content, libraryMode, libraryDependencyTokens, proverifBinary);
+        if (cache.document && libraryDependencyTokens && (!cache.invokeProverifResult || cache.invokeProverifResult.proverifBinary !== proverifBinary)) {
+            cache.invokeProverifResult = await invokeProverif(document, cache.document.getText(), selfIsLibrary, libraryDependencyTokens, proverifBinary);
         }
 
         this.documentCache.set(document.uri, cache);
+
+        return {...cache.invokeProverifResult};
     };
 
-    private parse = async (document: TextDocument) => {
-        const {content, libraryMode} = this.parseLibraryDependencies(document);
+    public parse = async (identifier: TextDocumentIdentifier) => {
+        const {selfIsLibrary} = this.parseLibraryDependencies(identifier);
 
-        const cache = this.documentCache.get(document.uri) ?? {};
+        const cache = this.documentCache.get(identifier.uri) ?? {};
 
-        if (!cache.parseProverifResult) {
-            cache.parseProverifResult = parseProverif(content, libraryMode);
+        if (cache.document && !cache.parseProverifResult) {
+            cache.parseProverifResult = parseProverif(cache.document.getText(), selfIsLibrary);
         }
 
-        if (!cache.createSymbolTableResult) {
-            cache.createSymbolTableResult = createSymbolTable(cache.parseProverifResult.parserTree);
-        }
+        this.documentCache.set(identifier.uri, cache);
 
-        this.documentCache.set(document.uri, cache);
+        return {...cache.parseProverifResult};
     };
 
-    private readSettings = async (document: TextDocument) => {
+    public createSymbolTable = async (identifier: TextDocumentIdentifier) => {
+        const {parserTree} = await this.parse(identifier);
+
+        const cache = this.documentCache.get(identifier.uri) ?? {};
+
+        if (parserTree && !cache.createSymbolTableResult) {
+            cache.createSymbolTableResult = createSymbolTable(parserTree);
+        }
+
+        this.documentCache.set(identifier.uri, cache);
+
+        return {...cache.createSymbolTableResult};
+    };
+
+    private readSettings = async (document: TextDocumentIdentifier) => {
         const cache = this.documentCache.get(document.uri) ?? {};
 
         if (!cache.settings) {
@@ -131,19 +161,18 @@ export class DocumentManager {
         return {...cache.settings};
     };
 
-    private parseLibraryDependencies = (document: TextDocument) => {
-        const content = document.getText();
-        const libraryMode = document.uri.endsWith('.pvl');
+    public parseLibraryDependencies = (identifier: TextDocumentIdentifier) => {
+        const selfIsLibrary = identifier.uri.endsWith('.pvl');
 
-        const cache = this.documentCache.get(document.uri) ?? {};
-        cache.document = document;
+        const cache = this.documentCache.get(identifier.uri) ?? {};
+        const content = cache.document?.getText();
 
-        if (!cache.parseLibraryDependenciesResult) {
-            cache.parseLibraryDependenciesResult = parseLibraryDependencies(document, content);
+        if (content && !cache.parseLibraryDependenciesResult) {
+            cache.parseLibraryDependenciesResult = parseLibraryDependencies(identifier, content);
         }
 
-        this.documentCache.set(document.uri, cache);
+        this.documentCache.set(identifier.uri, cache);
 
-        return {content, libraryMode, ...cache.parseLibraryDependenciesResult};
+        return {selfIsLibrary, ...cache.parseLibraryDependenciesResult};
     };
 }

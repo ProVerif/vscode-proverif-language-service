@@ -8,7 +8,6 @@ import {fileURLToPath} from "url";
 import {TextDocumentIdentifier} from "vscode-languageserver";
 
 export type InvokeProverifResult = {
-    libraryMode: boolean
     proverifBinary: string
     invocation: string
     diagnostics?: Diagnostic[]
@@ -140,7 +139,6 @@ export const invokeProverif = async (documentIdentifier: TextDocumentIdentifier,
     }));
 
     return {
-        selfIsLibrary: selfIsLibrary,
         proverifBinary,
         ...invocationResult,
     };

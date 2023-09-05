@@ -16,10 +16,13 @@ import {Connection} from "vscode-languageserver/node";
 import {joinOptionalLists} from "./utils/array";
 import doc = Mocha.reporters.doc;
 import {CachedTaskExecutor} from "./cached_task_executor";
+import exp = require("constants");
 
 export type ParseResult = ParseProverifResult & CreateSymbolTableResult & {
-    dependencySymbolTables: (LibraryDependencyToken & CreateSymbolTableResult)[]
+    dependencies: DependencySymbolTable[]
 };
+
+export type DependencySymbolTable = TextDocumentIdentifier & CreateSymbolTableResult;
 
 export class DocumentManager {
     private taskExecutor: CachedTaskExecutor;
@@ -76,7 +79,7 @@ export class DocumentManager {
         const dependencySymbolTables = (await Promise.all(dependencySymbolTablesPromises))
             .filter(withDefinedSymbolTable);
 
-        return {parser, parserTree, symbolTable, dependencySymbolTables};
+        return {parser, parserTree, symbolTable, dependencies: dependencySymbolTables};
     };
 }
 

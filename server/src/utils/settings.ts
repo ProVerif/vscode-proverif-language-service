@@ -1,5 +1,6 @@
 import {TextDocument} from "vscode-languageserver-textdocument";
 import {Connection} from "vscode-languageserver/node";
+import {TextDocumentIdentifier} from "vscode-languageserver";
 
 export type ProVerifSettings = {
     proverifBinary: string;
@@ -10,7 +11,7 @@ type RawProVerifSettings = {
 }
 
 const defaultSettings: ProVerifSettings = {proverifBinary: 'proverif'};
-export const getDocumentSettings = async (connection: Connection, hasConfigurationCapability: boolean, document: TextDocument): Promise<ProVerifSettings> => {
+export const getDocumentSettings = async (connection: Connection, hasConfigurationCapability: boolean, document: TextDocumentIdentifier): Promise<ProVerifSettings> => {
     if (!hasConfigurationCapability) {
         return defaultSettings;
     }

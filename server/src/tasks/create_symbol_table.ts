@@ -73,22 +73,6 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         return this.visitChildren(ctx);
     };
 
-    private visitLibInternal = (ctx: LibContext) => {
-        const identifierList = ctx.neidentseq();
-        if (identifierList && (ctx.CONST() || ctx.CHANNEL() || ctx.FREE())) {
-            this.collectNeidentseqIDENTs(identifierList).forEach(identifier => {
-                this.registerVariable(identifier);
-            });
-        }
-
-        const identifier = ctx.IDENT();
-        if (identifier && (ctx.TYPE() || ctx.FUN() || ctx.EVENT() || ctx.PREDICATE() || ctx.TABLE() || ctx.LET() || ctx.LETFUN())) {
-            this.registerVariable(identifier);
-        }
-
-        return this.visitChildren(ctx);
-    };
-
     public visitTprocess = (ctx: TprocessContext) => {
         return this.withContext(ctx, () => {
             const tpattern = ctx.tpattern();

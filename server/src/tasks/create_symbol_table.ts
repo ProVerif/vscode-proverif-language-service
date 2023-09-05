@@ -128,7 +128,7 @@ type ProverifSymbol = {
     context?: ParseTree
 }
 
-class ProverifSymbolTable {
+export class ProverifSymbolTable {
     private symbols: ProverifSymbol[] = [];
 
     public addSymbol(node: TerminalNode, context?: ParseTree) {

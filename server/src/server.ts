@@ -10,7 +10,7 @@ import {
 import {TextDocument} from 'vscode-languageserver-textdocument';
 import {
     DocumentManager,
-} from "./tasks";
+} from "./document_manager";
 import {getDefinitionLink} from "./go_to_definition";
 
 const connection = createConnection(ProposedFeatures.all);

@@ -10,6 +10,7 @@ import {createSymbolTable, CreateSymbolTableResult} from "./tasks/create_symbol_
 import {TextDocumentIdentifier} from "vscode-languageserver";
 import {Connection} from "vscode-languageserver/node";
 import {joinOptionalLists} from "./utils/array";
+import doc = Mocha.reporters.doc;
 
 export type ParseResult = ParseProverifResult & CreateSymbolTableResult;
 
@@ -22,7 +23,7 @@ type DocumentCache = {
     document?: TextDocument
 }
 
-export class TaskExecutor {
+export class DocumentManager {
     private documentCache: Map<string, DocumentCache> = new Map();
 
     constructor(
@@ -77,7 +78,6 @@ export class TaskExecutor {
         }
 
         await this.parse(cache.document);
-
         if (!cache.parseProverifResult || !cache.createSymbolTableResult) {
             return undefined;
         }
@@ -91,13 +91,13 @@ export class TaskExecutor {
     };
 
     private invoke = async (document: TextDocument) => {
-        const {content, path, libraryMode, libraryDependencyTokens} = this.parseLibraryDependencies(document);
+        const {content, libraryMode, libraryDependencyTokens} = this.parseLibraryDependencies(document);
         const {proverifBinary} = await this.readSettings(document);
 
         const cache = this.documentCache.get(document.uri) ?? {};
 
         if (!cache.invokeProverifResult || cache.invokeProverifResult.proverifBinary !== proverifBinary) {
-            cache.invokeProverifResult = await invokeProverif(path, content, libraryMode, libraryDependencyTokens, proverifBinary);
+            cache.invokeProverifResult = await invokeProverif(document, content, libraryMode, libraryDependencyTokens, proverifBinary);
         }
 
         this.documentCache.set(document.uri, cache);
@@ -133,18 +133,17 @@ export class TaskExecutor {
 
     private parseLibraryDependencies = (document: TextDocument) => {
         const content = document.getText();
-        const path = fileURLToPath(document.uri);
-        const libraryMode = path.endsWith('.pvl');
+        const libraryMode = document.uri.endsWith('.pvl');
 
         const cache = this.documentCache.get(document.uri) ?? {};
         cache.document = document;
 
         if (!cache.parseLibraryDependenciesResult) {
-            cache.parseLibraryDependenciesResult = parseLibraryDependencies(path, content);
+            cache.parseLibraryDependenciesResult = parseLibraryDependencies(document, content);
         }
 
         this.documentCache.set(document.uri, cache);
 
-        return {content, path, libraryMode, ...cache.parseLibraryDependenciesResult};
+        return {content, libraryMode, ...cache.parseLibraryDependenciesResult};
     };
 }

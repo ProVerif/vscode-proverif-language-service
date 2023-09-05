@@ -9,21 +9,18 @@ import {
 } from 'vscode-languageserver/node';
 import {TextDocument} from 'vscode-languageserver-textdocument';
 import {
-    TaskExecutor,
+    DocumentManager,
 } from "./tasks";
 import {getDefinitionLink} from "./go_to_definition";
 
-// Create a connection for the server, using Node's IPC as transport.
-// Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all);
-
-// Create a simple text document manager.
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
-
-let taskExecutor: TaskExecutor|undefined = undefined;
 
 let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
+
+let documentManager: DocumentManager|undefined = undefined;
+
 connection.onInitialize((params: InitializeParams) => {
     const capabilities = params.capabilities;
     hasConfigurationCapability = !!(
@@ -33,7 +30,7 @@ connection.onInitialize((params: InitializeParams) => {
 		capabilities.workspace && !!capabilities.workspace.workspaceFolders
 	);
 
-    taskExecutor = new TaskExecutor(connection, hasConfigurationCapability);
+    documentManager = new DocumentManager(connection, hasConfigurationCapability);
 
     const result: InitializeResult = {
         capabilities: {
@@ -59,12 +56,12 @@ connection.onInitialized(() => {
     }
 });
 
-connection.onDidChangeConfiguration(async _ => taskExecutor?.markSettingsChanged());
-documents.onDidClose(event => taskExecutor?.closeDocument(event.document));
-documents.onDidChangeContent(async event => taskExecutor?.markDocumentContentChanged(event.document));
+connection.onDidChangeConfiguration(async _ => documentManager?.markSettingsChanged());
+documents.onDidClose(event => documentManager?.closeDocument(event.document));
+documents.onDidChangeContent(async event => documentManager?.markDocumentContentChanged(event.document));
 
 connection.onDefinition(async (params) => {
-    const parseResult = await taskExecutor?.getParseResult(params.textDocument);
+    const parseResult = await documentManager?.getParseResult(params.textDocument);
     if (!parseResult) {
         connection.console.error("Parsing failed.");
         return undefined;

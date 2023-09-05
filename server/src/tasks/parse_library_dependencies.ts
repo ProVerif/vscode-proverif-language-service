@@ -2,6 +2,8 @@ import {Diagnostic, DiagnosticSeverity, Range} from "vscode-languageserver/node"
 import {sep} from "path";
 import {existsSync} from "fs";
 import {Message} from "../utils/log";
+import {TextDocumentIdentifier} from "vscode-languageserver";
+import {fileURLToPath, pathToFileURL} from "url";
 
 export type ParseLibraryDependenciesResult = {
     diagnostics: Diagnostic[]
@@ -11,7 +13,7 @@ export type ParseLibraryDependenciesResult = {
 
 export type LibraryDependencyToken = {
     match: RegExpMatchArray,
-    path: string,
+    uri: URL,
     exists: boolean
 }
 
@@ -24,17 +26,20 @@ export const libraryDependencyTokenToRange = (content: string, token: LibraryDep
 
 const LIB_FILE_ENDING = '.pvl';
 const LIB_REGEX_MATCH = /\(\* +-lib (.+)\.pvl/g;
-export const parseLibraryDependencies = (filePath: string, content: string): ParseLibraryDependenciesResult => {
+export const parseLibraryDependencies = (documentIdentifier: TextDocumentIdentifier, content: string): ParseLibraryDependenciesResult => {
     const diagnostics: Diagnostic[] = [];
     const libraryDependencyTokens: LibraryDependencyToken[] = [];
 
-    const folder = filePath.split(sep).slice(0, -1).join(sep);
+    const path = fileURLToPath(documentIdentifier.uri);
+    const folder = path.split(sep).slice(0, -1).join(sep);
     const matches = content.matchAll(LIB_REGEX_MATCH);
     for (const match of matches) {
         const expectedFilename = match[1] + LIB_FILE_ENDING;
-        const expectedLocation = folder + sep + expectedFilename;
-        const exists = existsSync(expectedLocation);
-        const libraryDependencyToken = {match, path: expectedLocation, exists};
+        const absolutePath = expectedFilename.startsWith(sep) ? expectedFilename : folder + sep + expectedFilename;
+        const exists = existsSync(absolutePath);
+
+        const uri = pathToFileURL(absolutePath);
+        const libraryDependencyToken = {match, uri, exists};
         libraryDependencyTokens.push(libraryDependencyToken);
 
         if (!exists) {
@@ -42,7 +47,7 @@ export const parseLibraryDependencies = (filePath: string, content: string): Par
             diagnostics.push({
                 severity: DiagnosticSeverity.Warning,
                 range,
-                message: 'Library not found at ' + expectedLocation,
+                message: 'Library not found at ' + absolutePath,
                 source: 'ProVerif Language Service'
             });
         }

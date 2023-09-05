@@ -1,6 +1,10 @@
 import {TextDocument} from "vscode-languageserver-textdocument";
 import {fileURLToPath} from "url";
-import {parseLibraryDependencies, ParseLibraryDependenciesResult} from "./tasks/parse_library_dependencies";
+import {
+    LibraryDependencyToken,
+    parseLibraryDependencies,
+    ParseLibraryDependenciesResult
+} from "./tasks/parse_library_dependencies";
 import {getDocumentSettings, ProVerifSettings} from "./utils/settings";
 import {invokeProverif, InvokeProverifResult} from "./tasks/invoke_proverif";
 import {logMessages} from "./utils/log";
@@ -13,7 +17,9 @@ import {joinOptionalLists} from "./utils/array";
 import doc = Mocha.reporters.doc;
 import {CachedTaskExecutor} from "./cached_task_executor";
 
-export type ParseResult = ParseProverifResult & CreateSymbolTableResult;
+export type ParseResult = ParseProverifResult & CreateSymbolTableResult & {
+    dependencySymbolTables: (LibraryDependencyToken & CreateSymbolTableResult)[]
+};
 
 export class DocumentManager {
     private taskExecutor: CachedTaskExecutor;
@@ -62,6 +68,16 @@ export class DocumentManager {
             return undefined;
         }
 
-        return {parser, parserTree, symbolTable};
+        const {libraryDependencyTokens} = await this.taskExecutor.parseLibraryDependencies(identification);
+        const dependencySymbolTablesPromises = (libraryDependencyTokens ?? []).map(async libraryDependencyToken => {
+            const symbolTable = await this.taskExecutor.createSymbolTable(libraryDependencyToken);
+            return {...libraryDependencyToken, ...symbolTable};
+        });
+        const dependencySymbolTables = (await Promise.all(dependencySymbolTablesPromises))
+            .filter(withDefinedSymbolTable);
+
+        return {parser, parserTree, symbolTable, dependencySymbolTables};
     };
 }
+
+const withDefinedSymbolTable = (entry: LibraryDependencyToken & Partial<CreateSymbolTableResult>): entry is LibraryDependencyToken & CreateSymbolTableResult => !!entry.symbolTable;

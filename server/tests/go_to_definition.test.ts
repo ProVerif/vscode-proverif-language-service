@@ -7,6 +7,8 @@ import {createSymbolTable} from "../src/tasks/create_symbol_table";
 import {DependencySymbolTable, ParseResult} from "../src/document_manager";
 import {getDefinitionLink} from "../src/go_to_definition";
 import {parseProverif} from "../src/tasks/parse_proverif";
+import {Position} from "vscode-languageserver";
+import {DefinitionLink} from "vscode-languageserver-protocol";
 
 describe('parser', function () {
     const getParserResult = (input: string, dependencyUri?: string, dependencyInput?: string): ParseResult => {
@@ -27,65 +29,64 @@ describe('parser', function () {
         return {parser, parserTree, symbolTable, dependencies: dependencySymbolTables};
     };
 
-    it("finds global scope variable", async () => {
-        const code = `channel c. channel d. process \nout(c, c)`;
+    const assertDefinitionPointsToTarget = (definitionLink: DefinitionLink | undefined, targetUri: string, target: Position, targetCharacterLength: number, source: Position) => {
+        assert.isDefined(definitionLink);
+        if (!definitionLink) {
+            return;
+        }
+        
+        expect(definitionLink.targetUri).to.equal(targetUri);
+
+        expect(definitionLink.targetRange.start).to.deep.equal(target);
+        const targetEnd = {...target, character: target.character + targetCharacterLength};
+        expect(definitionLink.targetRange.end).to.deep.equal(targetEnd);
+        expect(definitionLink.targetSelectionRange).to.deep.equal(definitionLink.targetRange);
+
+        assert.isDefined(definitionLink.originSelectionRange);
+        if (!definitionLink.originSelectionRange) {
+            return;
+        }
+
+        expect(definitionLink.originSelectionRange.start.line).to.equal(source.line);
+        assert.isTrue(definitionLink.originSelectionRange.start.character <= source.character && source.character <= definitionLink.originSelectionRange.end.character);
+    };
+
+    const assertSingleFileNavigation = async (code: string, click: Position, target: Position, targetCharacterLength: number) => {
+        const uri = 'main';
 
         const parserResult = getParserResult(code);
-        const definitionLink = await getDefinitionLink({uri: 'dummy'}, parserResult, {line: 1, character: 5});
+        const definitionLink = await getDefinitionLink({uri}, parserResult, click);
 
-        assert.isDefined(definitionLink);
-        if (definitionLink) {
-            expect(definitionLink.targetRange.start).to.deep.equal({line: 0, character: 8});
-            expect(definitionLink.targetRange.end).to.deep.equal({line: 0, character: 9});
-            expect(definitionLink.targetSelectionRange).to.deep.equal(definitionLink.targetRange);
+        assertDefinitionPointsToTarget(definitionLink, uri, target, targetCharacterLength, click);
+    };
 
-            assert.isDefined(definitionLink.originSelectionRange);
-            if (definitionLink.originSelectionRange) {
-                expect(definitionLink.originSelectionRange.start).to.deep.equal({line: 1, character: 4});
-                expect(definitionLink.originSelectionRange.end).to.deep.equal({line: 1, character: 5});
-            }
-        }
+    it("finds global scope variable", async () => {
+        const code = `channel c. channel d. process \nout(c, c)`;
+        const click = {line: 1, character: 5};
+        const target = {line: 0, character: 8};
+
+        await assertSingleFileNavigation(code, click, target, 1);
     });
 
     it("override local scope variable", async () => {
         const code = `channel c. process \nnew c:channel; \nout(c, c)`;
-
-        const parserResult = getParserResult(code);
-        const definitionLink = await getDefinitionLink({uri: 'dummy'}, parserResult, {line: 2, character: 5});
-
-        assert.isDefined(definitionLink);
-        if (definitionLink) {
-            expect(definitionLink.targetRange.start).to.deep.equal({line: 1, character: 4});
-            expect(definitionLink.targetRange.end).to.deep.equal({line: 1, character: 5});
-            expect(definitionLink.targetSelectionRange).to.deep.equal(definitionLink.targetRange);
-
-            assert.isDefined(definitionLink.originSelectionRange);
-            if (definitionLink.originSelectionRange) {
-                expect(definitionLink.originSelectionRange.start).to.deep.equal({line: 2, character: 4});
-                expect(definitionLink.originSelectionRange.end).to.deep.equal({line: 2, character: 5});
-            }
-        }
+        const click = {line: 2, character: 5};
+        const target = {line: 1, character: 4};
+        
+        await assertSingleFileNavigation(code, click, target, 1);
     });
 
     it("checks in dependencies if not found in main", async () => {
         const dependencyCode = `channel c.`;
+        const dependencyUri = 'dependency';
+
         const code = 'process \nout(c, c)';
+        const click = {line: 1, character: 5};
+        const target = {line: 0, character: 8};
 
-        const parserResult = getParserResult(code, 'dependency', dependencyCode);
-        const definitionLink = await getDefinitionLink({uri: 'dummy'}, parserResult, {line: 1, character: 5});
+        const parserResult = getParserResult(code, dependencyUri, dependencyCode);
+        const definitionLink = await getDefinitionLink({uri: 'dummy'}, parserResult, click);
 
-        assert.isDefined(definitionLink);
-        if (definitionLink) {
-            expect(definitionLink.targetUri).to.equal('dependency');
-            expect(definitionLink.targetRange.start).to.deep.equal({line: 0, character: 8});
-            expect(definitionLink.targetRange.end).to.deep.equal({line: 0, character: 9});
-            expect(definitionLink.targetSelectionRange).to.deep.equal(definitionLink.targetRange);
-
-            assert.isDefined(definitionLink.originSelectionRange);
-            if (definitionLink.originSelectionRange) {
-                expect(definitionLink.originSelectionRange.start).to.deep.equal({line: 1, character: 4});
-                expect(definitionLink.originSelectionRange.end).to.deep.equal({line: 1, character: 5});
-            }
-        }
+        assertDefinitionPointsToTarget(definitionLink, dependencyUri, target, 1, click);
     });
 });

@@ -13,9 +13,8 @@ export type ParseLibraryDependenciesResult = {
 
 export type LibraryDependencyToken = {
     match: RegExpMatchArray,
-    uri: URL,
     exists: boolean
-}
+} & TextDocumentIdentifier
 
 export const libraryDependencyTokenToRange = (content: string, token: LibraryDependencyToken) => {
     const linesUntilError = content.substring(0, token.match.index).split(/\r?\n/);
@@ -26,7 +25,7 @@ export const libraryDependencyTokenToRange = (content: string, token: LibraryDep
 
 const LIB_FILE_ENDING = '.pvl';
 const LIB_REGEX_MATCH = /\(\* +-lib (.+)\.pvl/g;
-export const parseLibraryDependencies = (documentIdentifier: TextDocumentIdentifier, content: string): ParseLibraryDependenciesResult => {
+export const parseLibraryDependencies = async (documentIdentifier: TextDocumentIdentifier, content: string): Promise<ParseLibraryDependenciesResult> => {
     const diagnostics: Diagnostic[] = [];
     const libraryDependencyTokens: LibraryDependencyToken[] = [];
 
@@ -38,7 +37,7 @@ export const parseLibraryDependencies = (documentIdentifier: TextDocumentIdentif
         const absolutePath = expectedFilename.startsWith(sep) ? expectedFilename : folder + sep + expectedFilename;
         const exists = existsSync(absolutePath);
 
-        const uri = pathToFileURL(absolutePath);
+        const uri = pathToFileURL(absolutePath).toString();
         const libraryDependencyToken = {match, uri, exists};
         libraryDependencyTokens.push(libraryDependencyToken);
 

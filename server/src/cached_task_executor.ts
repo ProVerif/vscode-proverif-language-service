@@ -54,7 +54,7 @@ export class CachedTaskExecutor {
     };
 
     public invoke = async (document: TextDocumentIdentifier) => {
-        const {selfIsLibrary, libraryDependencyTokens} = this.parseLibraryDependencies(document);
+        const {selfIsLibrary, libraryDependencyTokens} = await this.parseLibraryDependencies(document);
         const {proverifBinary} = await this.readSettings(document);
 
         const cache = this.documentCache.get(document.uri) ?? {};
@@ -69,7 +69,7 @@ export class CachedTaskExecutor {
     };
 
     public parse = async (identifier: TextDocumentIdentifier) => {
-        const {selfIsLibrary} = this.parseLibraryDependencies(identifier);
+        const {selfIsLibrary} = await this.parseLibraryDependencies(identifier);
 
         const cache = this.documentCache.get(identifier.uri) ?? {};
 
@@ -108,14 +108,14 @@ export class CachedTaskExecutor {
         return {...cache.settings};
     };
 
-    public parseLibraryDependencies = (identifier: TextDocumentIdentifier) => {
+    public parseLibraryDependencies = async (identifier: TextDocumentIdentifier) => {
         const selfIsLibrary = identifier.uri.endsWith('.pvl');
 
         const cache = this.documentCache.get(identifier.uri) ?? {};
         const content = cache.document?.getText();
 
         if (content && !cache.parseLibraryDependenciesResult) {
-            cache.parseLibraryDependenciesResult = parseLibraryDependencies(identifier, content);
+            cache.parseLibraryDependenciesResult = await parseLibraryDependencies(identifier, content);
         }
 
         this.documentCache.set(identifier.uri, cache);

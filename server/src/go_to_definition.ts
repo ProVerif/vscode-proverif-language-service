@@ -1,4 +1,4 @@
-import {ParseResult} from "./tasks";
+import {ParseResult} from "./document_manager";
 import {LocationLink, Position, TextDocumentIdentifier} from "vscode-languageserver";
 import {getTokenPosition} from "./parseTree/compute_token_position";
 import {getRange} from "./parseTree/get_range";

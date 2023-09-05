@@ -4,7 +4,7 @@ import {CharStreams, CommonTokenStream} from "antlr4ts";
 import {ProverifLexer} from "../src/parser-proverif/ProverifLexer";
 import {ProverifParser} from "../src/parser-proverif/ProverifParser";
 import {createSymbolTable} from "../src/tasks/create_symbol_table";
-import {ParseResult} from "../src/tasks";
+import {ParseResult} from "../src/document_manager";
 import {getDefinitionLink} from "../src/go_to_definition";
 
 describe('parser', function () {

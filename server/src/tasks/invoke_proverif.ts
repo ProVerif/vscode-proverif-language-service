@@ -67,17 +67,52 @@ const parseDiagnostics = (content: string, selfIsLibrary: boolean, libraryDepend
         return {diagnostics: []};
     }
 
-    // syntax errors in stdout
-    const lines = stdout.split(/\n/);
-    while (lines.length > 0 && !lines[0].startsWith('File "')) {
-        lines.shift();
-    }
-    if (lines.length < 2) {
-        return createSingleErrorMessage('Unknown error: ' + error);
+    // find all warnings / errors
+    const matchFileMessages = stdout.matchAll(/File "(.+)"/g);
+    const results = [];
+    for (const match of matchFileMessages) { 
+        if (!match.index) {
+            continue;
+        }
+
+        const nextNewlineIndex = stdout.indexOf('\n', match.index);
+        if (nextNewlineIndex === -1) {
+            continue;
+        }
+
+        const positionLine = stdout.substring(match.index, nextNewlineIndex);
+
+        const endOfErrorLineIndex = stdout.indexOf('\n', nextNewlineIndex+1);
+        const errorLine = stdout.substring(nextNewlineIndex + 1, endOfErrorLineIndex > 0 ? endOfErrorLineIndex : undefined);
+        
+        const result = parseDiagnosticLine(content, selfIsLibrary, libraryDependencyTokens, positionLine, errorLine);
+        results.push(result);
     }
 
-    const positionLine = lines[0];
-    const errorLine = lines[1];
+    return {
+        diagnostics: mergeOptionalLists(reduceToList(results, 'diagnostics')),
+        messages: mergeOptionalLists(reduceToList(results, 'messages'))
+    };
+};
+
+
+const reduceToList = <T, V, TProp extends keyof T>(objects: T[], property: TProp): T[TProp][] => {
+    return objects.reduce((previous, current) => previous.concat([current[property]]), [] as (T[TProp])[]);
+};
+
+const mergeOptionalLists = <T>(lists: (T[]|undefined)[]): T[]|undefined => {
+    if (!lists.some(entry => entry)) {
+        return undefined;
+    }
+
+    return lists.reduce((previous, current) => current && previous ? previous.concat(...current) : previous, [] as T[]);
+};
+
+
+const parseDiagnosticLine = (content: string, selfIsLibrary: boolean, libraryDependencyTokens: LibraryDependencyToken[], positionLine: string, errorLine: string): {
+    messages?: Message[]
+    diagnostics?: Diagnostic[]
+} => {
     if (selfIsLibrary && errorLine === 'Error: Lemma not used because there is no matching query.') {
         const message = createInfoMessage('Ignore error message which is not relevant in library: ' + errorLine);
         return {messages: [message], diagnostics: []};

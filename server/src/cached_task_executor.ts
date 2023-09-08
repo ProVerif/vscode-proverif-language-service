@@ -6,7 +6,7 @@ import {parseProverif, ParseProverifResult} from "./tasks/parse_proverif";
 import {createSymbolTable, CreateSymbolTableResult} from "./tasks/create_symbol_table";
 import {TextDocumentIdentifier} from "vscode-languageserver";
 import {Connection} from "vscode-languageserver/node";
-import { fileURLToPath } from 'url';
+import {fileURLToPath} from 'url';
 import {readFile} from "./utils/files";
 
 type DocumentCache = {
@@ -49,6 +49,20 @@ export class CachedTaskExecutor {
         cache.parseProverifResult = undefined;
         cache.createSymbolTableResult = undefined;
         this.documentCache.set(documentIdentifier.uri, cache);
+    };
+
+    public markDocumentDependencyChanged = (documentIdentifier: TextDocumentIdentifier) => {
+        const cache = this.documentCache.get(documentIdentifier.uri) ?? {};
+        cache.invokeProverifResult = undefined;
+        this.documentCache.set(documentIdentifier.uri, cache);
+    };
+
+    public findDependingDocuments = (documentIdentifier: TextDocumentIdentifier): TextDocumentIdentifier[] => {
+        return Array.from(this.documentCache.keys())
+            .filter(possibleConsumer =>
+                this.documentCache.get(possibleConsumer)?.parseLibraryDependenciesResult?.libraryDependencyTokens
+                    .find(token => token.uri === documentIdentifier.uri))
+            .map(consumer => ({uri: consumer}));
     };
 
     public invoke = async (document: TextDocumentIdentifier) => {
@@ -132,7 +146,7 @@ export class CachedTaskExecutor {
                 const path = fileURLToPath(identifier.uri);
                 cache.filesystemContent = await readFile(path);
             }
-            
+
             text = cache.filesystemContent;
         }
 

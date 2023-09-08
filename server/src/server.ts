@@ -59,6 +59,7 @@ connection.onInitialized(() => {
 connection.onDidChangeConfiguration(async _ => documentManager?.markSettingsChanged());
 documents.onDidClose(event => documentManager?.closeDocument(event.document));
 documents.onDidChangeContent(async event => documentManager?.markDocumentContentChanged(event.document));
+documents.onDidSave(async event => documentManager?.markFilesystemDocumentContentChanged(event.document));
 
 connection.onDefinition(async (params) => {
     const parseResult = await documentManager?.getParseResult(params.textDocument);

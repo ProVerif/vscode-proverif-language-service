@@ -71,7 +71,7 @@ const parseDiagnostics = (content: string, selfIsLibrary: boolean, libraryDepend
     const matchFileMessages = stdout.matchAll(/File "(.+)"/g);
     const results = [];
     for (const match of matchFileMessages) { 
-        if (!match.index) {
+        if (match.index === undefined) {
             continue;
         }
 

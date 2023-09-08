@@ -44,6 +44,16 @@ export class DocumentManager {
         await this.checkParsingErrors(document);
     };
 
+    public markFilesystemDocumentContentChanged = async (document: TextDocument) => {
+        const dependingDocuments = this.taskExecutor.findDependingDocuments(document);
+        const tasks = dependingDocuments.map(dependingDocument => {
+            this.taskExecutor.markDocumentDependencyChanged(dependingDocument);
+            return this.checkParsingErrors(dependingDocument);
+        });
+
+        return Promise.all(tasks);
+    };
+
     private checkParsingErrors = async (document: TextDocumentIdentifier) => {
         const parseLibraryDependenciesResult = await this.taskExecutor.parseLibraryDependencies(document);
         const invokeProverifResult = await this.taskExecutor.invoke(document);

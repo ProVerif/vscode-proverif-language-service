@@ -17,3 +17,8 @@ export const asTempFile = async <T>(path: string, content: string, appendFileEnd
         await fsPromises.rm(tempDir, {recursive: true});
     }
 };
+
+export const readFile = async <T>(path: string) => {
+    const buffer = await fsPromises.readFile(path);
+    return buffer.toString();
+};

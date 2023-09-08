@@ -1,16 +1,11 @@
 import {TextDocument} from "vscode-languageserver-textdocument";
-import {fileURLToPath} from "url";
 import {parseLibraryDependencies, ParseLibraryDependenciesResult} from "./tasks/parse_library_dependencies";
 import {getDocumentSettings, ProVerifSettings} from "./utils/settings";
 import {invokeProverif, InvokeProverifResult} from "./tasks/invoke_proverif";
-import {logMessages} from "./utils/log";
-import {sendDiagnostics} from "./utils/diagnostics";
 import {parseProverif, ParseProverifResult} from "./tasks/parse_proverif";
 import {createSymbolTable, CreateSymbolTableResult} from "./tasks/create_symbol_table";
 import {TextDocumentIdentifier} from "vscode-languageserver";
 import {Connection} from "vscode-languageserver/node";
-import {joinOptionalLists} from "./utils/array";
-import doc = Mocha.reporters.doc;
 
 type DocumentCache = {
     settings?: ProVerifSettings,

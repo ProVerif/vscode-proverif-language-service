@@ -106,12 +106,6 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         this.symbolTable.addSymbol(identifier, this.context);
     }
 
-    /**
-     visitFunctionDeclaration = (ctx: FunctionDeclarationContext) => {
-     return this.withScope(ctx, RoutineSymbol, [ctx.identifier().text], () => this.visitChildren(ctx));
-     };
-     */
-
     private withContext<T>(context: ParseTree, action: () => T): T {
         this.context = context;
         try {

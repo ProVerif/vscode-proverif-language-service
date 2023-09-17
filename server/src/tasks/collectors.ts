@@ -1,6 +1,6 @@
 import {
-    BasicpatternContext,
-    NeidentseqContext, NepatternseqContext,
+    BasicpatternContext, MayfailvartypeseqContext,
+    NeidentseqContext, NemayfailvartypeseqContext, NepatternseqContext,
     NevartypeContext,
     OnevartypeContext,
     TpatternContext, TpatternseqContext
@@ -70,4 +70,15 @@ export const collectBasicpattern = (ctx: BasicpatternContext): TerminalNode[] =>
     }
 
     return [];
+};
+
+export const collectNemayfailvartypeseq = (ctx: NemayfailvartypeseqContext) : TerminalNode[] => {
+    const identifiers = collectNeidentseqIDENTs(ctx.mayfailvartype().neidentseq());
+
+    const nemayfailvartypeseq = ctx.nemayfailvartypeseq();
+    if (nemayfailvartypeseq) {
+        return [...identifiers, ...collectNemayfailvartypeseq(nemayfailvartypeseq)];
+    }
+    
+    return [...identifiers];
 };

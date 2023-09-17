@@ -139,9 +139,15 @@ functionoptions
     | 
     ;
 
-probaargs: LPAREN dimlist RPAREN;
+probaargs
+    : 
+    | LPAREN dimlist RPAREN
+    ;
 
-dimlist: nedimlist;
+dimlist
+    : 
+    | nedimlist
+    ;
 
 nedimlist
     : dimext
@@ -157,13 +163,20 @@ dim
     ;
 
 poweropt
-    : POWER INT
+    : 
+    | POWER INT
     | POWER MINUS INT
     ;
 
-letprobaargs: LPAREN probaarglist RPAREN;
+letprobaargs
+    : 
+    | LPAREN probaarglist RPAREN
+    ;
 
-probaarglist: neprobaarglist;
+probaarglist
+    : 
+    | neprobaarglist
+    ;
 
 neprobaarglist
     : vardim
@@ -326,7 +339,8 @@ niseq
     ;
 
 opt_publivars_ror
-    : FOR LBRACE PUBLICVARS neidentseq RBRACE
+    : 
+    | FOR LBRACE PUBLICVARS neidentseq RBRACE
     | FOR LBRACE SECRET IDENT optpublicvars LBRACKET IDENT RBRACKET RBRACE
     ;
 
@@ -695,4 +709,9 @@ permut
     : 
     | onepermut
     | onepermut SEMI permut
+    ;
+
+order
+    : IDENT GREATER order
+    | IDENT
     ;

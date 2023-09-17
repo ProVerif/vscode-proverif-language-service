@@ -74,7 +74,7 @@ secret, select, set, suchthat, sync, table, then, type, weaksecret, yield
 term: state
 */
 NEW: 'new';
-CHOICE: 'choice';
+CHOICE: 'choice' | 'diff';
 LET: 'let';
 INSERT: 'insert';
 EVENT: 'event';
@@ -165,8 +165,8 @@ queries
 */
 // EVENT: 'event'; duplicate
 INJEVENT: 'inj-event';
-ATTACKER: 'attacker';
-MESS: 'mess';
+// ATTACKER: 'attacker'; not treated as its own taken, rather as IDENT
+// MESS: 'mess'; not treated as its own taken, rather as IDENT
 PHASE: 'phase';
 // CHOICE: 'choice'; duplicate
 // NEW: 'new'; duplicate

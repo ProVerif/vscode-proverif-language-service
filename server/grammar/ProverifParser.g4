@@ -205,7 +205,10 @@ probaf
     | FLOAT
     ;
 
-identlist: neidentseq;
+identlist
+    : 
+    | neidentseq
+    ;
 
 probaoptimcond
     : LPAREN probaoptimcond RPAREN
@@ -252,7 +255,8 @@ neidentseq
     ;
 
 newarg
-    : LBRACKET RBRACKET
+    : 
+    | LBRACKET RBRACKET
     | LBRACKET neidentseq RBRACKET
     ;
 
@@ -343,9 +347,15 @@ tquery
     | PUTBEGIN INJEVENT COLON neidentseq
     ;
 
-optpublicvars: PUBLICVARS neidentseq;
+optpublicvars
+    : 
+    | PUBLICVARS neidentseq
+    ;
 
-optatident: AT IDENT;
+optatident
+    : 
+    | AT IDENT
+    ;
 
 gterm
     : IDENT LPAREN gtermseq RPAREN optatident
@@ -543,7 +553,10 @@ progend
     | 
     ;
 
-syncopt: LBRACKET BARRIER COLON IDENT IDENT IDENT RBRACKET;
+syncopt
+    : 
+    | LBRACKET BARRIER COLON IDENT IDENT IDENT RBRACKET
+    ;
 
 tprocess
     : progbegin tprocess
@@ -679,6 +692,7 @@ onepermut
     ;
 
 permut
-    : onepermut
+    : 
+    | onepermut
     | onepermut SEMI permut
     ;

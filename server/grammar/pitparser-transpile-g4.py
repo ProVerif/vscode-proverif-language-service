@@ -34,9 +34,6 @@ with open('pitparser.mly', 'r') as reader:
                     # remove precedence declarations
                     if normalizedContent.find("%prec") > 0:
                         normalizedContent = normalizedContent[0: normalizedContent.find("%prec")]
-                    # remove empty lines
-                    if len(normalizedContent) == 0:
-                        continue
                     cleanedRuleContent.append(normalizedContent)
                 rules[ruleName] = cleanedRuleContent
             ruleStarts = True

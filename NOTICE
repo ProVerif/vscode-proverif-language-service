@@ -6,3 +6,7 @@ The code originates from an articles series about how to implement the go to def
 Repositories: 
 - https://github.com/Strumenta/article-antlr4-c3
 - https://github.com/Strumenta/article-lsp-go-to-definition
+
+The grammer of ProVerif is copied over from the ProVerif project, and therefore falls under GNU.
+Repository:
+- https://gitlab.inria.fr/bblanche/proverif

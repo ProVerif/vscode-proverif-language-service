@@ -106,9 +106,17 @@ describe('parser', function () {
     });
 
     it("consider query variables", async () => {
-        const code = `free b: bitstring.\nquery x:bitstring; attacker(x). process \nin(c, b)`;
+        const code = `free b: bitstring.\nquery x:bitstring; attacker(x). process 0`;
         const click = {line: 1, character: 29};
         const target = {line: 1, character: 6};
+
+        await assertSingleFileNavigation(code, click, target, 1);
+    });
+
+    it("consider let arguments", async () => {
+        const code = `let Proc(c: channel) = \nin(c, b:bitstring).\nprocess 0`;
+        const click = {line: 1, character: 4};
+        const target = {line: 0, character: 9};
 
         await assertSingleFileNavigation(code, click, target, 1);
     });

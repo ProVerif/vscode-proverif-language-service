@@ -5,7 +5,11 @@ import {
     TprocessContext
 } from "../parser-proverif/ProverifParser";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";
-import {collectNeidentseqIDENTs, collectNevartypeIDENTs, collectTPatternIDENTs} from "./collectors";
+import {
+    collectNeidentseqIDENTs, collectNemayfailvartypeseq,
+    collectNevartypeIDENTs,
+    collectTPatternIDENTs
+} from "./collectors";
 
 
 export type CreateSymbolTableResult = {
@@ -50,7 +54,20 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             });
         }
 
-        return this.visitChildren(ctx);
+        if (ctx.LET()) {
+            return this.withContext(ctx, () => {
+                const mayfailvartypeseq = ctx.mayfailvartypeseq();
+                const nemayfailvartypeseq = mayfailvartypeseq?.nemayfailvartypeseq();
+                if (nemayfailvartypeseq) {
+                    collectNemayfailvartypeseq(nemayfailvartypeseq).forEach(identifier => {
+                        this.registerVariable(identifier);
+                    });
+                }
+                return this.visitChildren(ctx);
+            });
+        } else {
+            return this.visitChildren(ctx);
+        }
     };
 
     public visitTprocess = (ctx: TprocessContext) => {

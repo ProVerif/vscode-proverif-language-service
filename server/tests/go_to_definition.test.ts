@@ -1,8 +1,5 @@
 import {assert, expect} from "chai";
 
-import {CharStreams, CommonTokenStream} from "antlr4ts";
-import {ProverifLexer} from "../src/parser-proverif/ProverifLexer";
-import {ProverifParser} from "../src/parser-proverif/ProverifParser";
 import {createSymbolTable} from "../src/tasks/create_symbol_table";
 import {DependencySymbolTable, ParseResult} from "../src/document_manager";
 import {getDefinitionLink} from "../src/go_to_definition";
@@ -18,7 +15,7 @@ describe('parser', function () {
         const symbolTable = createSymbolTable(parserTree).symbolTable;
 
         const dependencySymbolTables: DependencySymbolTable[] = [];
-        if (dependencyInput) {
+        if (dependencyUri && dependencyInput) {
             const {parser, parserTree} = parseProverif(dependencyInput, true);
             assert.isUndefined(parserTree.exception);
 
@@ -72,7 +69,39 @@ describe('parser', function () {
         const code = `channel c. process \nnew c:channel; \nout(c, c)`;
         const click = {line: 2, character: 5};
         const target = {line: 1, character: 4};
-        
+
+        await assertSingleFileNavigation(code, click, target, 1);
+    });
+
+    it("pattern variable", async () => {
+        const code = `channel c. process \nin(c, b:bitstring); \nout(c, b)`;
+        const click = {line: 2, character: 8};
+        const target = {line: 1, character: 6};
+
+        await assertSingleFileNavigation(code, click, target, 1);
+    });
+
+    it("complex pattern variable", async () => {
+        const code = `channel c. process \nin(c, (=2, b:bitstring)); \nout(c, b)`;
+        const click = {line: 2, character: 8};
+        const target = {line: 1, character: 11};
+
+        await assertSingleFileNavigation(code, click, target, 1);
+    });
+
+    it("override variable", async () => {
+        const code = `channel c. free b: bitstring. process \nin(c, b:bitstring); \nout(c, b)`;
+        const click = {line: 2, character: 8};
+        const target = {line: 1, character: 6};
+
+        await assertSingleFileNavigation(code, click, target, 1);
+    });
+
+    it("do not override match variable", async () => {
+        const code = `channel c. free b: bitstring. process \nin(c, =b); \nout(c, b)`;
+        const click = {line: 2, character: 8};
+        const target = {line: 0, character: 16};
+
         await assertSingleFileNavigation(code, click, target, 1);
     });
 

@@ -1,13 +1,15 @@
 import {AbstractParseTreeVisitor, ParseTree} from "antlr4ts/tree";
 import {ProverifParserVisitor} from "../parser-proverif/ProverifParserVisitor";
 import {
+    BasicpatternContext,
     LibContext,
     NeidentseqContext,
     NevartypeContext,
-    OnevartypeContext,
+    OnevartypeContext, TpatternContext,
     TprocessContext
 } from "../parser-proverif/ProverifParser";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";
+import {collectNeidentseqIDENTs, collectNevartypeIDENTs, collectTPatternIDENTs} from "./collectors";
 
 
 export type CreateSymbolTableResult = {
@@ -30,37 +32,10 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         return this.symbolTable;
     }
 
-    private collectNeidentseqIDENTs = (ctx?: NeidentseqContext): TerminalNode[] => {
-        if (!ctx) {
-            return [];
-        }
-
-        return [ctx.IDENT(), ...this.collectNeidentseqIDENTs(ctx.neidentseq())];
-    };
-
-    private collectNevartypeIDENTs = (ctx?: NevartypeContext): TerminalNode[] => {
-        if (!ctx) {
-            return [];
-        }
-
-        return [
-            ...this.collectOnevartypeIDENTs(ctx.onevartype()),
-            ...this.collectNevartypeIDENTs(ctx.nevartype())
-        ];
-    };
-
-    private collectOnevartypeIDENTs = (ctx?: OnevartypeContext): TerminalNode[] => {
-        if (!ctx) {
-            return [];
-        }
-
-        return [ctx.IDENT(), ...this.collectNeidentseqIDENTs(ctx.neidentseq())];
-    };
-
     public visitLib = (ctx: LibContext) => {
         const identifierList = ctx.neidentseq();
         if (identifierList && (ctx.CONST() || ctx.CHANNEL() || ctx.FREE())) {
-            this.collectNeidentseqIDENTs(identifierList).forEach(identifier => {
+            collectNeidentseqIDENTs(identifierList).forEach(identifier => {
                 this.registerVariable(identifier);
             });
         }
@@ -77,12 +52,14 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         return this.withContext(ctx, () => {
             const tpattern = ctx.tpattern();
             if (tpattern && (ctx.IN() || ctx.LET())) {
-                // TODO parse patterns
+                collectTPatternIDENTs(tpattern).forEach(identifier => {
+                    this.registerVariable(identifier);
+                });
             }
 
             const nevartype = ctx.nevartype();
             if (tpattern && (ctx.LET())) {
-                this.collectNevartypeIDENTs(nevartype).forEach(identifier => {
+                collectNevartypeIDENTs(nevartype).forEach(identifier => {
                     this.registerVariable(identifier);
                 });
             }

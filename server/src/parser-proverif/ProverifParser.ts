@@ -3290,8 +3290,8 @@ export class ProverifParser extends Parser {
 		try {
 			this.state = 929;
 			this._errHandler.sync(this);
-			switch (this._input.LA(1)) {
-			case ProverifParser.IDENT:
+			switch ( this.interpreter.adaptivePredict(this._input, 33, this._ctx) ) {
+			case 1:
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 924;
@@ -3302,15 +3302,14 @@ export class ProverifParser extends Parser {
 				this.nevartype();
 				}
 				break;
-			case ProverifParser.SEMI:
-			case ProverifParser.SUCHTHAT:
+
+			case 2:
 				this.enterOuterAlt(_localctx, 2);
-				// tslint:disable-next-line:no-empty
 				{
+				this.state = 928;
+				this.onevartype();
 				}
 				break;
-			default:
-				throw new NoViableAltException(this);
 			}
 		}
 		catch (re) {
@@ -5543,7 +5542,9 @@ export class ProverifParser extends Parser {
 				this.match(ProverifParser.FAIL);
 				}
 				break;
+			case ProverifParser.SEMI:
 			case ProverifParser.COMMA:
+			case ProverifParser.RPAREN:
 				this.enterOuterAlt(_localctx, 2);
 				// tslint:disable-next-line:no-empty
 				{
@@ -5605,8 +5606,8 @@ export class ProverifParser extends Parser {
 		try {
 			this.state = 1422;
 			this._errHandler.sync(this);
-			switch (this._input.LA(1)) {
-			case ProverifParser.IDENT:
+			switch ( this.interpreter.adaptivePredict(this._input, 67, this._ctx) ) {
+			case 1:
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 1417;
@@ -5617,15 +5618,14 @@ export class ProverifParser extends Parser {
 				this.nemayfailvartypeseq();
 				}
 				break;
-			case ProverifParser.SEMI:
-			case ProverifParser.RPAREN:
+
+			case 2:
 				this.enterOuterAlt(_localctx, 2);
-				// tslint:disable-next-line:no-empty
 				{
+				this.state = 1421;
+				this.mayfailvartype();
 				}
 				break;
-			default:
-				throw new NoViableAltException(this);
 			}
 		}
 		catch (re) {
@@ -5649,21 +5649,22 @@ export class ProverifParser extends Parser {
 		try {
 			this.state = 1426;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 68, this._ctx) ) {
-			case 1:
+			switch (this._input.LA(1)) {
+			case ProverifParser.IDENT:
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 1424;
 				this.nemayfailvartypeseq();
 				}
 				break;
-
-			case 2:
+			case ProverifParser.RPAREN:
 				this.enterOuterAlt(_localctx, 2);
 				// tslint:disable-next-line:no-empty
 				{
 				}
 				break;
+			default:
+				throw new NoViableAltException(this);
 			}
 		}
 		catch (re) {
@@ -8703,10 +8704,10 @@ export class ProverifParser extends Parser {
 		"\u0399\u039A\x07j\x02\x02\u039A\u039B\x07\x06\x02\x02\u039B\u039D\x05" +
 		"R*\x02\u039C\u0393\x03\x02\x02\x02\u039C\u0399\x03\x02\x02\x02\u039DM" +
 		"\x03\x02\x02\x02\u039E\u039F\x05L\'\x02\u039F\u03A0\x07\t\x02\x02\u03A0" +
-		"\u03A1\x05N(\x02\u03A1\u03A4\x03\x02\x02\x02\u03A2\u03A4\x03\x02\x02\x02" +
-		"\u03A3\u039E\x03\x02\x02\x02\u03A3\u03A2\x03\x02\x02\x02\u03A4O\x03\x02" +
-		"\x02\x02\u03A5\u03A6\x07T\x02\x02\u03A6\u03A7\x05N(\x02\u03A7\u03A8\x07" +
-		"\x07\x02\x02\u03A8\u03AB\x03\x02\x02\x02\u03A9\u03AB\x03\x02\x02\x02\u03AA" +
+		"\u03A1\x05N(\x02\u03A1\u03A4\x03\x02\x02\x02\u03A2\u03A4\x05L\'\x02\u03A3" +
+		"\u039E\x03\x02\x02\x02\u03A3\u03A2\x03\x02\x02\x02\u03A4O\x03\x02\x02" +
+		"\x02\u03A5\u03A6\x07T\x02\x02\u03A6\u03A7\x05N(\x02\u03A7\u03A8\x07\x07" +
+		"\x02\x02\u03A8\u03AB\x03\x02\x02\x02\u03A9\u03AB\x03\x02\x02\x02\u03AA" +
 		"\u03A5\x03\x02\x02\x02\u03AA\u03A9\x03\x02\x02\x02\u03ABQ\x03\x02";
 	private static readonly _serializedATNSegment2: string =
 		"\x02\x02\u03AC\u03AD\t\x05\x02\x02\u03ADS\x03\x02\x02\x02\u03AE\u03B1" +
@@ -8916,20 +8917,20 @@ export class ProverifParser extends Parser {
 		"\x02\x02\u0585\x89\x03\x02\x02\x02\u0586\u0587\x05H%\x02\u0587\u0588\x07" +
 		"\x06\x02\x02\u0588\u0589\x05R*\x02\u0589\u058A\x05\x88E\x02\u058A\x8B" +
 		"\x03\x02\x02\x02\u058B\u058C\x05\x8AF\x02\u058C\u058D\x07\t\x02\x02\u058D" +
-		"\u058E\x05\x8CG\x02\u058E\u0591\x03\x02\x02\x02\u058F\u0591\x03\x02\x02" +
-		"\x02\u0590\u058B\x03\x02\x02\x02\u0590\u058F\x03\x02\x02\x02\u0591\x8D" +
-		"\x03\x02\x02\x02\u0592\u0595\x05\x8CG\x02\u0593\u0595\x03\x02\x02\x02" +
-		"\u0594\u0592\x03\x02\x02\x02\u0594\u0593\x03\x02\x02\x02\u0595\x8F\x03" +
-		"\x02\x02\x02\u0596\u0597\x07T\x02\x02\u0597\u0598\x05\x8CG\x02\u0598\u0599" +
-		"\x07\x07\x02\x02\u0599\u059C\x03\x02\x02\x02\u059A\u059C\x03\x02\x02\x02" +
-		"\u059B\u0596\x03\x02\x02\x02\u059B\u059A\x03\x02\x02\x02\u059C\x91\x03" +
-		"\x02\x02\x02\u059D\u059E\x07)\x02\x02\u059E\u059F\x07j\x02\x02\u059F\u05A0" +
-		"\x07#\x02\x02\u05A0\u05A1\x05X-\x02\u05A1\u05A2\x071\x02\x02\u05A2\u05A3" +
-		"\x05\x92J\x02\u05A3\u05AC\x03\x02\x02\x02\u05A4\u05A5\x07j\x02\x02\u05A5" +
-		"\u05A6\x07\x19\x02\x02\u05A6\u05A7\x05X-\x02\u05A7\u05A8\x07\x07\x02\x02" +
-		"\u05A8\u05A9\x05\x92J\x02\u05A9\u05AC\x03\x02\x02\x02\u05AA\u05AC\x05" +
-		"X-\x02\u05AB\u059D\x03\x02\x02\x02\u05AB\u05A4\x03\x02\x02\x02\u05AB\u05AA" +
-		"\x03\x02\x02\x02\u05AC\x93\x03\x02\x02\x02\u05AD\u05AE\x07U\x02\x02\u05AE" +
+		"\u058E\x05\x8CG\x02\u058E\u0591\x03\x02\x02\x02\u058F\u0591\x05\x8AF\x02" +
+		"\u0590\u058B\x03\x02\x02\x02\u0590\u058F\x03\x02\x02\x02\u0591\x8D\x03" +
+		"\x02\x02\x02\u0592\u0595\x05\x8CG\x02\u0593\u0595\x03\x02\x02\x02\u0594" +
+		"\u0592\x03\x02\x02\x02\u0594\u0593\x03\x02\x02\x02\u0595\x8F\x03\x02\x02" +
+		"\x02\u0596\u0597\x07T\x02\x02\u0597\u0598\x05\x8CG\x02\u0598\u0599\x07" +
+		"\x07\x02\x02\u0599\u059C\x03\x02\x02\x02\u059A\u059C\x03\x02\x02\x02\u059B" +
+		"\u0596\x03\x02\x02\x02\u059B\u059A\x03\x02\x02\x02\u059C\x91\x03\x02\x02" +
+		"\x02\u059D\u059E\x07)\x02\x02\u059E\u059F\x07j\x02\x02\u059F\u05A0\x07" +
+		"#\x02\x02\u05A0\u05A1\x05X-\x02\u05A1\u05A2\x071\x02\x02\u05A2\u05A3\x05" +
+		"\x92J\x02\u05A3\u05AC\x03\x02\x02\x02\u05A4\u05A5\x07j\x02\x02\u05A5\u05A6" +
+		"\x07\x19\x02\x02\u05A6\u05A7\x05X-\x02\u05A7\u05A8\x07\x07\x02\x02\u05A8" +
+		"\u05A9\x05\x92J\x02\u05A9\u05AC\x03\x02\x02\x02\u05AA\u05AC\x05X-\x02" +
+		"\u05AB\u059D\x03\x02\x02\x02\u05AB\u05A4\x03\x02\x02\x02\u05AB\u05AA\x03" +
+		"\x02\x02\x02\u05AC\x93\x03\x02\x02\x02\u05AD\u05AE\x07U\x02\x02\u05AE" +
 		"\u05AF\x05\x90I\x02\u05AF\u05B0\x05\x92J\x02\u05B0\u05B1\x05\x94K\x02" +
 		"\u05B1\u05B7\x03\x02\x02\x02\u05B2\u05B3\x07U\x02\x02\u05B3\u05B4\x05" +
 		"\x90I\x02\u05B4\u05B5\x05\x92J\x02\u05B5\u05B7\x03\x02\x02\x02\u05B6\u05AD" +
@@ -10763,8 +10764,8 @@ export class OnevartypeContext extends ParserRuleContext {
 
 
 export class NevartypeContext extends ParserRuleContext {
-	public onevartype(): OnevartypeContext | undefined {
-		return this.tryGetRuleContext(0, OnevartypeContext);
+	public onevartype(): OnevartypeContext {
+		return this.getRuleContext(0, OnevartypeContext);
 	}
 	public COMMA(): TerminalNode | undefined { return this.tryGetToken(ProverifParser.COMMA, 0); }
 	public nevartype(): NevartypeContext | undefined {
@@ -11966,8 +11967,8 @@ export class MayfailvartypeContext extends ParserRuleContext {
 
 
 export class NemayfailvartypeseqContext extends ParserRuleContext {
-	public mayfailvartype(): MayfailvartypeContext | undefined {
-		return this.tryGetRuleContext(0, MayfailvartypeContext);
+	public mayfailvartype(): MayfailvartypeContext {
+		return this.getRuleContext(0, MayfailvartypeContext);
 	}
 	public COMMA(): TerminalNode | undefined { return this.tryGetToken(ProverifParser.COMMA, 0); }
 	public nemayfailvartypeseq(): NemayfailvartypeseqContext | undefined {

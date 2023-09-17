@@ -267,7 +267,7 @@ onevartype
 
 nevartype
     : onevartype COMMA nevartype
-    | 
+    | onevartype
     ;
 
 forallvartype
@@ -480,7 +480,7 @@ mayfailvartype: neidentseq COLON typeid optorfail;
 
 nemayfailvartypeseq
     : mayfailvartype COMMA nemayfailvartypeseq
-    | 
+    | mayfailvartype
     ;
 
 mayfailvartypeseq

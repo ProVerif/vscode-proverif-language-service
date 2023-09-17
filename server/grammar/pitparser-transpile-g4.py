@@ -43,6 +43,8 @@ with open('pitparser.mly', 'r') as reader:
             ruleContent.append(normalizedLine)
         elif ruleName and normalizedLine.startswith('|'):
             ruleContent.append(normalizedLine)
+        elif ruleName and len(ruleContent) > 0 and ruleContent[len(ruleContent)-1].strip() == '|':
+            ruleContent[len(ruleContent) - 1] += normalizedLine
         else:
             print("Ignoring line " + str(index+1) + ": " + normalizedLine)
 

@@ -105,6 +105,14 @@ describe('parser', function () {
         await assertSingleFileNavigation(code, click, target, 1);
     });
 
+    it("consider query variables", async () => {
+        const code = `free b: bitstring.\nquery x:bitstring; attacker(x). process \nin(c, b)`;
+        const click = {line: 1, character: 29};
+        const target = {line: 1, character: 6};
+
+        await assertSingleFileNavigation(code, click, target, 1);
+    });
+
     it("checks in dependencies if not found in main", async () => {
         const dependencyCode = `channel c.`;
         const dependencyUri = 'dependency';

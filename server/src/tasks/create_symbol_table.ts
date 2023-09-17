@@ -41,6 +41,15 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             this.registerVariable(identifier);
         }
 
+        const nevartype = ctx.nevartype();
+        if (nevartype) {
+            this.withContext(ctx, () => {
+                collectNevartypeIDENTs(nevartype).forEach(identifier => {
+                    this.registerVariable(identifier);
+                });
+            });
+        }
+
         return this.visitChildren(ctx);
     };
 

@@ -16,7 +16,7 @@ describe('parser', function () {
 
         const dependencySymbolTables: DependencySymbolTable[] = [];
         if (dependencyUri && dependencyInput) {
-            const {parser, parserTree} = parseProverif(dependencyInput, true);
+            const {parserTree} = parseProverif(dependencyInput, true);
             assert.isUndefined(parserTree.exception);
 
             const symbolTable = createSymbolTable(parserTree).symbolTable;

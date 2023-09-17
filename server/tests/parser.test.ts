@@ -35,4 +35,15 @@ describe('parser', function () {
         expect(parseTree.children?.length).to.equal(4);
         expect(parser.numberOfSyntaxErrors).to.equal(0);
     });
+
+    it("Parses query", () => {
+        const code = `free secr: bitstring.\nquery attacker(secr).\nprocess out(c, c)`;
+
+        const parser = getParser(code);
+
+        const parseTree = parser.all();
+
+        expect(parseTree).not.to.be.undefined;
+        expect(parser.numberOfSyntaxErrors).to.equal(0);
+    });
 });

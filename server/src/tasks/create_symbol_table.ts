@@ -1,11 +1,7 @@
 import {AbstractParseTreeVisitor, ParseTree} from "antlr4ts/tree";
 import {ProverifParserVisitor} from "../parser-proverif/ProverifParserVisitor";
 import {
-    BasicpatternContext,
     LibContext,
-    NeidentseqContext,
-    NevartypeContext,
-    OnevartypeContext, TpatternContext,
     TprocessContext
 } from "../parser-proverif/ProverifParser";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";

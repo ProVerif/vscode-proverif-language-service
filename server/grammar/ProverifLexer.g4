@@ -83,16 +83,12 @@ PROJECTION
     ;
 
 FLOAT
-    : Digit+ '.' Digit*
-    | Digit+ ('.' Digit*)? ('e'|'E') ('+'|'-')? Digit*
+    : Digit+ '.' Digit+
+    | Digit+ ('.' Digit*)? ('e'|'E') ('+'|'-')? Digit+
     ;
 
 IDENT
     : Letter (Letter | Digit | SpecialCharacter | Latin1AdditionalLetter)*
-    ;
-
-TAG
-    : (AT | Letter) (AT | Letter | Digit | SpecialCharacter | Latin1AdditionalLetter)*
     ;
 
 STRING

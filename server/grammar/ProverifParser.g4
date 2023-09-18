@@ -699,19 +699,3 @@ ptermseq
     : neptermseq
     | 
     ;
-
-onepermut
-    : TAG RED TAG
-    | TAG RED onepermut
-    ;
-
-permut
-    : 
-    | onepermut
-    | onepermut SEMI permut
-    ;
-
-order
-    : IDENT GREATER order
-    | IDENT
-    ;

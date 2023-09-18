@@ -102,9 +102,6 @@ import { OptsuchthatContext } from "./ProverifParser";
 import { OptargsContext } from "./ProverifParser";
 import { NeptermseqContext } from "./ProverifParser";
 import { PtermseqContext } from "./ProverifParser";
-import { OnepermutContext } from "./ProverifParser";
-import { PermutContext } from "./ProverifParser";
-import { OrderContext } from "./ProverifParser";
 
 
 /**
@@ -1200,38 +1197,5 @@ export interface ProverifParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitPtermseq?: (ctx: PtermseqContext) => void;
-
-	/**
-	 * Enter a parse tree produced by `ProverifParser.onepermut`.
-	 * @param ctx the parse tree
-	 */
-	enterOnepermut?: (ctx: OnepermutContext) => void;
-	/**
-	 * Exit a parse tree produced by `ProverifParser.onepermut`.
-	 * @param ctx the parse tree
-	 */
-	exitOnepermut?: (ctx: OnepermutContext) => void;
-
-	/**
-	 * Enter a parse tree produced by `ProverifParser.permut`.
-	 * @param ctx the parse tree
-	 */
-	enterPermut?: (ctx: PermutContext) => void;
-	/**
-	 * Exit a parse tree produced by `ProverifParser.permut`.
-	 * @param ctx the parse tree
-	 */
-	exitPermut?: (ctx: PermutContext) => void;
-
-	/**
-	 * Enter a parse tree produced by `ProverifParser.order`.
-	 * @param ctx the parse tree
-	 */
-	enterOrder?: (ctx: OrderContext) => void;
-	/**
-	 * Exit a parse tree produced by `ProverifParser.order`.
-	 * @param ctx the parse tree
-	 */
-	exitOrder?: (ctx: OrderContext) => void;
 }
 

@@ -64,6 +64,12 @@ with open('pitparser.mly', 'r') as reader:
         'options { tokenVocab = ProverifLexer; }',
         ''
     ]
+
+    # remove rules which we do not need
+    rules.pop('onepermut:')
+    rules.pop('permut:')
+    rules.pop('order:')
+
     for rule in rules.keys():
         resultLines.append(rule.strip(":"))
         if len(rules[rule]) == 1:

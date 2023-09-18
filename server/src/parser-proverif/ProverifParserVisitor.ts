@@ -102,9 +102,6 @@ import { OptsuchthatContext } from "./ProverifParser";
 import { OptargsContext } from "./ProverifParser";
 import { NeptermseqContext } from "./ProverifParser";
 import { PtermseqContext } from "./ProverifParser";
-import { OnepermutContext } from "./ProverifParser";
-import { PermutContext } from "./ProverifParser";
-import { OrderContext } from "./ProverifParser";
 
 
 /**
@@ -807,26 +804,5 @@ export interface ProverifParserVisitor<Result> extends ParseTreeVisitor<Result> 
 	 * @return the visitor result
 	 */
 	visitPtermseq?: (ctx: PtermseqContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `ProverifParser.onepermut`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitOnepermut?: (ctx: OnepermutContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `ProverifParser.permut`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitPermut?: (ctx: PermutContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `ProverifParser.order`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitOrder?: (ctx: OrderContext) => Result;
 }
 

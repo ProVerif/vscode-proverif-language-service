@@ -11,191 +11,68 @@ DelimitedComment
     ;
 
 WS
-    : [\u0020\u0009\u000C\u000D\u000A] // match SP (space), HT (tab), FF (page reak), CR (carriage return), LF (line feed)
+    : [\u0020\u0009\u000C\u000D\u000A] // match SP (space), HT (tab), FF (page break), CR (carriage return), LF (line feed)
       -> channel(HIDDEN)
     ;
 
-/**
-seperators and operators
-*/
-DOT: '.' ;
-COLON: ':' ;
-SEMI: ';' ;
-
-UNDERSCORE: '_';
-COMMA: ',' ;
-LPAREN: '(';
-RPAREN: ')' ;
-LBRACE: '{';
-RBRACE: '}' ;
-LBRACKET: '[';
-RBRACKET: ']' ;
-
-REPL: '!' ;
-BAR: '|';
-
-SLASH: '/';
-POWER: '^';
-PLUS: '+' ;
-MINUS: '-' ;
-
-STAR: '*' ;
-COUNT: '#' ;
-AT: '@' ;
-
-LEFTARROW: '<-' ;
-RANDOM: '<-R' ;
-
-WEDGE: '&&' ;
-OR: '||' ;
-BEFORE: '==>' ;
-
-LESS: '<' ;
-GREATER: '>' ;
-LEQ: '<=' ;
-GEQ: '>=' ;
-DIFF: '<>' ;
-EQUAL: '=' ;
-
-RED: '->';
-EQUIV: '<->';
-EQUIVEQ: '<=>';
-
-//KEYWORDS
-/*
-among, axiom, channel, choice, clauses, const, def, diff, do, elimtrue, else, equation, equivalence,
-event, expand, fail, for, forall, foreach, free, fun, get, if, implementation, in, inj-event,
-insert, lemma, let, letfun, letproba, new, noninterf, noselect, not, nounif, or, otherwise, out,
-param, phase, pred, proba, process, proof, public_vars, putbegin, query, reduc, restriction,
-secret, select, set, suchthat, sync, table, then, type, weaksecret, yield
-*/
-
-/**
-term: state
-*/
-NEW: 'new';
-CHOICE: 'choice' | 'diff';
-LET: 'let';
-INSERT: 'insert';
-EVENT: 'event';
-
-/**
-term: control structures
-*/
-GET: 'get';
-IF: 'if';
-THEN: 'then';
-ELSE: 'else';
-SUCHTHAT: 'suchthat';
-IN: 'in';
-NOT: 'not';
-ORTEXT: 'or';
-FAIL: 'fail';
-
-/**
-declaration: definitions
-*/
+/* keyword table */
 TYPE: 'type';
-CHANNEL: 'channel' ;
-FREE: 'free' ;
-CONST: 'const';
-TABLE: 'table';
-// LET: 'let'; duplicate
 SET: 'set';
-
-/**
-declaration: equations
-*/
-FUN: 'fun';
-LETFUN: 'letfun';
-REDUCTION: 'reduc';
-EQUATION: 'equation';
-PREDICATE: 'pred';
-ELIMTRUE: 'elimtrue';
-CLAUSES: 'clauses';
-
-/**
-declaration: proofs
-*/
-QUERY: 'query';
-AXIOM: 'axiom';
-RESTRICTION: 'restriction';
-LEMMA: 'lemma';
-NONINTERF: 'noninterf';
-AMONG: 'among';
-WEAKSECRET: 'weaksecret';
-// NOT: 'not'; duplicate
-
-/**
-declaration: tune resolution strategy
-*/
-SELECT: 'select';
-NOUNIF: 'nounif' | 'noselect';
-
-/**
-declaration: cryptoverif compatability
-*/
-PARAM: 'param'; // ignored by ProVerif
-PROBA: 'proba'; // ignored by ProVerif
-LETPROBA: 'letproba'; // ignored by ProVerif
-PROOF: 'proof'; // ignored by ProVerif
-IMPLEMENTATION: 'implementation'; // ignored by proverif
-DEFINE: 'def';
-EXPAND: 'expand';
-
-/**
-destructors
-*/
-// LET: 'let'; duplicate
-// IN: 'in'; duplicate
-FOR: 'for';
-DO: 'do';
 FORALL: 'forall';
-OTHERWISE: 'otherwise';
-
-/**
-query
-*/
-PUBLICVARS: 'public vars';
-SECRET: 'secret';
-PUTBEGIN: 'putbegin';
-
-/**
-queries
-*/
-// EVENT: 'event'; duplicate
-INJEVENT: 'inj-event';
-// ATTACKER: 'attacker'; not treated as its own taken, rather as IDENT
-// MESS: 'mess'; not treated as its own taken, rather as IDENT
-PHASE: 'phase';
-// CHOICE: 'choice'; duplicate
-// NEW: 'new'; duplicate
-// LET: 'let'; duplicate
-
-/**
-noinfoptions
-*/
-HZPOTHESIS: 'hypothesis';
-CONCLUSION: 'conclusion';
-IGNORE_A_FEW_TIMES: 'ignoreAFewTimes';
-INDUCTION_ON: 'inductionOn';
-
-/**
-equivalence
-*/
-EQUIVALENCE: 'equivqlence';
-
-/**
-process
-*/
-PROCESS: 'process' ;
-YIELD: 'yield';
-FOREACH: 'foreach';
-// IN: 'in'; duplicate
-OUT: 'out' ;
-BARRIER: 'sync';
-OPTIMIF: 'optim-if';
-ISCST: 'is-cst';
+FAIL: 'fail'; 
+ORTEXT: 'or'; 
+CONST: 'const'; 
+LETFUN: 'letfun'; 
+CHANNEL: 'channel'; 
+DEFINE: 'def'; 
+EXPAND: 'expand'; 
+YIELD: 'yield'; 
+PROBA: 'proba'; 
+LETPROBA: 'letproba'; 
+PROOF: 'proof'; 
+IMPLEMENTATION: 'implementation'; 
+FOREACH: 'foreach'; 
+DO: 'do'; 
+SECRET: 'secret'; 
+PUBLICVARS: 'public_vars'; 
+TABLE: 'table'; 
+INSERT: 'insert'; 
+GET: 'get'; 
+PARAM: 'param'; 
+NEW: 'new'; 
+OUT: 'out'; 
+IN: 'in'; 
+IF: 'if'; 
+THEN: 'then'; 
+ELSE: 'else'; 
+FUN: 'fun'; 
+EQUATION: 'equation'; 
+REDUCTION: 'reduc'; 
+PREDICATE: 'pred'; 
+PROCESS: 'process'; 
+LET: 'let'; 
+QUERY: 'query'; 
+PUTBEGIN: 'putbegin'; 
+NONINTERF: 'noninterf'; 
+EVENT: 'event'; 
+NOT: 'not'; 
+ELIMTRUE: 'elimtrue'; 
+FREE: 'free'; 
+CLAUSES: 'clauses'; 
+SUCHTHAT: 'suchthat'; 
+NOUNIF: 'nounif' | 'noselect'; 
+SELECT: 'select'; 
+PHASE: 'phase'; 
+BARRIER: 'sync'; 
+AMONG: 'among'; 
+WEAKSECRET: 'weaksecret'; 
+EQUIVALENCE: 'equivalence'; 
+OTHERWISE: 'otherwise'; 
+CHOICE: 'choice' | 'diff'; 
+LEMMA: 'lemma'; 
+AXIOM: 'axiom'; 
+RESTRICTION: 'restriction'; 
+FOR: 'for';
 
 INT
     : Digit+
@@ -222,6 +99,45 @@ STRING
     : '"' .*? '"'
     ;
 
+AT: '@';
+
+OPTIMIF: 'optim-if';
+ISCST: 'is-cst';
+
+COUNT: '#';
+COMMA: ',';
+LPAREN: '(';
+RPAREN: ')';
+LBRACKET: '[';
+RBRACKET: ']';
+LBRACE: '{';
+RBRACE: '}';
+BAR: '|';
+OR: '||';
+WEDGE: '&&';
+SEMI: ';';
+REPL: '!';
+EQUAL: '=';
+SLASH: '/';
+DOT: '.';
+STAR: '*';
+COLON: ':';
+PLUS: '+';
+MINUS: '-';
+POWER: '^';
+RED: '->';
+LEQ: '<=';
+EQUIV: '<->';
+EQUIVEQ: '<=>';
+DIFF: '<>';
+BEFORE: '==>';
+LESS: '<';
+GEQ: '>=';
+GREATER: '>';
+LEFTARROW: '<-';
+RANDOM: '<-R';
+UNDERSCORE: '_';
+INJEVENT: 'inj-event';
 
 fragment Digit
     : [0-9]

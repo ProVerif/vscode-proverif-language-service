@@ -14,7 +14,8 @@ Visual Studio Code extension for ProVerif files (.pv, .pvl, .pcv).
 ![Screenshot showing how the extension shows errors from ProVerif](./docs/sample.png)
 
 Functionality:
-- Highlights the first syntax errors ProVerif finds with the corresponding error. For libraries, see below. 
+- Highlights the first syntax errors ProVerif finds with the corresponding error. For libraries, see below.
+- Press `CTRL` and click on an identifier to navigate to its definition. This feature is sill experimental, so do not fully trust it.
 - Press `CTRL`+`SHIFT`+`B` to execute ProVerif over the currently opened file.
 - Configure the proverif bin in the settings, else it is taken from the `$PATH`.
 

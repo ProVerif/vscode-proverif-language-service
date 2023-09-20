@@ -12,4 +12,4 @@ export const contains = (range: Range, position: Position) => {
         return false;
     }
     return true;
-}
+};

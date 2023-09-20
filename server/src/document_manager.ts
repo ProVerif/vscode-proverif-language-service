@@ -14,7 +14,7 @@ export type ParseResult = ParseProverifResult & CreateSymbolTableResult & {
     dependencies: DependencySymbolTable[]
 };
 
-export type DependencySymbolTable = TextDocumentIdentifier & CreateSymbolTableResult;
+export type DependencySymbolTable = TextDocumentIdentifier & CreateSymbolTableResult & LibraryDependencyToken;
 
 export class DocumentManager {
     private taskExecutor: CachedTaskExecutor;

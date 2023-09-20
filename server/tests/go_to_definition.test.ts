@@ -4,23 +4,26 @@ import {createSymbolTable} from "../src/tasks/create_symbol_table";
 import {DependencySymbolTable, ParseResult} from "../src/document_manager";
 import {getDefinitionLink} from "../src/go_to_definition";
 import {parseProverif} from "../src/tasks/parse_proverif";
-import {Position} from "vscode-languageserver";
+import {Position, Range} from "vscode-languageserver";
 import {DefinitionLink} from "vscode-languageserver-protocol";
+import {LibraryDependencyToken} from "../src/tasks/parse_library_dependencies";
 
 describe('parser', function () {
-    const getParserResult = (input: string, dependencyUri?: string, dependencyInput?: string): ParseResult => {
+    const getParserResult = (input: string, dependencyInput?: string, dependencyUri?: string, dependencyRange?: Range): ParseResult => {
         const {parser, parserTree} = parseProverif(input, false);
         assert.isUndefined(parserTree.exception);
 
         const symbolTable = createSymbolTable(parserTree).symbolTable;
 
         const dependencySymbolTables: DependencySymbolTable[] = [];
-        if (dependencyUri && dependencyInput) {
+        if (dependencyInput) {
             const {parserTree} = parseProverif(dependencyInput, true);
             assert.isUndefined(parserTree.exception);
 
             const symbolTable = createSymbolTable(parserTree).symbolTable;
-            dependencySymbolTables.push({symbolTable, uri: dependencyUri});
+            const zeroPosition: Position = { line: 0, character: 0 };
+            const zeroRange: Range = { start: zeroPosition, end: zeroPosition};
+            dependencySymbolTables.push({symbolTable, uri: dependencyUri ?? "", range: dependencyRange ?? zeroRange, exists: true});
         }
 
         return {parser, parserTree, symbolTable, dependencies: dependencySymbolTables};
@@ -129,9 +132,24 @@ describe('parser', function () {
         const click = {line: 1, character: 5};
         const target = {line: 0, character: 8};
 
-        const parserResult = getParserResult(code, dependencyUri, dependencyCode);
+        const parserResult = getParserResult(code, dependencyCode, dependencyUri);
         const definitionLink = await getDefinitionLink({uri: 'dummy'}, parserResult, click);
 
         assertDefinitionPointsToTarget(definitionLink, dependencyUri, target, 1, click);
+    });
+
+    it("navigate to dependency when clicking on include", async () => {
+        const dependencyCode = `channel c.`;
+        const dependencyUri = 'dependency';
+
+        const code = `(* -lib dependency.pvl *)\nprocess \n0`;
+        const click = {line: 0, character: 9};
+        const target = {line: 0, character: 0};
+
+        const dependencyRange: Range = { start: {line: 0, character: 8}, end: {line: 0, character: 22}};
+        const parserResult = getParserResult(code, dependencyUri, dependencyUri, dependencyRange);
+        const definitionLink = await getDefinitionLink({uri: 'dummy'}, parserResult, click);
+
+        assertDefinitionPointsToTarget(definitionLink, dependencyUri, target, 0, click);
     });
 });

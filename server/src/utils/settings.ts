@@ -1,4 +1,3 @@
-import {TextDocument} from "vscode-languageserver-textdocument";
 import {Connection} from "vscode-languageserver/node";
 import {TextDocumentIdentifier} from "vscode-languageserver";
 

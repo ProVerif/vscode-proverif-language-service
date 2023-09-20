@@ -2,7 +2,7 @@ import {Diagnostic, DiagnosticSeverity, Range} from "vscode-languageserver/node"
 import {ExecException} from "child_process";
 import {exec} from "child_process";
 import {asTempFile} from "../utils/files";
-import {LibraryDependencyToken, libraryDependencyTokenToRange} from "./parse_library_dependencies";
+import {LibraryDependencyToken} from "./parse_library_dependencies";
 import {createInfoMessage, createSingleErrorMessage, Message} from "../utils/log";
 import {fileURLToPath} from "url";
 import {TextDocumentIdentifier} from "vscode-languageserver";
@@ -124,10 +124,9 @@ const parseDiagnosticLine = (content: string, selfIsLibrary: boolean, libraryDep
         const matchingDependencies = libraryDependencyTokens.filter(token => fileURLToPath(token.uri).endsWith(matchFile[1]));
         const diagnostics = [];
         for (const matchingDependency of matchingDependencies) {
-            const range = libraryDependencyTokenToRange(content, matchingDependency);
             diagnostics.push({
                 severity: DiagnosticSeverity.Warning,
-                range,
+                range: matchingDependency.range,
                 message: errorLine,
                 source: 'ProVerif Language Service'
             });

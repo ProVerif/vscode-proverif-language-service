@@ -12,15 +12,15 @@ export type ParseLibraryDependenciesResult = {
 }
 
 export type LibraryDependencyToken = {
-    match: RegExpMatchArray,
+    range: Range
     exists: boolean
 } & TextDocumentIdentifier
 
-export const libraryDependencyTokenToRange = (content: string, token: LibraryDependencyToken) => {
-    const linesUntilError = content.substring(0, token.match.index).split(/\r?\n/);
+const matchToRange = (content: string, match: RegExpMatchArray) => {
+    const linesUntilError = content.substring(0, match.index).split(/\r?\n/);
     const matchingLine = linesUntilError.pop();
-    const endError = (matchingLine?.length ?? 0) + token.match[0].length;
-    return Range.create(linesUntilError.length, endError - token.match[1].length - LIB_FILE_ENDING.length, linesUntilError.length, endError);
+    const endError = (matchingLine?.length ?? 0) + match[0].length;
+    return Range.create(linesUntilError.length, endError - match[1].length - LIB_FILE_ENDING.length, linesUntilError.length, endError);
 };
 
 const LIB_FILE_ENDING = '.pvl';
@@ -38,14 +38,14 @@ export const parseLibraryDependencies = async (documentIdentifier: TextDocumentI
         const exists = existsSync(absolutePath);
 
         const uri = pathToFileURL(absolutePath).toString();
-        const libraryDependencyToken = {match, uri, exists};
+        const range = matchToRange(content, match);
+        const libraryDependencyToken: LibraryDependencyToken = {uri, exists, range};
         libraryDependencyTokens.push(libraryDependencyToken);
 
         if (!exists) {
-            const range = libraryDependencyTokenToRange(content, libraryDependencyToken);
             diagnostics.push({
                 severity: DiagnosticSeverity.Warning,
-                range,
+                range: libraryDependencyToken.range,
                 message: 'Library not found at ' + absolutePath,
                 source: 'ProVerif Language Service'
             });

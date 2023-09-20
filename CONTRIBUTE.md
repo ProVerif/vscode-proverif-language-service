@@ -51,9 +51,10 @@ Execute ProVerif:
 
 Go to definition:
 - [x] PoC of how to implement grammar
-- [ ] Fully implement grammar, symbol table, over libraries 
-- [ ] Add go to definition functionality; see https://tomassetti.me/integrating-code-completion-in-visual-studio-code/
-- [ ] Invalidate cache of consumers when library stored
+- [x] Implement grammar, symbol table, over libraries 
+- [x] Add go to definition functionality; see https://tomassetti.me/integrating-code-completion-in-visual-studio-code/
+- [x] Invalidate cache of consumers when library stored
+- [ ] Support additional ways of declaring variables (e.g. in REDUCTION lib)
 
 Refactorings:
 - [ ] Introduce refactoring for free c: channel to replace with channel c

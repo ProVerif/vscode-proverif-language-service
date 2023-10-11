@@ -137,4 +137,4 @@ export const collectEqlist = (ctx: EqlistContext): TerminalNode[] => {
     }
 
     return [...identifiers];
-}
+};

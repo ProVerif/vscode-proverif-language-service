@@ -35,6 +35,16 @@ export const collectOnevartype = (ctx?: OnevartypeContext): TerminalNode[] => {
     return [ctx.IDENT(), ...collectNeidentseq(ctx.neidentseq())];
 };
 
+
+export const collectTPatternSeq = (ctx: TpatternseqContext): TerminalNode[] => {
+    const nepatternseq = ctx.nepatternseq();
+    if (nepatternseq) {
+        return collectNepatternseq(nepatternseq);
+    }
+
+    return [];
+};
+
 export const collectTPattern = (ctx: TpatternContext): TerminalNode[] => {
     const basicPattern = ctx.basicpattern();
     if (basicPattern) {

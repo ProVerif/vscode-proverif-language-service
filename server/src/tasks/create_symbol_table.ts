@@ -10,7 +10,7 @@ import {
     collectEqlist,
     collectNeidentseq, collectNemayfailvartypeseq,
     collectNevartype,
-    collectTPattern, collectTreduc
+    collectTPattern, collectTPatternSeq, collectTreduc
 } from "./ident_collectors";
 
 
@@ -100,6 +100,13 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             const tpattern = ctx.tpattern();
             if (tpattern && (ctx.IN() || ctx.LET())) {
                 collectTPattern(tpattern).forEach(identifier => {
+                    this.registerVariable(identifier);
+                });
+            }
+
+            const tpatternseq = ctx.tpatternseq();
+            if (tpatternseq && (ctx.GET())) {
+                collectTPatternSeq(tpatternseq).forEach(identifier => {
                     this.registerVariable(identifier);
                 });
             }

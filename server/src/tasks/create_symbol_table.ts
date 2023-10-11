@@ -6,10 +6,12 @@ import {
 } from "../parser-proverif/ProverifParser";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";
 import {
-    collectNeidentseqIDENTs, collectNemayfailvartypeseq,
-    collectNevartypeIDENTs,
-    collectTPatternIDENTs
-} from "./collectors";
+    collecMayfailvartypeseq,
+    collectEqlist,
+    collectNeidentseq, collectNemayfailvartypeseq,
+    collectNevartype,
+    collectTPattern, collectTreduc
+} from "./ident_collectors";
 
 
 export type CreateSymbolTableResult = {
@@ -33,9 +35,9 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
     }
 
     public visitLib = (ctx: LibContext) => {
-        const identifierList = ctx.neidentseq();
-        if (identifierList && (ctx.CONST() || ctx.CHANNEL() || ctx.FREE())) {
-            collectNeidentseqIDENTs(identifierList).forEach(identifier => {
+        const neidentseq = ctx.neidentseq();
+        if (neidentseq && (ctx.CONST() || ctx.CHANNEL() || ctx.FREE())) {
+            collectNeidentseq(neidentseq).forEach(identifier => {
                 this.registerVariable(identifier);
             });
         }
@@ -45,43 +47,66 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             this.registerVariable(identifier);
         }
 
-        const nevartype = ctx.nevartype();
-        if (nevartype) {
+        const treduc = ctx.treduc();
+        if (treduc && (ctx.REDUCTION())) {
             this.withContext(ctx, () => {
-                collectNevartypeIDENTs(nevartype).forEach(identifier => {
+                collectTreduc(treduc).forEach(identifier => {
                     this.registerVariable(identifier);
                 });
             });
         }
 
-        if (ctx.LET()) {
-            return this.withContext(ctx, () => {
-                const mayfailvartypeseq = ctx.mayfailvartypeseq();
-                const nemayfailvartypeseq = mayfailvartypeseq?.nemayfailvartypeseq();
-                if (nemayfailvartypeseq) {
-                    collectNemayfailvartypeseq(nemayfailvartypeseq).forEach(identifier => {
-                        this.registerVariable(identifier);
-                    });
-                }
-                return this.visitChildren(ctx);
+        const eqlist = ctx.eqlist();
+        if (eqlist) {
+            this.withContext(ctx, () => {
+                collectEqlist(eqlist).forEach(identifier => {
+                    this.registerVariable(identifier);
+                });
             });
-        } else {
-            return this.visitChildren(ctx);
         }
+
+        const nevartype = ctx.nevartype();
+        if (nevartype && (ctx.NOUNIF() || ctx.SELECT() || ctx.QUERY() || ctx.NONINTERF() || ctx.NOT() || ctx.lemma())) {
+            this.withContext(ctx, () => {
+                collectNevartype(nevartype).forEach(identifier => {
+                    this.registerVariable(identifier);
+                });
+            });
+        }
+
+        const mayfailvartypeseq = ctx.mayfailvartypeseq();
+        if (mayfailvartypeseq && (ctx.LET() || ctx.LETFUN())) {
+            this.withContext(ctx, () => {
+                collecMayfailvartypeseq(mayfailvartypeseq).forEach(identifier => {
+                    this.registerVariable(identifier);
+                });
+            });
+        }
+
+        const nemayfailvartypeseq = ctx.nemayfailvartypeseq();
+        if (nemayfailvartypeseq && (ctx.ELIMTRUE())) {
+            this.withContext(ctx, () => {
+                collectNemayfailvartypeseq(nemayfailvartypeseq).forEach(identifier => {
+                    this.registerVariable(identifier);
+                });
+            });
+        }
+
+        return this.visitChildren(ctx);
     };
 
     public visitTprocess = (ctx: TprocessContext) => {
         return this.withContext(ctx, () => {
             const tpattern = ctx.tpattern();
             if (tpattern && (ctx.IN() || ctx.LET())) {
-                collectTPatternIDENTs(tpattern).forEach(identifier => {
+                collectTPattern(tpattern).forEach(identifier => {
                     this.registerVariable(identifier);
                 });
             }
 
             const nevartype = ctx.nevartype();
             if (tpattern && (ctx.LET())) {
-                collectNevartypeIDENTs(nevartype).forEach(identifier => {
+                collectNevartype(nevartype).forEach(identifier => {
                     this.registerVariable(identifier);
                 });
             }
@@ -105,12 +130,13 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         this.symbolTable.addSymbol(identifier, this.context);
     }
 
-    private withContext<T>(context: ParseTree, action: () => T): T {
+    private withContext<T>(context: undefined | ParseTree, action: () => T): T {
+        const previous = this.context;
         this.context = context;
         try {
             return action();
         } finally {
-            this.context = context.parent;
+            this.context = previous;
         }
     }
 }

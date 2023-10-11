@@ -124,6 +124,14 @@ describe('parser', function () {
         await assertSingleFileNavigation(code, click, target, 1);
     });
 
+    it("consider multiple let arguments", async () => {
+        const code = `let Proc() = 0.\nlet Proc2() = 0.\nprocess Proc2()`;
+        const click = {line: 2, character: 9};
+        const target = {line: 1, character: 4};
+
+        await assertSingleFileNavigation(code, click, target, 5);
+    });
+
     it("checks in dependencies if not found in main", async () => {
         const dependencyCode = `channel c.`;
         const dependencyUri = 'dependency';

@@ -82,6 +82,7 @@ const parseDiagnostics = (content: string, selfIsLibrary: boolean, libraryDepend
 
         const positionLine = stdout.substring(match.index, nextNewlineIndex);
 
+        // note that some errors span multiple lines, but this is hard to reliably detect
         const endOfErrorLineIndex = stdout.indexOf('\n', nextNewlineIndex+1);
         const errorLine = stdout.substring(nextNewlineIndex + 1, endOfErrorLineIndex > 0 ? endOfErrorLineIndex : undefined);
         
@@ -113,7 +114,13 @@ const parseDiagnosticLine = (content: string, selfIsLibrary: boolean, libraryDep
     messages?: Message[]
     diagnostics?: Diagnostic[]
 } => {
-    if (selfIsLibrary && errorLine === 'Error: Lemma not used because there is no matching query.') {
+    // this hides annoying errors that result only because we are in a library, but the consuming .pv will likely fix
+    // note that is a hacky approach; and might lead to errors later checked by ProVerif not being shown 
+    const ignoreLibraryErrors = [
+        'Error: Lemma not used because there is no matching query.',
+        'Error: choice can only be used in lemmas when the main query is an equivalence of (bi)processes'
+    ];
+    if (selfIsLibrary && ignoreLibraryErrors.some(ignoreError => errorLine.startsWith(ignoreError))) {
         const message = createInfoMessage('Ignore error message which is not relevant in library: ' + errorLine);
         return {messages: [message], diagnostics: []};
     }

@@ -1,7 +1,7 @@
 {
 	"name": "vscode-proverif-language-service-server",
 	"description": "A simple ProVerif language server",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"author": "Florian Moser",
 	"license": "MIT",
 	"engines": {

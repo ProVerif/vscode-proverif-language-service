@@ -1,9 +1,9 @@
 import {
     BasicpatternContext, EqlistContext, Extended_equationContext, ForallvartypeContext, MayfailvartypeseqContext,
-    NeidentseqContext, NemayfailvartypeseqContext, NepatternseqContext,
+    NeidentseqContext, NemayfailvartypeseqContext, NepatternseqContext, NetypeidseqContext,
     NevartypeContext,
     OnevartypeContext,
-    TpatternContext, TpatternseqContext, TreducContext
+    TpatternContext, TpatternseqContext, TreducContext, TypeidseqContext
 } from "../parser-proverif/ProverifParser";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";
 
@@ -14,6 +14,35 @@ export const collectNeidentseq = (ctx?: NeidentseqContext): TerminalNode[] => {
     }
 
     return [ctx.IDENT(), ...collectNeidentseq(ctx.neidentseq())];
+};
+
+export const collectTypeidseq = (ctx?: TypeidseqContext): TerminalNode[] => {
+    if (!ctx) {
+        return [];
+    }
+
+    const netypeidseq = ctx.netypeidseq();
+    if (!netypeidseq) {
+        return [];
+    }
+
+    return collectNetypeidseq(netypeidseq);
+};
+
+export const collectNetypeidseq = (ctx?: NetypeidseqContext): TerminalNode[] => {
+    if (!ctx) {
+        return [];
+    }
+
+    const ident = ctx.typeid().IDENT();
+    const base = ident ? [ident] : [];
+
+    const netypeidseq = ctx.netypeidseq();
+    if (!netypeidseq) {
+        return base;
+    }
+
+    return [...base, ...collectNetypeidseq(netypeidseq)];
 };
 
 export const collectNevartype = (ctx?: NevartypeContext): TerminalNode[] => {

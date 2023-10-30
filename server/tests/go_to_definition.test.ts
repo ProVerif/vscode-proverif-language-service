@@ -108,6 +108,23 @@ describe('parser', function () {
         await assertSingleFileNavigation(code, click, target, 1);
     });
 
+    it("support macros", async () => {
+        const code = `let Proc = 0.
+def My(ProcImplementation,SystemInterface) { 
+    let SystemInterface() = ProcImplementation(). 
+}
+expand My(Proc, System).
+process System`;
+
+        const click = {line: 2, character: 28};
+        const target = {line: 1, character: 7};
+        await assertSingleFileNavigation(code, click, target, 18);
+
+        const click2 = {line: 5, character: 9};
+        const target2 = {line: 4, character: 16};
+        await assertSingleFileNavigation(code, click2, target2, 6);
+    });
+
     it("consider query variables", async () => {
         const code = `free b: bitstring.\nquery x:bitstring; attacker(x). process 0`;
         const click = {line: 1, character: 29};

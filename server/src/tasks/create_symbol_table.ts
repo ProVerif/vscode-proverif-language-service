@@ -10,7 +10,7 @@ import {
     collectEqlist,
     collectNeidentseq, collectNemayfailvartypeseq,
     collectNevartype,
-    collectTPattern, collectTPatternSeq, collectTreduc
+    collectTPattern, collectTPatternSeq, collectTreduc, collectTypeidseq
 } from "./ident_collectors";
 
 
@@ -43,8 +43,22 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         }
 
         const identifier = ctx.IDENT();
-        if (identifier && (ctx.TYPE() || ctx.FUN() || ctx.EVENT() || ctx.PREDICATE() || ctx.TABLE() || ctx.LET() || ctx.LETFUN())) {
+        if (identifier && (ctx.TYPE() || ctx.FUN() || ctx.EVENT() || ctx.PREDICATE() || ctx.TABLE() || ctx.LET() || ctx.LETFUN() || ctx.DEFINE())) {
             this.registerVariable(identifier);
+
+            if (ctx.DEFINE()) {
+                this.withContext(ctx, () => {
+                    collectTypeidseq(ctx.typeidseq()).forEach(identifier => {
+                        this.registerVariable(identifier);
+                    });
+                });
+            }
+        }
+
+        if (ctx.EXPAND()) {
+            collectTypeidseq(ctx.typeidseq()).forEach(identifier => {
+                this.registerVariable(identifier);
+            });
         }
 
         const treduc = ctx.treduc();
@@ -91,6 +105,9 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
                 });
             });
         }
+
+        const define = ctx.DEFINE;
+
 
         return this.visitChildren(ctx);
     };

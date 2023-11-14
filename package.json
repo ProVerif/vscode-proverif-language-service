@@ -1,16 +1,16 @@
 {
-	"name": "vscode-proverif-language-service",
-	"displayName": "ProVerif Language Service",
-	"description": "ProVerif Syntax Checker",
-	"author": "Florian Moser",
+	"name": "vscode-proverif",
+	"displayName": "ProVerif",
+	"description": "Language support for the ProVerif language",
+	"author": "ProVerif",
 	"icon": "img/icon.png",
 	"license": "MIT",
-	"version": "1.2.1",
+	"version": "1.2.2",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/famoser/vscode-proverif-language-service"
+		"url": "https://github.com/ProVerif/vscode-proverif-language-service"
 	},
-	"publisher": "florianalexandermoser",
+	"publisher": "ProVerif",
 	"engines": {
 		"vscode": "^1.75.0"
 	},

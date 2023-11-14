@@ -1,16 +1,17 @@
 {
-	"name": "vscode-proverif-language-service-server",
-	"description": "A simple ProVerif language server",
-	"version": "1.2.1",
-	"author": "Florian Moser",
+	"name": "vscode-proverif-server",
+	"description": "Language support for the ProVerif language - server",
+	"author": "ProVerif",
+	"version": "1.2.2",
 	"license": "MIT",
 	"engines": {
 		"node": "*"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/famoser/vscode-proverif-language-service"
+		"url": "https://github.com/ProVerif/vscode-proverif-language-service"
 	},
+	"publisher": "ProVerif",
 	"dependencies": {
 		"antlr4-c3": "^3.1.1",
 		"antlr4ts": "^0.5.0-alpha.4",

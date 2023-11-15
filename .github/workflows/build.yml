@@ -9,7 +9,7 @@ on:
       - main
   release:
     types:
-    - created
+    - published
 
 jobs:
   build-lint-test-release:
@@ -39,7 +39,7 @@ jobs:
         run: npm run test
 
       - name: Publish
-        if: success() && startsWith(github.ref, 'refs/tags/') && matrix.os == 'ubuntu-latest'
+        if: success() && startsWith(github.ref, 'refs/tags/')
         run: npm run deploy
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}

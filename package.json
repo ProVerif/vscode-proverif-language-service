@@ -1,7 +1,7 @@
 {
 	"name": "vscode-proverif",
-	"displayName": "ProVerif",
-	"description": "Language support for the ProVerif language",
+	"displayName": "ProVerif Language",
+	"description": "Language support for ProVerif",
 	"author": "ProVerif",
 	"icon": "img/icon.png",
 	"license": "MIT",

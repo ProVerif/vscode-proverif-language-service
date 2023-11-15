@@ -57,7 +57,7 @@ Checklist:
 - Upload the extension to GitHub
 - Upload the extension to https://open-vsx.org/
 
-If you are doing this for the first time on your machine, you need to login with `vsce login ProVerif` with an authentication token from your visual studio user settings (for Florian Moser, this is [here](https://famoser.visualstudio.com/_usersSettings/tokens)).
+If you are doing this for the first time on your machine, you need to login with `vsce login ProVerif` with an authentication token ([how to](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token)). You can manage members of the ProVerif organization [here](https://marketplace.visualstudio.com/manage/publishers/proverif?noPrompt=true).
 
 ## Development path
 

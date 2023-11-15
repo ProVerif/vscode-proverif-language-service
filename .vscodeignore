@@ -1,20 +1,21 @@
+# exclude sources except bundled files
+client/**
+!client/out/extension.js
+server/**
+!server/out/server.js
+
+# exclude all other folders, except img (linked in package.json) & except docs (linked in README.md)
+.github/**
 .vscode/**
 .vscode-test/**
-docs
-scripts
+node_modules/**
+scripts/**
 
+# exclude all files, except license, package.json (machine readable metadata) and README.md
 .eslintignore
 .eslintrc
 .gitignore
-
-**/*.ts
-**/*.map
-**/tsconfig.json
-**/tsconfig.base.json
-client/node_modules/**
-!client/node_modules/vscode-jsonrpc/**
-!client/node_modules/vscode-languageclient/**
-!client/node_modules/vscode-languageserver-protocol/**
-!client/node_modules/vscode-languageserver-types/**
-!client/node_modules/{minimatch,brace-expansion,concat-map,balanced-match}/**
-!client/node_modules/{semver,lru-cache,yallist}/**
+.vscodeignore
+CONTRIBUTE.md
+tsconfig.json
+*.vsix

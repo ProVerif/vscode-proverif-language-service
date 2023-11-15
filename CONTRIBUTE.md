@@ -50,7 +50,7 @@ Lastly, the language server waits for the user to click on an identifier, and th
 Process:
 - Bump versions in affected `package.json` (optionally in `server` and `client` too), and run `npm install`.
 - Commit and push to GitHub.
-- Create a tag on GitHub.
+- Create a release on GitHub.
 - [automatic] CI publishes extension to https://marketplace.visualstudio.com/vscode and https://open-vsx.org/
 
 You may generate `.vsix` manually with `vsce package`. You can generate the authentication tokens needed for the release as described [here](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) and [here](https://open-vsx.org/user-settings/tokens).

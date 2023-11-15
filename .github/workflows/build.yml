@@ -1,4 +1,4 @@
-name: Build, Lint and Test
+name: Build, Lint, Test and possibly release
 
 on:
   push:
@@ -7,9 +7,12 @@ on:
   pull_request:
     branches:
       - main
+  release:
+    types:
+    - created
 
 jobs:
-  build-lint-test:
+  build-lint-test-release:
     name: Node
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -34,6 +37,13 @@ jobs:
       - name: Test server
         working-directory: server
         run: npm run test
+
+      - name: Publish
+        if: success() && startsWith(github.ref, 'refs/tags/') && matrix.os == 'ubuntu-latest'
+        run: npm run deploy
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
 
       # deactive as does not work on CI
       # - name: Run Unit Tests

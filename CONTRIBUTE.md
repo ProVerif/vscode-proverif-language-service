@@ -47,17 +47,15 @@ Lastly, the language server waits for the user to click on an identifier, and th
 
 ## Publish
 
-Make sure you have https://github.com/microsoft/vscode-vsce installed.
-
-Checklist:
+Process:
 - Bump versions in affected `package.json` (including `server` and `client`).
-- Commit and tag.
-- `vsce package` to create the `.vsix` 
-- `vsce publish` to publish the new version to the marketplace
-- Upload the extension to GitHub
-- Upload the extension to https://open-vsx.org/
+- Commit and push to GitHub.
+- Create a tag on GitHub.
+- [automatic] CI publishes extension to https://marketplace.visualstudio.com/vscode and https://open-vsx.org/
 
-If you are doing this for the first time on your machine, you need to login with `vsce login ProVerif` with an authentication token ([how to](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token)). You can manage members of the ProVerif organization [here](https://marketplace.visualstudio.com/manage/publishers/proverif?noPrompt=true).
+You may generate `.vsix` manually with `vsce package`. You can generate the authentication tokens needed for the release as described [here](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) and [here](https://open-vsx.org/user-settings/tokens).
+
+ You can manage members of the ProVerif organization [here](https://marketplace.visualstudio.com/manage/publishers/proverif?noPrompt=true) and [here](https://open-vsx.org/user-settings/namespaces).
 
 ## Development path
 

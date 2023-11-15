@@ -48,7 +48,7 @@ Lastly, the language server waits for the user to click on an identifier, and th
 ## Publish
 
 Process:
-- Bump versions in affected `package.json` (optionally in `server` and `client` too), and run `npm install`.
+- Bump versions in the `package.json` (optionally in `server` and `client` too), and run `npm install`.
 - Commit and push to GitHub.
 - Create a release on GitHub.
 - [automatic] CI publishes extension to https://marketplace.visualstudio.com/vscode and https://open-vsx.org/

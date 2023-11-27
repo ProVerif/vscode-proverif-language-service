@@ -31,7 +31,8 @@
 					".pv",
 					".pvl",
 					".pcv"
-				]
+				],
+                "configuration": "./language-configuration.json"
 			}
 		],
 		"configuration": {
@@ -48,7 +49,14 @@
 			{
 				"type": "ProVerif"
 			}
-		]
+		],
+        "grammars": [
+            {
+                "language": "pv",
+                "scopeName": "source.proverif",
+                "path": "./syntaxes/pv.tmLanguage.json"
+            }
+        ]
 	},
 	"scripts": {
 		"vscode:prepublish": "esbuild ./client/src/extension.ts --bundle --outfile=client/out/extension.js --external:vscode --format=cjs --platform=node --minify && esbuild ./server/src/server.ts --bundle --outfile=server/out/server.js --external:vscode --format=cjs --platform=node --minify ",

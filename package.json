@@ -53,7 +53,7 @@
         "grammars": [
             {
                 "language": "pv",
-                "scopeName": "source.proverif",
+                "scopeName": "source.pv",
                 "path": "./syntaxes/pv.tmLanguage.json"
             }
         ]

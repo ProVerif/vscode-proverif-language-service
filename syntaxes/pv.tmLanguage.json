@@ -2,14 +2,9 @@
 	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
 	"name": "pv",
 	"scopeName": "source.pv",
-	"fileTypes": [
-		"pv",
-		"pvl"
-	],
+	"fileTypes": ["pv", "pvl", "pcv"],
 	"patterns": [
-	  {
-		"include": "#comments"
-	  }
+		{ "include": "#comments" }
 	],
 	"repository": {
 		"comments": {
@@ -17,12 +12,8 @@
 			{
 			  "name": "comment.line.documentation.pv",
 			  "begin": "\\(\\*",
-			  "end": "\\)\\*",
-			  "patterns": [
-				{
-				  "include": "#commentContents"
-				}
-			  ]
+			  "end": "\\*\\)",
+			  "patterns": [{ "include": "#commentContents" }]
 			}
 		  ]
 		},

@@ -2,6 +2,13 @@ import json
 import re
 
 
+reserved_regex_characters = '.()[]|\{\}*+?^$/-\\'
+reserved_regex_characters_dictionary = {}
+for character in reserved_regex_characters:
+    reserved_regex_characters_dictionary[character] = '\\' + character
+reserved_regex_translator = str.maketrans(reserved_regex_characters_dictionary)
+
+
 class ScopedRegex:
     def __init__(self, regex, scope):
         self.regex = regex
@@ -20,7 +27,8 @@ def get_lexer_content():
         for line in lines:
             x = re.search("^([A-Z]+):\s*'(.+)';.*scope ([a-z.]+)", line)
             if x:
-                tokens[x.group(1)] = ScopedRegex(x.group(2), x.group(3))
+                regex = x.group(2).translate(reserved_regex_translator)
+                tokens[x.group(1)] = ScopedRegex(regex, x.group(3))
 
     return tokens
 
@@ -80,72 +88,73 @@ def add_manual_tokens(tokens):
         'entity.name.projection.pv'
     )
 
+
 def generate_textmate(rule, rules, tokens, root_context):
     variants = rules[rule]
-    valid_terminals = ['.', ';']
+    valid_terminals = ['DOT', 'SEMI']
 
     patterns = []
     for variant in variants:
         if len(variant) == 0:
             continue
 
-        match_groups = []
-        match_groups_scope = []
-        last_terminal_at = 0
-        if root_context and variant[len(variant)-1] == rule:
+        if root_context and variant[len(variant) - 1] == rule:
             variant = variant[:-1]
+
+        begin_entries = []
+        begin_captures = {}
         for entry in variant:
             if entry in tokens:
-                match_groups.append('('+tokens[entry].regex+')')
-                match_groups_scope.append(tokens[entry].scope)
-
-                if tokens[entry].regex in valid_terminals:
-                    last_terminal_at = len(match_groups) - 1
+                begin_entries.append('(' + tokens[entry].regex + ')')
+                begin_captures[str(len(begin_captures)+1)] = {'name': tokens[entry].scope}
             else:
-                match_groups.append('.?')
-        
-        if last_terminal_at < len(match_groups) - 1:
-            print('WARNING: Variant does not end with a terminal. Discarding ' + " ".join(variant[last_terminal_at+1:]))
+                break
 
-        if last_terminal_at > 0:
-            begin_captures = {}
-            for index, match_group_scope in enumerate(match_groups_scope[:-1], start=1):
-                begin_captures[str(index)] = {'name': match_group_scope}
+        terminal_token = None
+        ignored_tokens = []
+        for entry in reversed(variant):
+            if entry in valid_terminals and entry in tokens:
+                terminal_token = tokens[entry]
+                break
+            else:
+                ignored_tokens.append(entry)
 
+        if terminal_token and len(begin_entries) > 0:
+            if len(ignored_tokens) > 0:
+                print('WARNING: No terminal found at the end; ignoring parts of the rule: ' + ' '.join(variant))
             patterns.append({
-                'begin': '\s'.join(match_groups[:last_terminal_at]),
-                'end': match_groups[last_terminal_at],
+                'begin': '\s+'.join(begin_entries),
                 "beginCaptures": begin_captures,
+                'end': '(' + terminal_token.regex + ')',
                 "endCaptures": {
-                    "1": {"name": match_groups_scope[len(match_groups_scope)-1]}
+                    "1": {"name": terminal_token.scope}
                 }
             })
         else:
-            print('WARNING: Variant has no terminal. Discarding ' + " ".join(variant))
+            print('WARNING: Ignoring rule as no terminal or no expressible tokens found: ' + ' '.join(variant))
 
     return patterns
 
 
 def write_to_repository(repository):
+    with open('../../syntaxes/pv.tmLanguage.json', 'r') as reader:
+        content = reader.read()
 
-    with open('../../syntaxes/pv.tmLanguage.json', 'rw') as file:
-        content = file.read()
-        current_json = json.loads(content)
+    current_json = json.loads(content)
+    for key in repository.keys():
+        current_json['repository'][key] = {'patterns': repository[key] }
+    next_json = json.dumps(current_json)
 
-        for rule in repository:
-            current_json['repository'][rule] = repository[rule]
+    with open('../../syntaxes/pv.tmLanguage.json', 'w') as writer:
+        writer.write(next_json)
 
-        next_json = json.dumps(current_json)
-        file.write(next_json)
 
 tokens = get_lexer_content()
-print(tokens)
 add_manual_tokens(tokens)
-print(tokens)
 
 rules = get_parser_content()
-print(rules)
 
 textmate_repository = {}
 textmate_repository['lib'] = generate_textmate('lib', rules, tokens, True)
+print(textmate_repository)
 write_to_repository(textmate_repository)

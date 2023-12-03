@@ -1,0 +1,38 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "pv",
+	"scopeName": "source.pv",
+	"fileTypes": [
+		"pv",
+		"pvl"
+	],
+	"patterns": [
+	  {
+		"include": "#comments"
+	  }
+	],
+	"repository": {
+		"comments": {
+		  "patterns": [
+			{
+			  "name": "comment.line.documentation.pv",
+			  "begin": "\\(\\*",
+			  "end": "\\*\\)",
+			  "patterns": [
+				{
+				  "include": "#commentContents"
+				}
+			  ]
+			}
+		  ]
+		},
+		"commentContents": {
+		  "patterns": [
+			{
+			  "match": "\\b(TODO|FIXME|XXX|NOTE)\\b:?",
+			  "name": "keyword.todo.pv"
+			}
+		  ]
+		}
+	}
+}

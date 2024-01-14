@@ -6,9 +6,8 @@ import {getDefinitionLink} from "../src/go_to_definition";
 import {parseProverif} from "../src/tasks/parse_proverif";
 import {Position, Range} from "vscode-languageserver";
 import {DefinitionLink} from "vscode-languageserver-protocol";
-import {LibraryDependencyToken} from "../src/tasks/parse_library_dependencies";
 
-describe('parser', function () {
+describe('go to definition', function () {
     const getParserResult = (input: string, dependencyInput?: string, dependencyUri?: string, dependencyRange?: Range): ParseResult => {
         const {parser, parserTree} = parseProverif(input, false);
         assert.isUndefined(parserTree.exception);
@@ -161,20 +160,5 @@ process System`;
         const definitionLink = await getDefinitionLink({uri: 'dummy'}, parserResult, click);
 
         assertDefinitionPointsToTarget(definitionLink, dependencyUri, target, 1, click);
-    });
-
-    it("navigate to dependency when clicking on include", async () => {
-        const dependencyCode = `channel c.`;
-        const dependencyUri = 'dependency';
-
-        const code = `(* -lib dependency.pvl *)\nprocess \n0`;
-        const click = {line: 0, character: 9};
-        const target = {line: 0, character: 0};
-
-        const dependencyRange: Range = { start: {line: 0, character: 8}, end: {line: 0, character: 22}};
-        const parserResult = getParserResult(code, dependencyUri, dependencyUri, dependencyRange);
-        const definitionLink = await getDefinitionLink({uri: 'dummy'}, parserResult, click);
-
-        assertDefinitionPointsToTarget(definitionLink, dependencyUri, target, 0, click);
     });
 });

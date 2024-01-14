@@ -1,8 +1,5 @@
 import {assert, expect} from "chai";
 
-import {CharStreams, CommonTokenStream} from "antlr4ts";
-import {ProverifLexer} from "../src/parser-proverif/ProverifLexer";
-import {ProverifParser} from "../src/parser-proverif/ProverifParser";
 import {createSymbolTable} from "../src/tasks/create_symbol_table";
 import {parseProverif} from "../src/tasks/parse_proverif";
 

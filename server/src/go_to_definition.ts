@@ -6,7 +6,9 @@ import {DefinitionLink} from "vscode-languageserver-protocol";
 import {ParseTree} from "antlr4ts/tree";
 
 export const getDocumentLocations = async (parseResult: ParseResult): Promise<DocumentLink[]> => {
-    return parseResult.dependencies.map(dependecy => DocumentLink.create(dependecy.range, dependecy.uri));
+    return parseResult.dependencies
+        .filter(dependency => dependency.exists)
+        .map(dependency => DocumentLink.create(dependency.range, dependency.uri));
 };
 
 export const getDefinitionLink = async (uri: TextDocumentIdentifier, parseResult: ParseResult, position: Position): Promise<DefinitionLink | undefined> => {

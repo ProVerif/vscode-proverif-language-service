@@ -163,6 +163,7 @@ export const invokeProverif = async (documentIdentifier: TextDocumentIdentifier,
         appendFileEnding = '.pv';
     }
 
+    // sync changes here into the proverif build task in the client
     const path = fileURLToPath(documentIdentifier.uri);
     const invocationResult = await asTempFile<{
         invocation: string,

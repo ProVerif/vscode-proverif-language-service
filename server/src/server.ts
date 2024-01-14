@@ -11,7 +11,7 @@ import {TextDocument} from 'vscode-languageserver-textdocument';
 import {
     DocumentManager,
 } from "./document_manager";
-import {getDefinitionLink} from "./go_to_definition";
+import {getDefinitionLink, getDocumentLocations} from "./go_to_definition";
 
 const connection = createConnection(ProposedFeatures.all);
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
@@ -35,7 +35,8 @@ connection.onInitialize((params: InitializeParams) => {
     const result: InitializeResult = {
         capabilities: {
             textDocumentSync: TextDocumentSyncKind.Full,
-            definitionProvider: true 
+            definitionProvider: true,
+            documentLinkProvider: { resolveProvider: true, workDoneProgress: true },
         },
     };
 
@@ -74,6 +75,20 @@ connection.onDefinition(async (params) => {
         return undefined;
     }
     return [definitionLink];
+});
+
+connection.onDocumentLinks(async params => {
+    const parseResult = await documentManager?.getParseResult(params.textDocument);
+    if (!parseResult) {
+        connection.console.error("Parsing failed.");
+        return undefined;
+    }
+
+    return await getDocumentLocations(parseResult);
+});
+
+connection.onDocumentLinkResolve(async params => {
+    return params;
 });
 
 documents.listen(connection);

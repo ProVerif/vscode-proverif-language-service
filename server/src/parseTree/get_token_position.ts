@@ -8,7 +8,7 @@ export type TokenPosition = { index: number, context: ParseTree, text: string };
 export const getTokenPosition = (parseTree: ParseTree, tokens: TokenStream, position: Position): TokenPosition | undefined => {
     const caretPosition = {line: position.line + 1, column: position.character};
     return getTokenPositionInternal(parseTree, tokens, caretPosition);
-}
+};
 
 const getTokenPositionInternal = (parseTree: ParseTree, tokens: TokenStream, caretPosition: CaretPosition, identifierTokenTypes: number[] = []): TokenPosition | undefined => {
     if (parseTree instanceof TerminalNode) {

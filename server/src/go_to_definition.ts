@@ -6,7 +6,7 @@ import {DefinitionLink} from "vscode-languageserver-protocol";
 import {ParseTree} from "antlr4ts/tree";
 import {ProverifSymbol} from "./tasks/create_symbol_table";
 
-export const getDocumentLocations = async (parseResult: ParseResult): Promise<DocumentLink[]> => {
+export const getDocumentLinks = async (parseResult: ParseResult): Promise<DocumentLink[]> => {
     return parseResult.dependencies
         .filter(dependency => dependency.exists)
         .map(dependency => DocumentLink.create(dependency.range, dependency.uri));

@@ -11,7 +11,7 @@ import {TextDocument} from 'vscode-languageserver-textdocument';
 import {
     DocumentManager,
 } from "./document_manager";
-import {getDefinitionLink, getDocumentLocations} from "./go_to_definition";
+import {getDefinitionLink, getDocumentLinks} from "./go_to_definition";
 import {rename} from "./rename";
 import {getReferences} from "./references";
 
@@ -88,7 +88,7 @@ connection.onDocumentLinks(async params => {
         return undefined;
     }
 
-    return await getDocumentLocations(parseResult);
+    return await getDocumentLinks(parseResult);
 });
 
 connection.onRenameRequest(async params => {

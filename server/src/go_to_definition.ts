@@ -1,9 +1,10 @@
 import {ParseResult} from "./document_manager";
 import {DocumentLink, LocationLink, Position, TextDocumentIdentifier} from "vscode-languageserver";
-import {getTokenPosition} from "./parseTree/compute_token_position";
+import {getTokenPosition, TokenPosition} from "./parseTree/get_token_position";
 import {getRange} from "./parseTree/get_range";
 import {DefinitionLink} from "vscode-languageserver-protocol";
 import {ParseTree} from "antlr4ts/tree";
+import {ProverifSymbol} from "./tasks/create_symbol_table";
 
 export const getDocumentLocations = async (parseResult: ParseResult): Promise<DocumentLink[]> => {
     return parseResult.dependencies
@@ -11,16 +12,12 @@ export const getDocumentLocations = async (parseResult: ParseResult): Promise<Do
         .map(dependency => DocumentLink.create(dependency.range, dependency.uri));
 };
 
-export const getDefinitionLink = async (uri: TextDocumentIdentifier, parseResult: ParseResult, position: Position): Promise<DefinitionLink | undefined> => {
-    const caretPosition = {line: position.line + 1, column: position.character};
-    const tokenPosition = getTokenPosition(parseResult.parserTree, parseResult.parser.inputStream, caretPosition);
-    if (!tokenPosition) {
-        return undefined;
-    }
+export type DefinitionSymbol = ProverifSymbol & { uri: TextDocumentIdentifier }
 
+export const getDefinitionSymbol = async (uri: TextDocumentIdentifier, parseResult: ParseResult, tokenPosition: TokenPosition): Promise<DefinitionSymbol | undefined> => {
     const closestSymbol = parseResult.symbolTable.findClosestSymbol(tokenPosition.context);
     if (closestSymbol) {
-        return constructLocationLink(uri, closestSymbol, tokenPosition.context);
+        return {...closestSymbol, uri};
     }
 
     for (let i = 0; i < parseResult.dependencies.length; i++) {
@@ -29,10 +26,24 @@ export const getDefinitionLink = async (uri: TextDocumentIdentifier, parseResult
             continue;
         }
 
-        return constructLocationLink(parseResult.dependencies[i], closestSymbol, tokenPosition.context);
+        return {...closestSymbol, uri: parseResult.dependencies[i]};
     }
 
     return undefined;
+};
+
+export const getDefinitionLink = async (uri: TextDocumentIdentifier, parseResult: ParseResult, position: Position): Promise<DefinitionLink | undefined> => {
+    const tokenPosition = getTokenPosition(parseResult.parserTree, parseResult.parser.inputStream, position);
+    if (!tokenPosition) {
+        return undefined;
+    }
+
+    const definitionSymbol = await getDefinitionSymbol(uri, parseResult, tokenPosition);
+    if (!definitionSymbol) {
+        return undefined;
+    }
+
+    return constructLocationLink(uri, definitionSymbol.node, tokenPosition.context);
 };
 
 const constructLocationLink = (identifier: TextDocumentIdentifier, target: ParseTree, source: ParseTree): LocationLink | undefined => {

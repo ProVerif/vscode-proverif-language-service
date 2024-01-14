@@ -12,6 +12,8 @@ import {
     DocumentManager,
 } from "./document_manager";
 import {getDefinitionLink, getDocumentLocations} from "./go_to_definition";
+import {rename} from "./rename";
+import {getReferences} from "./references";
 
 const connection = createConnection(ProposedFeatures.all);
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
@@ -37,6 +39,8 @@ connection.onInitialize((params: InitializeParams) => {
             textDocumentSync: TextDocumentSyncKind.Full,
             definitionProvider: true,
             documentLinkProvider: { resolveProvider: true, workDoneProgress: true },
+            renameProvider: { },
+            referencesProvider: { }
         },
     };
 
@@ -89,6 +93,32 @@ connection.onDocumentLinks(async params => {
 
 connection.onDocumentLinkResolve(async params => {
     return params;
+});
+
+connection.onRenameRequest(async params => {
+    const parseResult = await documentManager?.getParseResult(params.textDocument);
+    if (!parseResult) {
+        connection.console.error("Parsing failed.");
+        return undefined;
+    }
+
+    return rename(params.textDocument, parseResult, params.position, params.newName);
+});
+
+connection.onReferences(async params => {
+    const parseResult = await documentManager?.getParseResult(params.textDocument);
+    if (!parseResult) {
+        connection.console.error("Parsing failed.");
+        return undefined;
+    }
+
+    const references = await getReferences(params.textDocument, parseResult, params.position);
+    if (!references) {
+        connection.console.log("References not found.");
+        return undefined;
+    }
+
+    return references;
 });
 
 documents.listen(connection);

@@ -43,7 +43,7 @@ export const getDefinitionLink = async (uri: TextDocumentIdentifier, parseResult
         return undefined;
     }
 
-    return constructLocationLink(uri, definitionSymbol.node, tokenPosition.context);
+    return constructLocationLink(definitionSymbol.uri, definitionSymbol.node, tokenPosition.context);
 };
 
 const constructLocationLink = (identifier: TextDocumentIdentifier, target: ParseTree, source: ParseTree): LocationLink | undefined => {

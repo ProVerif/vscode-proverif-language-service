@@ -38,7 +38,13 @@ class ProVerifTaskProvider implements vscode.TaskProvider {
 		const settings = vscode.workspace.getConfiguration('proverif', uri);
 		const proverifBinary = settings.proverifPath ? settings.proverifPath : 'proverif';
 
-		const task = new vscode.Task({ type: ProVerifTaskProvider.CustomBuildScriptType }, vscode.TaskScope.Workspace, 'Build', ProVerifTaskProvider.CustomBuildScriptType, new vscode.ShellExecution(`${proverifBinary} ${libraryDependencies} ${currentFilepath}`));
+		const task = new vscode.Task(
+			{ type: ProVerifTaskProvider.CustomBuildScriptType },
+			vscode.TaskScope.Workspace,
+			'Build',
+			ProVerifTaskProvider.CustomBuildScriptType,
+			new vscode.ShellExecution(`${proverifBinary} ${libraryDependencies} "${currentFilepath}"`)
+		);
 		task.group = vscode.TaskGroup.Build;
 		return task;
 	}

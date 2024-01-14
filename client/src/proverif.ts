@@ -1,6 +1,7 @@
 import {sep} from "path";
 
-const LIB_ARGUMENT_PREFIX = '-lib ';
+// sync changes here into the invoke_proverif task in the language server
+const LIB_ARGUMENT_PREFIX = '-lib';
 const LIB_FILE_ENDING = '.pvl';
 const LIB_REGEX_MATCH = /\(\* +-lib (.+)\.pvl/g;
 export const parseLibraryDependenciesNoValidate = (filePath: string, content: string) => {
@@ -13,5 +14,5 @@ export const parseLibraryDependenciesNoValidate = (filePath: string, content: st
         expectedLocations.add(folder + sep + expectedFilename);
     }
 
-    return Array.from(expectedLocations).map(expectedLocation => LIB_ARGUMENT_PREFIX + expectedLocation).join(" ");
+    return Array.from(expectedLocations).map(expectedLocation => `${LIB_ARGUMENT_PREFIX} "${expectedLocation}"`).join(" ");
 };

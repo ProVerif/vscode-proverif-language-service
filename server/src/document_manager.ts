@@ -1,6 +1,7 @@
 import {TextDocument} from "vscode-languageserver-textdocument";
 import {
-    LibraryDependencyToken} from "./tasks/parse_library_dependencies";
+    LibraryDependencyToken
+} from "./tasks/parse_library_dependencies";
 import {logMessages} from "./utils/log";
 import {sendDiagnostics} from "./utils/diagnostics";
 import {ParseProverifResult} from "./tasks/parse_proverif";
@@ -74,10 +75,12 @@ export class DocumentManager {
         }
 
         const {libraryDependencyTokens} = await this.taskExecutor.parseLibraryDependencies(identification);
-        const dependencySymbolTablesPromises = (libraryDependencyTokens ?? []).map(async libraryDependencyToken => {
-            const symbolTable = await this.taskExecutor.createSymbolTable(libraryDependencyToken);
-            return {...libraryDependencyToken, ...symbolTable};
-        });
+        const dependencySymbolTablesPromises = (libraryDependencyTokens ?? [])
+            .filter(libraryDependencyToken => libraryDependencyToken.exists)
+            .map(async libraryDependencyToken => {
+                const symbolTable = await this.taskExecutor.createSymbolTable(libraryDependencyToken);
+                return {...libraryDependencyToken, ...symbolTable};
+            });
         const dependencySymbolTables = (await Promise.all(dependencySymbolTablesPromises))
             .filter(withDefinedSymbolTable);
 

@@ -38,7 +38,7 @@ connection.onInitialize((params: InitializeParams) => {
         capabilities: {
             textDocumentSync: TextDocumentSyncKind.Full,
             definitionProvider: true,
-            documentLinkProvider: { resolveProvider: true, workDoneProgress: true },
+            documentLinkProvider: { },
             renameProvider: { },
             referencesProvider: { }
         },
@@ -89,10 +89,6 @@ connection.onDocumentLinks(async params => {
     }
 
     return await getDocumentLocations(parseResult);
-});
-
-connection.onDocumentLinkResolve(async params => {
-    return params;
 });
 
 connection.onRenameRequest(async params => {

@@ -106,9 +106,6 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             });
         }
 
-        const define = ctx.DEFINE;
-
-
         return this.visitChildren(ctx);
     };
 
@@ -166,7 +163,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
 }
 
 
-type ProverifSymbol = {
+export type ProverifSymbol = {
     node: TerminalNode
     context?: ParseTree
 }
@@ -178,7 +175,7 @@ export class ProverifSymbolTable {
         this.symbols.push({node, context});
     }
 
-    public findClosestSymbol(node: ParseTree): ParseTree | undefined {
+    public findClosestSymbol(node: ParseTree): ProverifSymbol | undefined {
         return this.findClosestSymbolInternal(node.text, node);
     }
 
@@ -186,11 +183,11 @@ export class ProverifSymbolTable {
         return this.symbols;
     }
 
-    private findClosestSymbolInternal(name: string, context?: ParseTree): ParseTree | undefined {
+    private findClosestSymbolInternal(name: string, context?: ParseTree): ProverifSymbol | undefined {
         const symbolsOfContext = this.symbols.filter(symbol => symbol.context === context);
         const matchingSymbol = symbolsOfContext.find(symbol => symbol.node.text === name);
         if (matchingSymbol) {
-            return matchingSymbol.node;
+            return matchingSymbol;
         }
 
         return context ? this.findClosestSymbolInternal(name, context.parent) : undefined;

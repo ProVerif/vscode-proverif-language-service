@@ -39,8 +39,8 @@ connection.onInitialize((params: InitializeParams) => {
             textDocumentSync: TextDocumentSyncKind.Full,
             definitionProvider: true,
             documentLinkProvider: { },
-            renameProvider: { },
-            referencesProvider: { }
+            // renameProvider: { },
+            // referencesProvider: { }
         },
     };
 

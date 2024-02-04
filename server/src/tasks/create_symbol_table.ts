@@ -1,16 +1,17 @@
 import {AbstractParseTreeVisitor, ParseTree} from "antlr4ts/tree";
 import {ProverifParserVisitor} from "../parser-proverif/ProverifParserVisitor";
-import {
-    LibContext,
-    TprocessContext
-} from "../parser-proverif/ProverifParser";
+import {LibContext, TprocessContext} from "../parser-proverif/ProverifParser";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";
 import {
     collecMayfailvartypeseq,
     collectEqlist,
-    collectNeidentseq, collectNemayfailvartypeseq,
+    collectNeidentseq,
+    collectNemayfailvartypeseq,
     collectNevartype,
-    collectTPattern, collectTPatternSeq, collectTreduc, collectTypeidseq
+    collectTPattern,
+    collectTPatternSeq,
+    collectTreduc,
+    collectTypeidseq
 } from "./ident_collectors";
 
 

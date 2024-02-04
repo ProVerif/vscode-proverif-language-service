@@ -1,6 +1,5 @@
 import {Diagnostic, DiagnosticSeverity, Range} from "vscode-languageserver/node";
-import {ExecException} from "child_process";
-import {exec} from "child_process";
+import {exec, ExecException} from "child_process";
 import {asTempFile} from "../utils/files";
 import {LibraryDependencyToken} from "./parse_library_dependencies";
 import {createInfoMessage, createSingleErrorMessage, Message} from "../utils/log";

@@ -3,6 +3,6 @@ import {ParseResult} from "./document_manager";
 import {WorkspaceEdit} from "vscode-languageserver-protocol";
 
 export const rename = async (uri: TextDocumentIdentifier, parseResult: ParseResult, position: Position, newName: string): Promise<WorkspaceEdit | undefined> => {
-    // TODO implement. First implement references.
+    // TODO implement. Use concept of references.
     return undefined;
 };

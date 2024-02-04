@@ -4,16 +4,17 @@ import {
     InitializeParams,
     InitializeResult,
     ProposedFeatures,
+    ResponseError,
     TextDocuments,
     TextDocumentSyncKind
 } from 'vscode-languageserver/node';
 import {TextDocument} from 'vscode-languageserver-textdocument';
-import {
-    DocumentManager,
-} from "./document_manager";
-import {getDefinitionLink, getDocumentLinks} from "./go_to_definition";
+import {DocumentManager, DocumentManagerInterface,} from "./document_manager";
+import {getDefinitionLink} from "./go_to_definition";
 import {rename} from "./rename";
 import {getReferences} from "./references";
+import {getSemanticTokens, tokenModifier, tokenTypes} from './semantic_token_provider';
+import {getDocumentLinks} from "./document_links";
 
 const connection = createConnection(ProposedFeatures.all);
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
@@ -21,7 +22,7 @@ const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
 
-let documentManager: DocumentManager|undefined = undefined;
+let documentManager: DocumentManagerInterface = new DocumentManager(connection, false);
 
 connection.onInitialize((params: InitializeParams) => {
     const capabilities = params.capabilities;
@@ -39,8 +40,14 @@ connection.onInitialize((params: InitializeParams) => {
             textDocumentSync: TextDocumentSyncKind.Full,
             definitionProvider: true,
             documentLinkProvider: { },
+            semanticTokensProvider: { 
+                documentSelector: null, // use client-side definition 
+                legend: {tokenModifiers: tokenModifier, tokenTypes: tokenTypes}, 
+                full: true,
+                range: false
+            },
+            referencesProvider: { },
             // renameProvider: { },
-            // referencesProvider: { }
         },
     };
 
@@ -61,28 +68,23 @@ connection.onInitialized(() => {
     }
 });
 
-connection.onDidChangeConfiguration(async _ => documentManager?.markSettingsChanged());
-documents.onDidClose(event => documentManager?.closeDocument(event.document));
-documents.onDidChangeContent(async event => documentManager?.markDocumentContentChanged(event.document));
-documents.onDidSave(async event => documentManager?.markFilesystemDocumentContentChanged(event.document));
+connection.onDidChangeConfiguration(async _ => documentManager.markSettingsChanged());
+documents.onDidClose(event => documentManager.closeDocument(event.document));
+documents.onDidChangeContent(async event => documentManager.markDocumentContentChanged(event.document));
+documents.onDidSave(async event => documentManager.markFilesystemDocumentContentChanged(event.document));
 
 connection.onDefinition(async (params) => {
-    const parseResult = await documentManager?.getParseResult(params.textDocument);
-    if (!parseResult) {
-        connection.console.error("Parsing failed.");
-        return undefined;
-    }
-
-    const definitionLink = await getDefinitionLink(parseResult, params.position);
+    const definitionLink = await getDefinitionLink(params.textDocument, params.position, documentManager);
     if (!definitionLink) {
         connection.console.log("Definition not found.");
         return undefined;
     }
+
     return [definitionLink];
 });
 
 connection.onDocumentLinks(async params => {
-    const parseResult = await documentManager?.getParseResult(params.textDocument);
+    const parseResult = await documentManager.getParseResult(params.textDocument);
     if (!parseResult) {
         connection.console.error("Parsing failed.");
         return undefined;
@@ -91,24 +93,28 @@ connection.onDocumentLinks(async params => {
     return await getDocumentLinks(parseResult);
 });
 
-connection.onRenameRequest(async params => {
-    const parseResult = await documentManager?.getParseResult(params.textDocument);
+connection.languages.semanticTokens.on(async params => {
+    const parseResult = await documentManager.getParseResult(params.textDocument);
     if (!parseResult) {
         connection.console.error("Parsing failed.");
-        return undefined;
+        return new ResponseError(2, 'Parsing failed', undefined);
     }
 
-    return rename(params.textDocument, parseResult, params.position, params.newName);
+    const semanticTokens = getSemanticTokens(parseResult);
+    if (!semanticTokens) {
+        connection.console.error("Retrieving semantic tokens failed.");
+        return new ResponseError(3, 'Semantic tokens extraction failed', undefined);
+    }
+
+    return semanticTokens;
+});
+
+connection.onRenameRequest(async params => {
+    return rename(params.textDocument, params.position, params.newName, documentManager);
 });
 
 connection.onReferences(async params => {
-    const parseResult = await documentManager?.getParseResult(params.textDocument);
-    if (!parseResult) {
-        connection.console.error("Parsing failed.");
-        return undefined;
-    }
-
-    const references = await getReferences(parseResult, params.position);
+    const references = await getReferences(params.textDocument, params.position, documentManager);
     if (!references) {
         connection.console.log("References not found.");
         return undefined;

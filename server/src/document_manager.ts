@@ -13,7 +13,7 @@ import {CachedTaskExecutor} from "./cached_task_executor";
 
 export type ParseResult = ParseProverifResult & CreateSymbolTableResult & {
     identifier: TextDocumentIdentifier
-    dependencies: DependencySymbolTable[]
+    dependencyTokens: LibraryDependencyToken[]
 };
 
 export type DependencySymbolTable = TextDocumentIdentifier & CreateSymbolTableResult & LibraryDependencyToken;
@@ -74,17 +74,7 @@ export class DocumentManager {
         }
 
         const {libraryDependencyTokens} = await this.taskExecutor.parseLibraryDependencies(identifier);
-        const dependencySymbolTablesPromises = (libraryDependencyTokens ?? [])
-            .filter(libraryDependencyToken => libraryDependencyToken.exists)
-            .map(async libraryDependencyToken => {
-                const symbolTable = await this.taskExecutor.createSymbolTable(libraryDependencyToken);
-                return {...libraryDependencyToken, ...symbolTable};
-            });
-        const dependencySymbolTables = (await Promise.all(dependencySymbolTablesPromises))
-            .filter(withDefinedSymbolTable);
 
-        return {identifier, parser, parserTree, symbolTable, dependencies: dependencySymbolTables};
+        return {identifier, parser, parserTree, symbolTable, dependencyTokens: libraryDependencyTokens};
     };
 }
-
-const withDefinedSymbolTable = (entry: LibraryDependencyToken & Partial<CreateSymbolTableResult>): entry is LibraryDependencyToken & CreateSymbolTableResult => !!entry.symbolTable;

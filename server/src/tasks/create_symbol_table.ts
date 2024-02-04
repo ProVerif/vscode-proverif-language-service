@@ -23,6 +23,26 @@ export const createSymbolTable = (context: ParseTree): CreateSymbolTableResult =
     return {symbolTable: symbolTableVisitor.visit(context)};
 };
 
+export enum SymbolType {
+    External = 'external',
+    Variable = 'variable',
+
+    Const = 'const',
+    Channel = 'channel',
+    Free = 'free',
+
+    Type = 'type',
+    Fun = 'fun',
+    Event = 'event',
+    Predicate = 'predicate',
+    Table = 'table',
+    Let = 'let',
+    LetFun = 'letfun',
+    Define = 'define',
+    DefineArgument = 'define_argument',
+    ExpandArgument = 'expand_argument'
+}
+
 class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> implements ProverifParserVisitor<ProverifSymbolTable> {
     constructor(
         private readonly symbolTable = new ProverifSymbolTable(),

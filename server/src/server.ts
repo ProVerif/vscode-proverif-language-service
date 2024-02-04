@@ -73,7 +73,7 @@ connection.onDefinition(async (params) => {
         return undefined;
     }
 
-    const definitionLink = await getDefinitionLink(params.textDocument, parseResult, params.position);
+    const definitionLink = await getDefinitionLink(parseResult, params.position);
     if (!definitionLink) {
         connection.console.log("Definition not found.");
         return undefined;
@@ -108,7 +108,7 @@ connection.onReferences(async params => {
         return undefined;
     }
 
-    const references = await getReferences(params.textDocument, parseResult, params.position);
+    const references = await getReferences(parseResult, params.position);
     if (!references) {
         connection.console.log("References not found.");
         return undefined;

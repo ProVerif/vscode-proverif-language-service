@@ -1,7 +1,5 @@
 import {TextDocument} from "vscode-languageserver-textdocument";
-import {
-    LibraryDependencyToken
-} from "./tasks/parse_library_dependencies";
+import {LibraryDependencyToken} from "./tasks/parse_library_dependencies";
 import {logMessages} from "./utils/log";
 import {sendDiagnostics} from "./utils/diagnostics";
 import {ParseProverifResult} from "./tasks/parse_proverif";

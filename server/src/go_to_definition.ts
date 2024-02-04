@@ -14,10 +14,10 @@ export const getDocumentLinks = async (parseResult: ParseResult): Promise<Docume
 
 export type DefinitionSymbol = ProverifSymbol & { uri: TextDocumentIdentifier }
 
-export const getDefinitionSymbol = async (uri: TextDocumentIdentifier, parseResult: ParseResult, matchingParseTree: ParseTree): Promise<DefinitionSymbol | undefined> => {
+export const getDefinitionSymbol = async (parseResult: ParseResult, matchingParseTree: ParseTree): Promise<DefinitionSymbol | undefined> => {
     const closestSymbol = parseResult.symbolTable.findClosestSymbol(matchingParseTree);
     if (closestSymbol) {
-        return {...closestSymbol, uri};
+        return {...closestSymbol, uri: parseResult.identifier};
     }
 
     for (let i = 0; i < parseResult.dependencies.length; i++) {
@@ -32,13 +32,13 @@ export const getDefinitionSymbol = async (uri: TextDocumentIdentifier, parseResu
     return undefined;
 };
 
-export const getDefinitionLink = async (uri: TextDocumentIdentifier, parseResult: ParseResult, position: Position): Promise<DefinitionLink | undefined> => {
+export const getDefinitionLink = async (parseResult: ParseResult, position: Position): Promise<DefinitionLink | undefined> => {
     const matchingParseTree = getMatchingParseTree(parseResult.parserTree, parseResult.parser.inputStream, position);
     if (!matchingParseTree) {
         return undefined;
     }
 
-    const definitionSymbol = await getDefinitionSymbol(uri, parseResult, matchingParseTree);
+    const definitionSymbol = await getDefinitionSymbol(parseResult, matchingParseTree);
     if (!definitionSymbol) {
         return undefined;
     }

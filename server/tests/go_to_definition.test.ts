@@ -1,31 +1,29 @@
 import {assert, expect} from "chai";
 
 import {createSymbolTable} from "../src/tasks/create_symbol_table";
-import {DependencySymbolTable, ParseResult} from "../src/document_manager";
+import {ParseResult} from "../src/document_manager";
 import {getDefinitionLink} from "../src/go_to_definition";
 import {parseProverif} from "../src/tasks/parse_proverif";
 import {Position, Range} from "vscode-languageserver";
 import {DefinitionLink} from "vscode-languageserver-protocol";
+import {LibraryDependencyToken} from "../src/tasks/parse_library_dependencies";
+import {MockDocumentManager} from "./mocks/mock_document_manager";
 
 describe('go to definition', function () {
-    const getParserResult = (input: string, dependencyInput?: string, dependencyUri?: string, dependencyRange?: Range): ParseResult => {
-        const {parser, parserTree} = parseProverif(input, false);
+    const getParserResult = (uri: string, input: string, dependencyUri?: string, dependencyRange?: Range): ParseResult => {
+        const {parser, parserTree} = parseProverif(input, uri.endsWith('.pvl'));
         assert.isUndefined(parserTree.exception);
 
         const symbolTable = createSymbolTable(parserTree).symbolTable;
 
-        const dependencySymbolTables: DependencySymbolTable[] = [];
-        if (dependencyInput) {
-            const {parserTree} = parseProverif(dependencyInput, true);
-            assert.isUndefined(parserTree.exception);
-
-            const symbolTable = createSymbolTable(parserTree).symbolTable;
+        const dependencyTokens: LibraryDependencyToken[] = [];
+        if (dependencyUri) {
             const zeroPosition: Position = { line: 0, character: 0 };
             const zeroRange: Range = { start: zeroPosition, end: zeroPosition};
-            dependencySymbolTables.push({symbolTable, uri: dependencyUri ?? "", range: dependencyRange ?? zeroRange, exists: true});
+            dependencyTokens.push({uri: dependencyUri, range: dependencyRange ?? zeroRange, exists: true});
         }
 
-        return {parser, parserTree, symbolTable, dependencies: dependencySymbolTables};
+        return {identifier: {uri}, parser, parserTree, symbolTable, dependencyTokens: dependencyTokens};
     };
 
     const assertDefinitionPointsToTarget = (definitionLink: DefinitionLink | undefined, targetUri: string, target: Position, targetCharacterLength: number, source: Position) => {
@@ -51,10 +49,11 @@ describe('go to definition', function () {
     };
 
     const assertSingleFileNavigation = async (code: string, click: Position, target: Position, targetCharacterLength: number) => {
-        const uri = 'main';
+        const uri = 'main.pv';
 
-        const parserResult = getParserResult(code);
-        const definitionLink = await getDefinitionLink({uri}, parserResult, click);
+        const parserResult = getParserResult(uri, code);
+        const documentManager = new MockDocumentManager()
+        const definitionLink = await getDefinitionLink(parserResult, click, documentManager);
 
         assertDefinitionPointsToTarget(definitionLink, uri, target, targetCharacterLength, click);
     };
@@ -149,15 +148,18 @@ process System`;
     });
 
     it("checks in dependencies if not found in main", async () => {
+        const dependencyUri = 'dependency.pvl';
         const dependencyCode = `channel c.`;
-        const dependencyUri = 'dependency';
 
+        const uri = 'main.pv'
         const code = 'process \nout(c, c)';
         const click = {line: 1, character: 5};
         const target = {line: 0, character: 8};
 
-        const parserResult = getParserResult(code, dependencyCode, dependencyUri);
-        const definitionLink = await getDefinitionLink({uri: 'dummy'}, parserResult, click);
+        const parserResult = getParserResult(uri, code, dependencyUri);
+        const documentManager = new MockDocumentManager()
+        documentManager.registerParseResult(dependencyUri, getParserResult(dependencyUri, dependencyCode))
+        const definitionLink = await getDefinitionLink(parserResult, click, documentManager);
 
         assertDefinitionPointsToTarget(definitionLink, dependencyUri, target, 1, click);
     });

@@ -57,19 +57,43 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
     public visitLib = (ctx: LibContext) => {
         const neidentseq = ctx.neidentseq();
         if (neidentseq && (ctx.CONST() || ctx.CHANNEL() || ctx.FREE())) {
+            let type = SymbolType.Variable;
+            if (ctx.CONST()) type = SymbolType.Const;
+            else if (ctx.CHANNEL()) type = SymbolType.Channel;
+            else if (ctx.FREE()) type = SymbolType.Free;
+
             collectNeidentseq(neidentseq).forEach(identifier => {
-                this.registerVariable(identifier);
+                this.registerVariable(identifier, type);
             });
         }
 
         const identifier = ctx.IDENT();
         if (identifier && (ctx.TYPE() || ctx.FUN() || ctx.EVENT() || ctx.PREDICATE() || ctx.TABLE() || ctx.LET() || ctx.LETFUN() || ctx.DEFINE())) {
-            this.registerVariable(identifier);
+            let type = SymbolType.Variable;
+            if (ctx.TYPE()) type = SymbolType.Type;
+            else if (ctx.FUN()) type = SymbolType.Fun;
+            else if (ctx.EVENT()) type = SymbolType.Event;
+            else if (ctx.PREDICATE()) type = SymbolType.Predicate;
+            else if (ctx.TABLE()) type = SymbolType.Table;
+            else if (ctx.LET()) type = SymbolType.Let;
+            else if (ctx.LETFUN()) type = SymbolType.LetFun;
+            else if (ctx.DEFINE()) type = SymbolType.Define;
+
+            this.registerVariable(identifier, type);
 
             if (ctx.DEFINE()) {
                 this.withContext(ctx, () => {
                     collectTypeidseq(ctx.typeidseq()).forEach(identifier => {
-                        this.registerVariable(identifier);
+                        this.registerVariable(identifier, SymbolType.DefineArgument);
+                    });
+                });
+            }
+
+            const mayfailvartypeseq = ctx.mayfailvartypeseq();
+            if (mayfailvartypeseq && (ctx.LET() || ctx.LETFUN())) {
+                this.withContext(ctx, () => {
+                    collecMayfailvartypeseq(mayfailvartypeseq).forEach(identifier => {
+                        this.registerVariable(identifier, SymbolType.Variable);
                     });
                 });
             }
@@ -77,7 +101,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
 
         if (ctx.EXPAND()) {
             collectTypeidseq(ctx.typeidseq()).forEach(identifier => {
-                this.registerVariable(identifier);
+                this.registerVariable(identifier, SymbolType.ExpandArgument);
             });
         }
 
@@ -91,7 +115,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         }
 
         const eqlist = ctx.eqlist();
-        if (eqlist) {
+        if (eqlist && ctx.EQUATION()) {
             this.withContext(ctx, () => {
                 collectEqlist(eqlist).forEach(identifier => {
                     this.registerVariable(identifier);
@@ -103,15 +127,6 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         if (nevartype && (ctx.NOUNIF() || ctx.SELECT() || ctx.QUERY() || ctx.NONINTERF() || ctx.NOT() || ctx.lemma())) {
             this.withContext(ctx, () => {
                 collectNevartype(nevartype).forEach(identifier => {
-                    this.registerVariable(identifier);
-                });
-            });
-        }
-
-        const mayfailvartypeseq = ctx.mayfailvartypeseq();
-        if (mayfailvartypeseq && (ctx.LET() || ctx.LETFUN())) {
-            this.withContext(ctx, () => {
-                collecMayfailvartypeseq(mayfailvartypeseq).forEach(identifier => {
                     this.registerVariable(identifier);
                 });
             });
@@ -167,8 +182,8 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         });
     };
 
-    private registerVariable(identifier: TerminalNode) {
-        this.symbolTable.addSymbol(identifier, this.context);
+    private registerVariable(identifier: TerminalNode, type: SymbolType = SymbolType.Variable) {
+        this.symbolTable.addSymbol(identifier, type, this.context);
     }
 
     private withContext<T>(context: undefined | ParseTree, action: () => T): T {
@@ -182,17 +197,17 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
     }
 }
 
-
 export type ProverifSymbol = {
     node: TerminalNode
+    type: SymbolType
     context?: ParseTree
 }
 
 export class ProverifSymbolTable {
     private symbols: ProverifSymbol[] = [];
 
-    public addSymbol(node: TerminalNode, context?: ParseTree) {
-        this.symbols.push({node, context});
+    public addSymbol(node: TerminalNode, type: SymbolType, context?: ParseTree) {
+        this.symbols.push({node, type, context});
     }
 
     public findClosestSymbol(node: ParseTree): ProverifSymbol | undefined {

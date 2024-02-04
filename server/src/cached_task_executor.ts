@@ -11,12 +11,17 @@ import {readFile} from "./utils/files";
 
 type DocumentCache = {
     settings?: ProVerifSettings,
+
+    identifier: TextDocumentIdentifier,
+    document?: TextDocument,
+    filesystemContent?: string,
+
     parseLibraryDependenciesResult?: ParseLibraryDependenciesResult,
+    consumers?: Set<TextDocumentIdentifier>,
+
     invokeProverifResult?: InvokeProverifResult,
     parseProverifResult?: ParseProverifResult,
-    createSymbolTableResult?: CreateSymbolTableResult,
-    document?: TextDocument,
-    filesystemContent?: string
+    createSymbolTableResult?: CreateSymbolTableResult
 }
 
 export class CachedTaskExecutor {
@@ -35,26 +40,26 @@ export class CachedTaskExecutor {
         this.documentCache.delete(document.uri);
     };
 
-    public markSettingsChanged = (document: TextDocumentIdentifier) => {
-        const cache = this.documentCache.get(document.uri) ?? {};
+    public markSettingsChanged = (identifier: TextDocumentIdentifier) => {
+        const cache = this.documentCache.get(identifier.uri) ?? {identifier};
         cache.settings = undefined;
-        this.documentCache.set(document.uri, cache);
+        this.documentCache.set(identifier.uri, cache);
     };
 
-    public markDocumentChanged = (documentIdentifier: TextDocumentIdentifier, document?: TextDocument) => {
-        const cache = this.documentCache.get(documentIdentifier.uri) ?? {};
+    public markDocumentChanged = (identifier: TextDocumentIdentifier, document?: TextDocument) => {
+        const cache = this.documentCache.get(identifier.uri) ?? {identifier};
         cache.document = document;
         cache.parseLibraryDependenciesResult = undefined;
         cache.invokeProverifResult = undefined;
         cache.parseProverifResult = undefined;
         cache.createSymbolTableResult = undefined;
-        this.documentCache.set(documentIdentifier.uri, cache);
+        this.documentCache.set(identifier.uri, cache);
     };
 
-    public markDocumentDependencyChanged = (documentIdentifier: TextDocumentIdentifier) => {
-        const cache = this.documentCache.get(documentIdentifier.uri) ?? {};
+    public markDocumentDependencyChanged = (identifier: TextDocumentIdentifier) => {
+        const cache = this.documentCache.get(identifier.uri) ?? {identifier};
         cache.invokeProverifResult = undefined;
-        this.documentCache.set(documentIdentifier.uri, cache);
+        this.documentCache.set(identifier.uri, cache);
     };
 
     public findDependingDocuments = (documentIdentifier: TextDocumentIdentifier): TextDocumentIdentifier[] => {
@@ -65,18 +70,18 @@ export class CachedTaskExecutor {
             .map(consumer => ({uri: consumer}));
     };
 
-    public invoke = async (document: TextDocumentIdentifier) => {
-        const {selfIsLibrary, libraryDependencyTokens} = await this.parseLibraryDependencies(document);
-        const {proverifBinary} = await this.readSettings(document);
-        const {text} = await this.getDocumentText(document);
+    public invoke = async (identifier: TextDocumentIdentifier) => {
+        const {selfIsLibrary, libraryDependencyTokens} = await this.parseLibraryDependencies(identifier);
+        const {proverifBinary} = await this.readSettings(identifier);
+        const {text} = await this.getDocumentText(identifier);
 
-        const cache = this.documentCache.get(document.uri) ?? {};
+        const cache = this.documentCache.get(identifier.uri) ?? {identifier};
 
         if (libraryDependencyTokens && (!cache.invokeProverifResult || cache.invokeProverifResult.proverifBinary !== proverifBinary)) {
-            cache.invokeProverifResult = await invokeProverif(document, text, selfIsLibrary, libraryDependencyTokens, proverifBinary);
+            cache.invokeProverifResult = await invokeProverif(identifier, text, selfIsLibrary, libraryDependencyTokens, proverifBinary);
         }
 
-        this.documentCache.set(document.uri, cache);
+        this.documentCache.set(identifier.uri, cache);
 
         return {...cache.invokeProverifResult};
     };
@@ -85,7 +90,7 @@ export class CachedTaskExecutor {
         const {selfIsLibrary} = await this.parseLibraryDependencies(identifier);
         const {text} = await this.getDocumentText(identifier);
 
-        const cache = this.documentCache.get(identifier.uri) ?? {};
+        const cache = this.documentCache.get(identifier.uri) ?? {identifier};
 
         if (!cache.parseProverifResult) {
             cache.parseProverifResult = parseProverif(text, selfIsLibrary);
@@ -99,7 +104,7 @@ export class CachedTaskExecutor {
     public createSymbolTable = async (identifier: TextDocumentIdentifier) => {
         const {parserTree} = await this.parse(identifier);
 
-        const cache = this.documentCache.get(identifier.uri) ?? {};
+        const cache = this.documentCache.get(identifier.uri) ?? {identifier};
 
         if (parserTree && !cache.createSymbolTableResult) {
             cache.createSymbolTableResult = createSymbolTable(parserTree);
@@ -110,14 +115,14 @@ export class CachedTaskExecutor {
         return {...cache.createSymbolTableResult};
     };
 
-    private readSettings = async (document: TextDocumentIdentifier) => {
-        const cache = this.documentCache.get(document.uri) ?? {};
+    private readSettings = async (identifier: TextDocumentIdentifier) => {
+        const cache = this.documentCache.get(identifier.uri) ?? {identifier};
 
         if (!cache.settings) {
-            cache.settings = await getDocumentSettings(this.connection, this.hasConfigurationCapability, document);
+            cache.settings = await getDocumentSettings(this.connection, this.hasConfigurationCapability, identifier);
         }
 
-        this.documentCache.set(document.uri, cache);
+        this.documentCache.set(identifier.uri, cache);
 
         return {...cache.settings};
     };
@@ -126,10 +131,18 @@ export class CachedTaskExecutor {
         const selfIsLibrary = identifier.uri.endsWith('.pvl');
         const {text} = await this.getDocumentText(identifier);
 
-        const cache = this.documentCache.get(identifier.uri) ?? {};
+        const cache = this.documentCache.get(identifier.uri) ?? {identifier};
 
         if (!cache.parseLibraryDependenciesResult) {
-            cache.parseLibraryDependenciesResult = await parseLibraryDependencies(identifier, text);
+            const parseLibraryDependenciesResult = await parseLibraryDependencies(identifier, text);
+            parseLibraryDependenciesResult.libraryDependencyTokens.forEach(token => {
+                const dependency = this.documentCache.get(token.uri) ?? {identifier}
+                const consumers = dependency.consumers ?? new Set<TextDocumentIdentifier>()
+                consumers.add(identifier)
+                dependency.consumers = consumers;
+                this.documentCache.set(token.uri, dependency)
+            })
+            cache.parseLibraryDependenciesResult = parseLibraryDependenciesResult;
         }
 
         this.documentCache.set(identifier.uri, cache);
@@ -138,7 +151,7 @@ export class CachedTaskExecutor {
     };
 
     public getDocumentText = async (identifier: TextDocumentIdentifier) => {
-        const cache = this.documentCache.get(identifier.uri) ?? {};
+        const cache = this.documentCache.get(identifier.uri) ?? {identifier};
 
         let text = cache.document?.getText();
         if (text === undefined) {

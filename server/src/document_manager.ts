@@ -12,6 +12,7 @@ import {joinOptionalLists} from "./utils/array";
 import {CachedTaskExecutor} from "./cached_task_executor";
 
 export type ParseResult = ParseProverifResult & CreateSymbolTableResult & {
+    identifier: TextDocumentIdentifier
     dependencies: DependencySymbolTable[]
 };
 
@@ -20,9 +21,7 @@ export type DependencySymbolTable = TextDocumentIdentifier & CreateSymbolTableRe
 export class DocumentManager {
     private taskExecutor: CachedTaskExecutor;
 
-    constructor(
-        private connection: Connection,
-        hasConfigurationCapability: boolean) {
+    constructor(private connection: Connection, hasConfigurationCapability: boolean) {
         this.taskExecutor = new CachedTaskExecutor(connection, hasConfigurationCapability);
     }
 
@@ -35,8 +34,8 @@ export class DocumentManager {
         await Promise.all(processingDocuments);
     };
 
-    public closeDocument = (document: TextDocumentIdentifier) => {
-        this.taskExecutor.forget(document);
+    public closeDocument = (identifier: TextDocumentIdentifier) => {
+        this.taskExecutor.forget(identifier);
     };
 
     public markDocumentContentChanged = async (document: TextDocument) => {
@@ -55,26 +54,26 @@ export class DocumentManager {
         return Promise.all(tasks);
     };
 
-    private checkParsingErrors = async (document: TextDocumentIdentifier) => {
-        const parseLibraryDependenciesResult = await this.taskExecutor.parseLibraryDependencies(document);
-        const invokeProverifResult = await this.taskExecutor.invoke(document);
+    private checkParsingErrors = async (identifier: TextDocumentIdentifier) => {
+        const parseLibraryDependenciesResult = await this.taskExecutor.parseLibraryDependencies(identifier);
+        const invokeProverifResult = await this.taskExecutor.invoke(identifier);
 
         const messages = joinOptionalLists(parseLibraryDependenciesResult?.messages, invokeProverifResult?.messages);
         logMessages(this.connection, messages);
 
         const diagnostics = joinOptionalLists(parseLibraryDependenciesResult?.diagnostics, invokeProverifResult?.diagnostics);
-        await sendDiagnostics(this.connection, document, diagnostics);
+        await sendDiagnostics(this.connection, identifier, diagnostics);
     };
 
-    public getParseResult = async (identification: TextDocumentIdentifier): Promise<ParseResult | undefined> => {
-        const {parser, parserTree} = await this.taskExecutor.parse(identification);
-        const {symbolTable} = await this.taskExecutor.createSymbolTable(identification);
+    public getParseResult = async (identifier: TextDocumentIdentifier): Promise<ParseResult | undefined> => {
+        const {parser, parserTree} = await this.taskExecutor.parse(identifier);
+        const {symbolTable} = await this.taskExecutor.createSymbolTable(identifier);
 
         if (!parser || !parserTree || !symbolTable) {
             return undefined;
         }
 
-        const {libraryDependencyTokens} = await this.taskExecutor.parseLibraryDependencies(identification);
+        const {libraryDependencyTokens} = await this.taskExecutor.parseLibraryDependencies(identifier);
         const dependencySymbolTablesPromises = (libraryDependencyTokens ?? [])
             .filter(libraryDependencyToken => libraryDependencyToken.exists)
             .map(async libraryDependencyToken => {
@@ -84,7 +83,7 @@ export class DocumentManager {
         const dependencySymbolTables = (await Promise.all(dependencySymbolTablesPromises))
             .filter(withDefinedSymbolTable);
 
-        return {parser, parserTree, symbolTable, dependencies: dependencySymbolTables};
+        return {identifier, parser, parserTree, symbolTable, dependencies: dependencySymbolTables};
     };
 }
 

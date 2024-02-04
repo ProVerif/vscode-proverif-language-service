@@ -3,34 +3,34 @@ import {ParserRuleContext, Token, TokenStream} from "antlr4ts";
 import {Position} from "vscode-languageserver";
 
 export type CaretPosition = { line: number, column: number };
-export type TokenPosition = { index: number, context: ParseTree, text: string };
+export type TokenPosition = { context: ParseTree };
 
 export const getTokenPosition = (parseTree: ParseTree, tokens: TokenStream, position: Position): TokenPosition | undefined => {
     const caretPosition = {line: position.line + 1, column: position.character};
     return getTokenPositionInternal(parseTree, tokens, caretPosition);
 };
 
-const getTokenPositionInternal = (parseTree: ParseTree, tokens: TokenStream, caretPosition: CaretPosition, identifierTokenTypes: number[] = []): TokenPosition | undefined => {
+const getTokenPositionInternal = (parseTree: ParseTree, tokens: TokenStream, caretPosition: CaretPosition): TokenPosition | undefined => {
     if (parseTree instanceof TerminalNode) {
-        return getTokenPositionOfTerminal(parseTree, caretPosition, identifierTokenTypes);
+        return getTokenPositionOfTerminal(parseTree, caretPosition);
     } else {
-        return getTokenPositionOfChildNode(parseTree as ParserRuleContext, tokens, caretPosition, identifierTokenTypes);
+        return getTokenPositionOfChildNode(parseTree as ParserRuleContext, tokens, caretPosition);
     }
 };
 
-const getTokenPositionOfTerminal = (parseTree: TerminalNode, caretPosition: CaretPosition, identifierTokenTypes: number[]): TokenPosition | undefined => {
+const getTokenPositionOfTerminal = (parseTree: TerminalNode, caretPosition: CaretPosition): TokenPosition | undefined => {
     const token = parseTree.symbol;
     const text = parseTree.text;
-    return createTokenPosition(token, text, caretPosition, identifierTokenTypes, parseTree);
+    return createTokenPosition(token, text, caretPosition, parseTree);
 };
 
-const getTokenPositionOfChildNode = (parseTree: ParserRuleContext, tokens: TokenStream, caretPosition: CaretPosition, identifierTokenTypes: number[]): TokenPosition | undefined => {
+const getTokenPositionOfChildNode = (parseTree: ParserRuleContext, tokens: TokenStream, caretPosition: CaretPosition): TokenPosition | undefined => {
     if ((parseTree.start && parseTree.start.line > caretPosition.line) ||
         (parseTree.stop && parseTree.stop.line < caretPosition.line)) {
         return undefined;
     }
     for (let i = 0; i < parseTree.childCount; i++) {
-        const position = getTokenPositionInternal(parseTree.getChild(i), tokens, caretPosition, identifierTokenTypes);
+        const position = getTokenPositionInternal(parseTree.getChild(i), tokens, caretPosition);
         if (position !== undefined) {
             return position;
         }
@@ -42,7 +42,7 @@ const getTokenPositionOfChildNode = (parseTree: ParserRuleContext, tokens: Token
                 continue;
             }
 
-            const position = createTokenPosition(tokens.get(i), text, caretPosition, identifierTokenTypes, parseTree);
+            const position = createTokenPosition(tokens.get(i), text, caretPosition, parseTree);
             if (position) {
                 return position;
             }
@@ -51,18 +51,12 @@ const getTokenPositionOfChildNode = (parseTree: ParserRuleContext, tokens: Token
     return undefined;
 };
 
-const createTokenPosition = (token: Token, text: string, caretPosition: CaretPosition, identifierTokenTypes: number[], parseTree: ParseTree): TokenPosition | undefined => {
+const createTokenPosition = (token: Token, text: string, caretPosition: CaretPosition, parseTree: ParseTree): TokenPosition | undefined => {
     const start = token.charPositionInLine;
     const stop = token.charPositionInLine + text.length;
     if (token.line == caretPosition.line && start <= caretPosition.column && stop >= caretPosition.column) {
-        let index = token.tokenIndex;
-        if (identifierTokenTypes.includes(token.type)) {
-            index--;
-        }
         return {
-            index: index,
             context: parseTree,
-            text: text.substring(0, caretPosition.column - start)
         };
     } else {
         return undefined;

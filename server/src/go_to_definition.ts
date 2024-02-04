@@ -36,7 +36,12 @@ export const getDefinitionSymbol = async (parseResult: ParseResult, matchingPars
     return undefined;
 };
 
-export const getDefinitionLink = async (parseResult: ParseResult, position: Position, documentManager: DocumentManagerInterface): Promise<DefinitionLink | undefined> => {
+export const getDefinitionLink = async (identifier: TextDocumentIdentifier, position: Position, documentManager: DocumentManagerInterface): Promise<DefinitionLink | undefined> => {
+    const parseResult = await documentManager.getParseResult(identifier);
+    if (!parseResult) {
+        return undefined;
+    }
+
     const matchingParseTree = getMatchingParseTree(parseResult.parserTree, parseResult.parser.inputStream, position);
     if (!matchingParseTree) {
         return undefined;

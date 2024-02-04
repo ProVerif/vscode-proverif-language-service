@@ -32,7 +32,7 @@ export const getReferences = async (identifier: TextDocumentIdentifier, position
     return matchingTerminals
         .filter(terminal => {
             const matchDefinition = definitionParseResult.symbolTable.findClosestSymbol(terminal);
-            return matchDefinition === definitionSymbol;
+            return matchDefinition === definitionSymbol.symbol;
         }).map(match => constructLocationLink(definitionParseResult.identifier, match))
         .filter(nonNullable);
 

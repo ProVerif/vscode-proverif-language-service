@@ -6,12 +6,12 @@ import {DefinitionLink} from "vscode-languageserver-protocol";
 import {ParseTree} from "antlr4ts/tree";
 import {ProverifSymbol} from "./tasks/create_symbol_table";
 
-export type DefinitionSymbol = ProverifSymbol & { uri: TextDocumentIdentifier }
+export type DefinitionSymbol = { uri: TextDocumentIdentifier, symbol: ProverifSymbol }
 
 export const getDefinitionSymbol = async (parseResult: ParseResult, matchingParseTree: ParseTree, documentManager: DocumentManagerInterface): Promise<DefinitionSymbol | undefined> => {
     const closestSymbol = parseResult.symbolTable.findClosestSymbol(matchingParseTree);
     if (closestSymbol) {
-        return {...closestSymbol, uri: parseResult.identifier};
+        return { uri: parseResult.identifier, symbol: closestSymbol};
     }
 
     for (let i = 0; i < parseResult.dependencyTokens.length; i++) {
@@ -30,7 +30,7 @@ export const getDefinitionSymbol = async (parseResult: ParseResult, matchingPars
             continue;
         }
 
-        return {...closestSymbol, uri: dependency};
+        return { uri: dependency, symbol: closestSymbol};
     }
 
     return undefined;
@@ -52,7 +52,7 @@ export const getDefinitionLink = async (identifier: TextDocumentIdentifier, posi
         return undefined;
     }
 
-    return constructLocationLink(definitionSymbol.uri, definitionSymbol.node, matchingParseTree);
+    return constructLocationLink(definitionSymbol.uri, definitionSymbol.symbol.node, matchingParseTree);
 };
 
 const constructLocationLink = (identifier: TextDocumentIdentifier, target: ParseTree, source: ParseTree): LocationLink | undefined => {

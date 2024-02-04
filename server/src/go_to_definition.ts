@@ -1,4 +1,4 @@
-import {DocumentManager, ParseResult} from "./document_manager";
+import {DocumentManagerInterface, ParseResult} from "./document_manager";
 import {LocationLink, Position, TextDocumentIdentifier} from "vscode-languageserver";
 import {getMatchingParseTree} from "./parseTree/get_matching_parse_tree";
 import {getRange} from "./parseTree/get_range";
@@ -8,7 +8,7 @@ import {ProverifSymbol} from "./tasks/create_symbol_table";
 
 export type DefinitionSymbol = ProverifSymbol & { uri: TextDocumentIdentifier }
 
-export const getDefinitionSymbol = async (parseResult: ParseResult, matchingParseTree: ParseTree, documentManager: DocumentManager): Promise<DefinitionSymbol | undefined> => {
+export const getDefinitionSymbol = async (parseResult: ParseResult, matchingParseTree: ParseTree, documentManager: DocumentManagerInterface): Promise<DefinitionSymbol | undefined> => {
     const closestSymbol = parseResult.symbolTable.findClosestSymbol(matchingParseTree);
     if (closestSymbol) {
         return {...closestSymbol, uri: parseResult.identifier};
@@ -36,7 +36,7 @@ export const getDefinitionSymbol = async (parseResult: ParseResult, matchingPars
     return undefined;
 };
 
-export const getDefinitionLink = async (parseResult: ParseResult, position: Position, documentManager: DocumentManager): Promise<DefinitionLink | undefined> => {
+export const getDefinitionLink = async (parseResult: ParseResult, position: Position, documentManager: DocumentManagerInterface): Promise<DefinitionLink | undefined> => {
     const matchingParseTree = getMatchingParseTree(parseResult.parserTree, parseResult.parser.inputStream, position);
     if (!matchingParseTree) {
         return undefined;

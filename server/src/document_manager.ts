@@ -16,7 +16,15 @@ export type ParseResult = ParseProverifResult & CreateSymbolTableResult & {
 
 export type DependencySymbolTable = TextDocumentIdentifier & CreateSymbolTableResult & LibraryDependencyToken;
 
-export class DocumentManager {
+export interface DocumentManagerInterface {
+    markSettingsChanged(): Promise<void>
+    closeDocument(identifier: TextDocumentIdentifier): void
+    markDocumentContentChanged(document: TextDocument): Promise<void>
+    markFilesystemDocumentContentChanged(document: TextDocument): Promise<void>
+    getParseResult(identifier: TextDocumentIdentifier): Promise<ParseResult | undefined>
+}
+
+export class DocumentManager implements DocumentManagerInterface {
     private taskExecutor: CachedTaskExecutor;
 
     constructor(private connection: Connection, hasConfigurationCapability: boolean) {
@@ -49,7 +57,7 @@ export class DocumentManager {
             return this.checkParsingErrors(dependingDocument);
         });
 
-        return Promise.all(tasks);
+        await Promise.all(tasks);
     };
 
     private checkParsingErrors = async (identifier: TextDocumentIdentifier) => {

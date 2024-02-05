@@ -6,7 +6,7 @@ export const collectMatchingTerminals = (parseTree: ParseTree, text: string): Te
     if (parseTree instanceof TerminalNode) {
         const token = parseTree.symbol;
         if (token.text === text) {
-            return [parseTree]
+            return [parseTree];
         }
     }
 
@@ -15,7 +15,7 @@ export const collectMatchingTerminals = (parseTree: ParseTree, text: string): Te
         // check if children match
         for (let i = 0; i < parseTree.childCount; i++) {
             const matchingTerminalsChild = collectMatchingTerminals(parseTree.getChild(i), text);
-            matchingTerminals.push(...matchingTerminalsChild)
+            matchingTerminals.push(...matchingTerminalsChild);
         }
     }
 

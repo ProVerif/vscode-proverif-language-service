@@ -40,13 +40,15 @@ connection.onInitialize((params: InitializeParams) => {
             textDocumentSync: TextDocumentSyncKind.Full,
             definitionProvider: true,
             documentLinkProvider: {},
+            referencesProvider: {},
+            /**
             semanticTokensProvider: {
-                documentSelector: null, // use client-side definition 
+                documentSelector: null, // use client-side definition
                 legend: {tokenModifiers: tokenModifier, tokenTypes: tokenTypes},
                 full: true,
                 range: false
             },
-            referencesProvider: {},
+             **/
             // renameProvider: { },
         },
     };

@@ -14,14 +14,13 @@ export type ParseResult = ParseProverifResult & CreateSymbolTableResult & {
     dependencyTokens: LibraryDependencyToken[]
 };
 
-export type DependencySymbolTable = TextDocumentIdentifier & CreateSymbolTableResult & LibraryDependencyToken;
-
 export interface DocumentManagerInterface {
     markSettingsChanged(): Promise<void>
     closeDocument(identifier: TextDocumentIdentifier): void
     markDocumentContentChanged(document: TextDocument): Promise<void>
     markFilesystemDocumentContentChanged(document: TextDocument): Promise<void>
     getParseResult(identifier: TextDocumentIdentifier): Promise<ParseResult | undefined>
+    getConsumers(identifier: TextDocumentIdentifier): Promise<Set<TextDocumentIdentifier>>
 }
 
 export class DocumentManager implements DocumentManagerInterface {
@@ -82,5 +81,9 @@ export class DocumentManager implements DocumentManagerInterface {
         const {libraryDependencyTokens} = await this.taskExecutor.parseLibraryDependencies(identifier);
 
         return {identifier, parser, parserTree, symbolTable, dependencyTokens: libraryDependencyTokens};
+    };
+
+    public getConsumers = async (identifier: TextDocumentIdentifier): Promise<Set<TextDocumentIdentifier>> => {
+        return this.taskExecutor.getConsumers(identifier);
     };
 }

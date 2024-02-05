@@ -29,9 +29,9 @@ connection.onInitialize((params: InitializeParams) => {
     hasConfigurationCapability = !!(
         capabilities.workspace && !!capabilities.workspace.configuration
     );
-	hasWorkspaceFolderCapability = !!(
-		capabilities.workspace && !!capabilities.workspace.workspaceFolders
-	);
+    hasWorkspaceFolderCapability = !!(
+        capabilities.workspace && !!capabilities.workspace.workspaceFolders
+    );
 
     documentManager = new DocumentManager(connection, hasConfigurationCapability);
 
@@ -39,25 +39,25 @@ connection.onInitialize((params: InitializeParams) => {
         capabilities: {
             textDocumentSync: TextDocumentSyncKind.Full,
             definitionProvider: true,
-            documentLinkProvider: { },
-            semanticTokensProvider: { 
+            documentLinkProvider: {},
+            semanticTokensProvider: {
                 documentSelector: null, // use client-side definition 
-                legend: {tokenModifiers: tokenModifier, tokenTypes: tokenTypes}, 
+                legend: {tokenModifiers: tokenModifier, tokenTypes: tokenTypes},
                 full: true,
                 range: false
             },
-            referencesProvider: { },
+            referencesProvider: {},
             // renameProvider: { },
         },
     };
 
-	if (hasWorkspaceFolderCapability) {
-		result.capabilities.workspace = {
-			workspaceFolders: {
-				supported: true
-			}
-		};
-	}
+    if (hasWorkspaceFolderCapability) {
+        result.capabilities.workspace = {
+            workspaceFolders: {
+                supported: true
+            }
+        };
+    }
 
     return result;
 });
@@ -76,7 +76,7 @@ documents.onDidSave(async event => documentManager.markFilesystemDocumentContent
 connection.onDefinition(async (params) => {
     const definitionLink = await getDefinitionLink(params.textDocument, params.position, documentManager);
     if (!definitionLink) {
-        connection.console.log("Definition not found.");
+        connection.console.log("Definition not found at l" + params.position.line + "c" + params.position.character + ".");
         return undefined;
     }
 
@@ -119,6 +119,7 @@ connection.onReferences(async params => {
         connection.console.log("References not found.");
         return undefined;
     }
+    connection.console.log("Found " + references.length + " references. Have looked into " + (await documentManager.getConsumers(params.textDocument)).size + " consumers.");
 
     return references;
 });

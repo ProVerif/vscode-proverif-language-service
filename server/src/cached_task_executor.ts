@@ -167,4 +167,9 @@ export class CachedTaskExecutor {
 
         return {text};
     };
+
+    public getConsumers = (identifier: TextDocumentIdentifier) => {
+        const cache = this.documentCache.get(identifier.uri) ?? {identifier};
+        return cache.consumers ?? new Set<TextDocumentIdentifier>()
+    }
 }

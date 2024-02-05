@@ -4,12 +4,12 @@ import {Position} from "vscode-languageserver";
 
 export type CaretPosition = { line: number, column: number };
 
-export const getMatchingParseTree = (parseTree: ParseTree, tokens: TokenStream, position: Position): ParseTree | undefined => {
+export const getMatchingParseTree = (parseTree: ParseTree, position: Position): TerminalNode | undefined => {
     const caretPosition = {line: position.line + 1, column: position.character};
-    return getMatchingParseTreeInternal(parseTree, tokens, caretPosition);
+    return getMatchingParseTreeInternal(parseTree, caretPosition);
 };
 
-const getMatchingParseTreeInternal = (parseTree: ParseTree, tokens: TokenStream, caretPosition: CaretPosition): ParseTree | undefined => {
+const getMatchingParseTreeInternal = (parseTree: ParseTree, caretPosition: CaretPosition): TerminalNode | undefined => {
     if (parseTree instanceof TerminalNode) {
         const token = parseTree.symbol;
         if (checkCaretPositionOverlapsToken(caretPosition, token)) {
@@ -26,7 +26,7 @@ const getMatchingParseTreeInternal = (parseTree: ParseTree, tokens: TokenStream,
 
         // check if children match
         for (let i = 0; i < parseTree.childCount; i++) {
-            const matchingParseTree = getMatchingParseTreeInternal(parseTree.getChild(i), tokens, caretPosition);
+            const matchingParseTree = getMatchingParseTreeInternal(parseTree.getChild(i), caretPosition);
             if (matchingParseTree) {
                 return matchingParseTree;
             }

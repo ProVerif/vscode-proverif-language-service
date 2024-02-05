@@ -31,14 +31,6 @@ const getMatchingParseTreeInternal = (parseTree: ParseTree, tokens: TokenStream,
                 return matchingParseTree;
             }
         }
-
-        // else, check if self matches. ignore not finished parsed trees
-        let maxTokenIndex = parseTree.stop ? parseTree.stop?.tokenIndex + 1 : 0;
-        for (let i = parseTree.start.tokenIndex; i < maxTokenIndex; i++) {
-            if (checkCaretPositionOverlapsToken(caretPosition, tokens.get(i))) {
-                return parseTree;
-            }
-        }
     }
 
     return undefined;

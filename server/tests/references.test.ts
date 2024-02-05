@@ -5,20 +5,37 @@ import {MockDocumentManager} from "./mocks/mock_document_manager";
 import {getReferences} from "../src/references";
 
 describe('references', function () {
-    const assertDefinitionPointsToTarget = (locations: Location[]|undefined, targetUri: string, references: Position[], targetCharacterLength: number, source: Position) => {
+    const assertSingleFileLocationsFoundAllReferences = (locations: Location[]|undefined, expectedReferences: Position[], targetCharacterLength: number, source: Position) => {
         assert.isDefined(locations);
         if (!locations) {
             return;
         }
 
-        expect(locations.length).to.equal(references.length + 1);
+        expect(locations.length).to.equal(expectedReferences.length + 1);
 
-        const expectedLocations = [...references, source].map(reference => {
+        const expectedLocations = [...expectedReferences, source].map(reference => {
             const endPosition = { ...reference, character: reference.character+targetCharacterLength};
             const range = Range.create(reference, endPosition);
-            return Location.create(targetUri, range);
+            return Location.create(locations[0].uri, range);
         });
         expect(locations).to.have.deep.members(expectedLocations);
+    };
+
+    const assertLocationsFoundAllReferences = (locations: Location[]|undefined, uri: string, expectedReferences: Position[], targetCharacterLength: number) => {
+        assert.isDefined(locations);
+        if (!locations) {
+            return;
+        }
+
+        const consideredLocations = locations.filter(location => location.uri === uri);
+        expect(consideredLocations.length).to.equal(expectedReferences.length);
+
+        const expectedLocations = [...expectedReferences].map(reference => {
+            const endPosition = { ...reference, character: reference.character+targetCharacterLength};
+            const range = Range.create(reference, endPosition);
+            return Location.create(uri, range);
+        });
+        expect(consideredLocations).to.have.deep.members(expectedLocations);
     };
 
     const assertSingleFileReferences = async (code: string, click: Position, references: Position[], targetCharacterLength: number) => {
@@ -28,15 +45,44 @@ describe('references', function () {
         documentManager.parse(uri, code);
         const locations = await getReferences({uri}, click, documentManager);
 
-        assertDefinitionPointsToTarget(locations, uri, references, targetCharacterLength, click);
+        assertSingleFileLocationsFoundAllReferences(locations, references, targetCharacterLength, click);
     };
 
-    it("finds global scope variable", async () => {
+    it("finds current scope variables", async () => {
         const code = `channel c.\nchannel d. process \nout(c, c)`;
         const click = {line: 0, character: 8};
         const reference1 = {line: 2, character: 4};
         const reference2 = {line: 2, character: 7};
 
         await assertSingleFileReferences(code, click, [reference1, reference2], 1);
+    });
+
+    it("finds local scope variables", async () => {
+        const code = `channel c. process \nnew c:channel; \nout(c, c)`;
+        const click = {line: 1, character: 4};
+        const reference1 = {line: 2, character: 4};
+        const reference2 = {line: 2, character: 7};
+
+        await assertSingleFileReferences(code, click, [reference1, reference2], 1);
+    });
+
+
+    it("includes dependencies (down -> up)", async () => {
+        const dependencyUri = 'dependency.pvl';
+        const dependencyCode = `channel c.`;
+        const click = {line: 0, character: 8};
+
+        const uri = 'main.pv';
+        const code = 'process \nout(c, c)';
+        const reference1 = {line: 1, character: 4};
+        const reference2 = {line: 1, character: 7};
+
+        const documentManager = new MockDocumentManager();
+        documentManager.parse(uri, code, dependencyUri);
+        documentManager.parse(dependencyUri, dependencyCode);
+        const definitionLink = await getReferences({uri: dependencyUri}, click, documentManager);
+
+        assertLocationsFoundAllReferences(definitionLink, dependencyUri, [click], 1);
+        assertLocationsFoundAllReferences(definitionLink, uri, [reference1, reference2], 1);
     });
 });

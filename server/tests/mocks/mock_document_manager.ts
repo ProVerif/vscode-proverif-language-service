@@ -7,7 +7,6 @@ import {createSymbolTable} from "../../src/tasks/create_symbol_table";
 import {LibraryDependencyToken} from "../../src/tasks/parse_library_dependencies";
 
 export class MockDocumentManager implements DocumentManagerInterface {
-
     public markSettingsChanged(): Promise<void> {
         return;
     }
@@ -25,6 +24,7 @@ export class MockDocumentManager implements DocumentManagerInterface {
     }
 
     private parseResults: Map<string, ParseResult> = new Map();
+    private consumers: Map<string, Set<TextDocumentIdentifier>> = new Map();
     public parse(uri: string, code: string, dependencyUri?: string, dependencyRange?: Range) {
         const {parser, parserTree} = parseProverif(code, uri.endsWith('.pvl'));
         assert.isUndefined(parserTree.exception);
@@ -36,6 +36,10 @@ export class MockDocumentManager implements DocumentManagerInterface {
             const zeroPosition: Position = { line: 0, character: 0 };
             const zeroRange: Range = { start: zeroPosition, end: zeroPosition};
             dependencyTokens.push({uri: dependencyUri, range: dependencyRange ?? zeroRange, exists: true});
+
+            const consumers = this.consumers.get(dependencyUri) ?? new Set<TextDocumentIdentifier>()
+            consumers.add({uri})
+            this.consumers.set(dependencyUri, consumers)
         }
 
         const parseResult = {identifier: {uri}, parser, parserTree, symbolTable, dependencyTokens: dependencyTokens};
@@ -47,4 +51,7 @@ export class MockDocumentManager implements DocumentManagerInterface {
         return this.parseResults.get(identifier.uri);
     }
 
+    public async getConsumers(identifier: TextDocumentIdentifier): Promise<Set<TextDocumentIdentifier>> {
+        return this.consumers.get(identifier.uri) ?? new Set<TextDocumentIdentifier>()
+    }
 }

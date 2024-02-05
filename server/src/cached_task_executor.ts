@@ -136,12 +136,12 @@ export class CachedTaskExecutor {
         if (!cache.parseLibraryDependenciesResult) {
             const parseLibraryDependenciesResult = await parseLibraryDependencies(identifier, text);
             parseLibraryDependenciesResult.libraryDependencyTokens.forEach(token => {
-                const dependency = this.documentCache.get(token.uri) ?? {identifier}
-                const consumers = dependency.consumers ?? new Set<TextDocumentIdentifier>()
-                consumers.add(identifier)
+                const dependency = this.documentCache.get(token.uri) ?? {identifier};
+                const consumers = dependency.consumers ?? new Set<TextDocumentIdentifier>();
+                consumers.add(identifier);
                 dependency.consumers = consumers;
-                this.documentCache.set(token.uri, dependency)
-            })
+                this.documentCache.set(token.uri, dependency);
+            });
             cache.parseLibraryDependenciesResult = parseLibraryDependenciesResult;
         }
 
@@ -170,6 +170,6 @@ export class CachedTaskExecutor {
 
     public getConsumers = (identifier: TextDocumentIdentifier) => {
         const cache = this.documentCache.get(identifier.uri) ?? {identifier};
-        return cache.consumers ?? new Set<TextDocumentIdentifier>()
-    }
+        return cache.consumers ?? new Set<TextDocumentIdentifier>();
+    };
 }

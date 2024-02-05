@@ -3,4 +3,4 @@ export const joinOptionalLists = <T>(...lists: (T[] | undefined)[]): T[] => {
 };
 export const nonNullable = <TValue>(value: TValue): value is NonNullable<TValue> => {
     return value !== null && value !== undefined;
-}
+};

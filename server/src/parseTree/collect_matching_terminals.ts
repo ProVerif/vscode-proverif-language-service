@@ -17,8 +17,6 @@ export const collectMatchingTerminals = (parseTree: ParseTree, text: string): Te
             const matchingTerminalsChild = collectMatchingTerminals(parseTree.getChild(i), text);
             matchingTerminals.push(...matchingTerminalsChild)
         }
-
-        // TODO check if need to go through token stream manually
     }
 
     return matchingTerminals;

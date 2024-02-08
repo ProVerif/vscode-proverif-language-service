@@ -60,6 +60,7 @@
 		"compile": "tsc -b",
 		"watch": "tsc -b -w",
 		"lint": "eslint ./client/src ./server/src --ext .ts,.tsx",
+		"lint-fix": "eslint ./client/src ./server/src --ext .ts,.tsx --fix",
 		"postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
 		"test": "sh ./scripts/e2e.sh",
 		"deploy": "vsce publish && ovsx publish"
@@ -72,7 +73,7 @@
 		"@vscode/vsce": "^2.22.0",
 		"esbuild": "^0.19.5",
 		"eslint": "^8.35.0",
-		"mocha": "^9.2.1",
+		"mocha": "^10",
 		"ovsx": "^0.8.3",
 		"typescript": "^5.1.3"
 	}

@@ -48,7 +48,7 @@ export class CachedTaskExecutor {
         cache.settings = undefined;
         this.documentCache.set(identifier.uri, cache);
 
-        this.folderCache = new Set<string>
+        this.folderCache = new Set<string>;
     };
 
     public markDocumentChanged = (identifier: TextDocumentIdentifier, document?: TextDocument) => {
@@ -174,13 +174,13 @@ export class CachedTaskExecutor {
     };
 
     public getConsumers = async (identifier: TextDocumentIdentifier) => {
-        const path = fileURLToPath(identifier.uri)
-        const folder = dirname(path)
+        const path = fileURLToPath(identifier.uri);
+        const folder = dirname(path);
         if (!this.folderCache.has(folder)) {
             const {parentFolderDiscoveryLimit} = await this.readSettings(identifier);
 
-            await this.discoverFolder(folder, parentFolderDiscoveryLimit)
-            this.folderCache.add(folder)
+            await this.discoverFolder(folder, parentFolderDiscoveryLimit);
+            this.folderCache.add(folder);
         }
 
         const cache = this.documentCache.get(identifier.uri) ?? {identifier};
@@ -189,33 +189,33 @@ export class CachedTaskExecutor {
 
     private discoveredFolders: Set<string> = new Set();
     private discoverFolder = async (folder: string, parentFolderDiscoveryLimit: number) => {
-        const workspaceFolders = await this.connection.workspace.getWorkspaceFolders()
+        const workspaceFolders = await this.connection.workspace.getWorkspaceFolders();
         if (!workspaceFolders) {
-            return
+            return;
         }
 
-        const folderWhitelist = workspaceFolders.map(workspaceFolder => fileURLToPath(workspaceFolder.uri))
+        const folderWhitelist = workspaceFolders.map(workspaceFolder => fileURLToPath(workspaceFolder.uri));
 
         // check folders
         let discoveredFolderCount = 0;
-        let currentFolder = folder
+        let currentFolder = folder;
         while (parentFolderDiscoveryLimit === -1 || discoveredFolderCount <= parentFolderDiscoveryLimit) {
-            console.log("looking in " + currentFolder)
+            console.log("looking in " + currentFolder);
             if (!folderWhitelist.some(whitelistedFolder => currentFolder.startsWith(whitelistedFolder))) {
-                console.log("ignoring folder not in whitelist")
-                return
+                console.log("ignoring folder not in whitelist");
+                return;
             }
 
             if (!this.discoveredFolders.has(currentFolder)) {
-                const entries = await readdir(currentFolder, { withFileTypes: true })
-                const fileUrls = entries.filter(entry => entry.isFile()).map(file => pathToFileURL(currentFolder + sep + file.name))
-                await Promise.all(fileUrls.map(fileUrl => this.parseLibraryDependencies({ uri: fileUrl.toString()})))
+                const entries = await readdir(currentFolder, { withFileTypes: true });
+                const fileUrls = entries.filter(entry => entry.isFile()).map(file => pathToFileURL(currentFolder + sep + file.name));
+                await Promise.all(fileUrls.map(fileUrl => this.parseLibraryDependencies({ uri: fileUrl.toString()})));
 
-                this.discoveredFolders.add(currentFolder)
+                this.discoveredFolders.add(currentFolder);
             }
 
-            currentFolder = dirname(currentFolder)
-            discoveredFolderCount++
+            currentFolder = dirname(currentFolder);
+            discoveredFolderCount++;
         }
-    }
+    };
 }

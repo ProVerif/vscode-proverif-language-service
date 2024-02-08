@@ -20,7 +20,7 @@ export interface DocumentManagerInterface {
     markDocumentContentChanged(document: TextDocument): Promise<void>
     markFilesystemDocumentContentChanged(document: TextDocument): Promise<void>
     getParseResult(identifier: TextDocumentIdentifier): Promise<ParseResult | undefined>
-    getConsumers(identifier: TextDocumentIdentifier): Promise<Set<TextDocumentIdentifier>>
+    getConsumers(identifier: TextDocumentIdentifier): Promise<TextDocumentIdentifier[]>
 }
 
 export class DocumentManager implements DocumentManagerInterface {
@@ -84,7 +84,7 @@ export class DocumentManager implements DocumentManagerInterface {
         return {identifier, parser, parserTree, symbolTable, dependencyTokens: libraryDependencyTokens};
     };
 
-    public getConsumers = (identifier: TextDocumentIdentifier): Promise<Set<TextDocumentIdentifier>> => {
+    public getConsumers = (identifier: TextDocumentIdentifier): Promise<TextDocumentIdentifier[]> => {
         return this.taskExecutor.getConsumers(identifier);
     };
 }

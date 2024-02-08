@@ -200,10 +200,10 @@ export class CachedTaskExecutor {
         let discoveredFolderCount = 0;
         let currentFolder = folder;
         while (parentFolderDiscoveryLimit === -1 || discoveredFolderCount <= parentFolderDiscoveryLimit) {
-            console.log("looking in " + currentFolder);
+            console.log("Discovering files in " + currentFolder);
             if (!folderWhitelist.some(whitelistedFolder => currentFolder.startsWith(whitelistedFolder))) {
-                console.log("ignoring folder not in whitelist");
-                return;
+                console.log("Ignoring folder not in Whitelist");
+                break;
             }
 
             if (!this.discoveredFolders.has(currentFolder)) {

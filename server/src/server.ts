@@ -78,7 +78,6 @@ documents.onDidSave(async event => documentManager.markFilesystemDocumentContent
 connection.onDefinition(async (params) => {
     const definitionLink = await getDefinitionLink(params.textDocument, params.position, documentManager);
     if (!definitionLink) {
-        connection.console.log("Definition not found at l" + params.position.line + "c" + params.position.character + ".");
         return undefined;
     }
 
@@ -88,7 +87,6 @@ connection.onDefinition(async (params) => {
 connection.onDocumentLinks(async params => {
     const parseResult = await documentManager.getParseResult(params.textDocument);
     if (!parseResult) {
-        connection.console.error("Parsing failed.");
         return undefined;
     }
 
@@ -118,10 +116,8 @@ connection.onRenameRequest(async params => {
 connection.onReferences(async params => {
     const references = await getReferences(params.textDocument, params.position, documentManager);
     if (!references) {
-        connection.console.log("References not found.");
         return undefined;
     }
-    connection.console.log("Found " + references.length + " references. Have looked into " + (await documentManager.getConsumers(params.textDocument)).size + " consumers.");
 
     return references;
 });

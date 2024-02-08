@@ -27,8 +27,6 @@ export const getReferences = async (identifier: TextDocumentIdentifier, position
     await referenceCollector.collect(definitionSymbol.uri);
     const references = referenceCollector.getReferences();
 
-    console.log(references);
-
     return references
         .map(reference => constructLocationLink(reference.uri, reference.match))
         .filter(nonNullable);

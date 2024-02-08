@@ -15,11 +15,15 @@ Visual Studio Code extension for ProVerif files (.pv, .pvl, .pcv).
 
 Functionality:
 - Highlights the first syntax errors ProVerif finds with the corresponding error. For libraries, see below.
-- Press `CTRL` and click on an identifier to navigate to its definition.
+- Press `CTRL` and click on an identifier to navigate to its definition or find all references of the definition.
 - Press `CTRL`+`SHIFT`+`B` to execute ProVerif over the currently opened file.
 - Configure the proverif bin in the settings, else it is taken from the `$PATH`.
 
 Use in combination with https://github.com/georgio/proverif-vscode to get syntax highlighting.
+
+Settings:
+- `Proverif Path`: Custom path to the proverif binary.
+- `Parent Folder Discovery Limit`: Parent folders to read until discovery stops (e.g. to find references).
 
 ## Libraries (.pvl)
 

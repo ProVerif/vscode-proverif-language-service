@@ -45,7 +45,7 @@
 				"proverif.parentFolderDiscoveryLimit": {
 					"type": "number",
 					"default": 1,
-					"description": "Parent folders to read until discovery stops (e.g. to find references, rename). Enter -1 for no limit. Sibling folders and folders outside of the workspace are ignored."
+					"description": "Parent folders to read until discovery stops (e.g. to find references). Enter -1 for no limit. Sibling folders and folders outside of the workspace are ignored."
 				}
 			}
 		},

@@ -19,7 +19,7 @@ type DocumentCache = {
     filesystemContent?: string,
 
     parseLibraryDependenciesResult?: ParseLibraryDependenciesResult,
-    consumers?: Set<TextDocumentIdentifier>,
+    consumers?: TextDocumentIdentifier[],
 
     invokeProverifResult?: InvokeProverifResult,
     parseProverifResult?: ParseProverifResult,
@@ -142,9 +142,9 @@ export class CachedTaskExecutor {
             const parseLibraryDependenciesResult = await parseLibraryDependencies(identifier, text);
             parseLibraryDependenciesResult.libraryDependencyTokens.forEach(token => {
                 const dependency = this.documentCache.get(token.uri) ?? {identifier};
-                const consumers = dependency.consumers ?? new Set<TextDocumentIdentifier>();
-                consumers.add(identifier);
-                dependency.consumers = consumers;
+                dependency.consumers = (dependency.consumers ?? [])
+                    .filter(consumer => consumer.uri !== identifier.uri)
+                    .concat(identifier);
                 this.documentCache.set(token.uri, dependency);
             });
             cache.parseLibraryDependenciesResult = parseLibraryDependenciesResult;
@@ -184,7 +184,7 @@ export class CachedTaskExecutor {
         }
 
         const cache = this.documentCache.get(identifier.uri) ?? {identifier};
-        return cache.consumers ?? new Set<TextDocumentIdentifier>();
+        return cache.consumers ?? [];
     };
 
     private discoveredFolders: Set<string> = new Set();

@@ -19,7 +19,5 @@ export const rename = async (identifier: TextDocumentIdentifier, position: Posit
         changes[reference.uri].push({range: reference.range, newText: newText})
     })
 
-    console.log(changes, references)
-
     return {changes}
 };

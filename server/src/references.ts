@@ -45,7 +45,7 @@ const collectReferences = async (identifier: TextDocumentIdentifier, definitionS
         .map(symbol => ({uri: identifier, match: symbol.origin.match}));
 
     const consumers = await documentManager.getConsumers(identifier);
-    const collectDependencyReferences = Array.from(consumers).map(consumer => collectReferences(consumer, definitionSymbol, documentManager));
+    const collectDependencyReferences = consumers.map(consumer => collectReferences(consumer, definitionSymbol, documentManager));
     const dependencyReferences = await Promise.all(collectDependencyReferences);
 
     return matchingReferences.concat(...dependencyReferences.flat());

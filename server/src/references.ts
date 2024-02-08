@@ -23,33 +23,55 @@ export const getReferences = async (identifier: TextDocumentIdentifier, position
         return undefined;
     }
 
-    const references = await collectReferences(definitionSymbol.uri, definitionSymbol, documentManager);
+    const referenceCollector = new ReferenceCollector(definitionSymbol, documentManager);
+    await referenceCollector.collect(definitionSymbol.uri);
+    const references = referenceCollector.getReferences();
+
+    console.log(references);
 
     return references
         .map(reference => constructLocationLink(reference.uri, reference.match))
         .filter(nonNullable);
 };
 
-const collectReferences = async (identifier: TextDocumentIdentifier, definitionSymbol: DefinitionSymbol, documentManager: DocumentManagerInterface): Promise<Reference[]> => {
-    const definitionParseResult = await documentManager.getParseResult(identifier);
-    if (!definitionParseResult) {
-        return [];
+class ReferenceCollector {
+    private collected = new Set<string>;
+    private references: Reference[] = [];
+
+    public constructor(private definitionSymbol: DefinitionSymbol, private documentManager: DocumentManagerInterface) {
     }
 
-    const candidateTerminals = collectMatchingTerminals(definitionParseResult.parserTree, definitionSymbol.origin.match.text);
-    const collectMatchingReferences = candidateTerminals
-        .map(async terminal => getDefinitionSymbolFromMatch(definitionParseResult, terminal, documentManager));
-    const matchingReferences: Reference[] = (await Promise.all(collectMatchingReferences))
-        .filter(nonNullable)
-        .filter(symbol => definitionSymbolsEqual(symbol, definitionSymbol))
-        .map(symbol => ({uri: identifier, match: symbol.origin.match}));
+    public async collect(identifier: TextDocumentIdentifier): Promise<void> {
+        if (this.collected.has(identifier.uri)) {
+            return;
+        }
+        this.collected.add(identifier.uri);
 
-    const consumers = await documentManager.getConsumers(identifier);
-    const collectDependencyReferences = consumers.map(consumer => collectReferences(consumer, definitionSymbol, documentManager));
-    const dependencyReferences = await Promise.all(collectDependencyReferences);
+        const definitionParseResult = await this.documentManager.getParseResult(identifier);
+        if (!definitionParseResult) {
+            return;
+        }
 
-    return matchingReferences.concat(...dependencyReferences.flat());
-};
+        // collect references
+        const candidateTerminals = collectMatchingTerminals(definitionParseResult.parserTree, this.definitionSymbol.origin.match.text);
+        const collectMatchingReferences = candidateTerminals
+            .map(async terminal => getDefinitionSymbolFromMatch(definitionParseResult, terminal, this.documentManager));
+        const matchingReferences: Reference[] = (await Promise.all(collectMatchingReferences))
+            .filter(nonNullable)
+            .filter(symbol => definitionSymbolsEqual(symbol, this.definitionSymbol))
+            .map(symbol => ({uri: identifier, match: symbol.origin.match}));
+        this.references = this.references.concat(...matchingReferences);
+
+        // collect references of consumers
+        const consumers = await this.documentManager.getConsumers(identifier);
+        const collectDependencyReferences = consumers.map(consumer => this.collect(consumer));
+        await Promise.all(collectDependencyReferences);
+    }
+
+    public getReferences(): Reference[] {
+        return this.references;
+    }
+}
 
 const constructLocationLink = (identifier: TextDocumentIdentifier, target: ParseTree): Location | undefined => {
     const targetRange = getRange(target);

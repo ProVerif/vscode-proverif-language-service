@@ -200,7 +200,6 @@ export class CachedTaskExecutor {
         let discoveredFolderCount = 0;
         let currentFolder = folder;
         while (parentFolderDiscoveryLimit === -1 || discoveredFolderCount <= parentFolderDiscoveryLimit) {
-            console.log("Discovering files in " + currentFolder);
             if (!folderWhitelist.some(whitelistedFolder => currentFolder.startsWith(whitelistedFolder))) {
                 console.log("Ignoring folder not in Whitelist");
                 break;
@@ -208,6 +207,7 @@ export class CachedTaskExecutor {
 
             if (!this.discoveredFolders.has(currentFolder)) {
                 const entries = await readdir(currentFolder, { withFileTypes: true });
+                console.log("Discovering " + entries.length + " files in " + currentFolder);
                 const fileUrls = entries.filter(entry => entry.isFile()).map(file => pathToFileURL(currentFolder + sep + file.name));
                 await Promise.all(fileUrls.map(fileUrl => this.parseLibraryDependencies({ uri: fileUrl.toString()})));
 

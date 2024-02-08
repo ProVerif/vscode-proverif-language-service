@@ -24,7 +24,7 @@ export class MockDocumentManager implements DocumentManagerInterface {
     }
 
     private parseResults: Map<string, ParseResult> = new Map();
-    private consumers: Map<string, Set<TextDocumentIdentifier>> = new Map();
+    private consumers: Map<string, TextDocumentIdentifier[]> = new Map();
     public parse(uri: string, code: string, dependencyUri?: string, dependencyRange?: Range) {
         const {parser, parserTree} = parseProverif(code, uri.endsWith('.pvl'));
         assert.isUndefined(parserTree.exception);
@@ -37,8 +37,8 @@ export class MockDocumentManager implements DocumentManagerInterface {
             const zeroRange: Range = { start: zeroPosition, end: zeroPosition};
             dependencyTokens.push({uri: dependencyUri, range: dependencyRange ?? zeroRange, exists: true});
 
-            const consumers = this.consumers.get(dependencyUri) ?? new Set<TextDocumentIdentifier>()
-            consumers.add({uri})
+            const consumers = this.consumers.get(dependencyUri) ?? []
+            consumers.push({uri})
             this.consumers.set(dependencyUri, consumers)
         }
 
@@ -51,7 +51,7 @@ export class MockDocumentManager implements DocumentManagerInterface {
         return this.parseResults.get(identifier.uri);
     }
 
-    public async getConsumers(identifier: TextDocumentIdentifier): Promise<Set<TextDocumentIdentifier>> {
-        return this.consumers.get(identifier.uri) ?? new Set<TextDocumentIdentifier>()
+    public async getConsumers(identifier: TextDocumentIdentifier): Promise<TextDocumentIdentifier[]> {
+        return this.consumers.get(identifier.uri) ?? []
     }
 }

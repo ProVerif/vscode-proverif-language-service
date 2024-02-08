@@ -41,6 +41,7 @@ connection.onInitialize((params: InitializeParams) => {
             definitionProvider: true,
             documentLinkProvider: {},
             referencesProvider: {},
+            renameProvider: { },
             /**
             semanticTokensProvider: {
                 documentSelector: null, // use client-side definition
@@ -49,7 +50,6 @@ connection.onInitialize((params: InitializeParams) => {
                 range: false
             },
              **/
-            // renameProvider: { },
         },
     };
 

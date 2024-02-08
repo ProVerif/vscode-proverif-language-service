@@ -31,10 +31,11 @@ export class DocumentManager implements DocumentManagerInterface {
     }
 
     public markSettingsChanged = async () => {
+        // possible improvement: check what setting has changed, and which documents are impacted
         const processingDocuments = this.taskExecutor.allDocuments()
-            .map(async document => {
+            .map(document => {
                 this.taskExecutor.markSettingsChanged(document);
-                await this.checkParsingErrors(document);
+                return this.checkParsingErrors(document);
             });
         await Promise.all(processingDocuments);
     };
@@ -83,7 +84,7 @@ export class DocumentManager implements DocumentManagerInterface {
         return {identifier, parser, parserTree, symbolTable, dependencyTokens: libraryDependencyTokens};
     };
 
-    public getConsumers = async (identifier: TextDocumentIdentifier): Promise<Set<TextDocumentIdentifier>> => {
+    public getConsumers = (identifier: TextDocumentIdentifier): Promise<Set<TextDocumentIdentifier>> => {
         return this.taskExecutor.getConsumers(identifier);
     };
 }

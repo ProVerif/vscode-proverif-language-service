@@ -40,7 +40,12 @@
 				"proverif.proverifPath": {
 					"type": "string",
 					"default": null,
-					"description": "Set a custom path to the proverif binary. Empty string will lookup proverif in PATH."
+					"description": "Custom path to the proverif binary. Empty string will use proverif in PATH."
+				},
+				"proverif.parentFolderDiscoveryLimit": {
+					"type": "number",
+					"default": 1,
+					"description": "Parent folders to read until discovery stops (e.g. to find references, rename). Enter -1 for no limit. Sibling folders and folders outside of the workspace are ignored."
 				}
 			}
 		},

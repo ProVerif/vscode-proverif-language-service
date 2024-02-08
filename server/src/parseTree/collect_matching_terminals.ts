@@ -1,6 +1,5 @@
 import {ParseTree, TerminalNode} from "antlr4ts/tree";
-import {ParserRuleContext, Token, TokenStream} from "antlr4ts";
-import {Position} from "vscode-languageserver";
+import {ParserRuleContext} from "antlr4ts";
 
 export const collectMatchingTerminals = (parseTree: ParseTree, text: string): TerminalNode[] => {
     if (parseTree instanceof TerminalNode) {

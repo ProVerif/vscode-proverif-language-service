@@ -1,5 +1,5 @@
 import {ParseTree, TerminalNode} from "antlr4ts/tree";
-import {ParserRuleContext, Token, TokenStream} from "antlr4ts";
+import {ParserRuleContext, Token} from "antlr4ts";
 import {Position} from "vscode-languageserver";
 
 export type CaretPosition = { line: number, column: number };

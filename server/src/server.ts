@@ -13,7 +13,7 @@ import {DocumentManager, DocumentManagerInterface,} from "./document_manager";
 import {getDefinitionLink} from "./go_to_definition";
 import {rename} from "./rename";
 import {getReferences} from "./references";
-import {getSemanticTokens, tokenModifier, tokenTypes} from './semantic_token_provider';
+import {getSemanticTokens} from './semantic_token_provider';
 import {getDocumentLinks} from "./document_links";
 
 const connection = createConnection(ProposedFeatures.all);

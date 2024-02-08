@@ -1,6 +1,5 @@
-import {Location, LocationLink, Position, TextDocumentIdentifier} from "vscode-languageserver";
-import {DocumentManager, DocumentManagerInterface, ParseResult} from "./document_manager";
-import {getMatchingParseTree} from "./parseTree/get_matching_parse_tree";
+import {Location, Position, TextDocumentIdentifier} from "vscode-languageserver";
+import {DocumentManagerInterface} from "./document_manager";
 import {
     DefinitionSymbol,
     definitionSymbolsEqual,

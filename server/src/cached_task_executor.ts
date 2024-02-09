@@ -9,7 +9,7 @@ import {Connection} from "vscode-languageserver/node";
 import {fileURLToPath, pathToFileURL} from 'url';
 import {dirname, sep} from 'path';
 import {readdir} from 'fs/promises';
-import {readFile} from "./utils/files";
+import {isProverifFile, readFile} from "./utils/files";
 
 type DocumentCache = {
     settings?: ProVerifSettings,
@@ -210,7 +210,7 @@ export class CachedTaskExecutor {
                 console.log("Discovering " + entries.length + " files in " + currentFolder);
                 const fileUrls = entries
                     .filter(entry => entry.isFile())
-                    .filter(entry => entry.name.endsWith(".pv") || entry.name.endsWith(".pvl") || entry.name.endsWith(".pvc"))
+                    .filter(entry => isProverifFile(entry.name))
                     .map(file => pathToFileURL(currentFolder + sep + file.name));
                 await Promise.all(fileUrls.map(fileUrl => this.parseLibraryDependencies({ uri: fileUrl.toString()})));
 

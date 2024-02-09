@@ -208,7 +208,10 @@ export class CachedTaskExecutor {
             if (!this.discoveredFolders.has(currentFolder)) {
                 const entries = await readdir(currentFolder, { withFileTypes: true });
                 console.log("Discovering " + entries.length + " files in " + currentFolder);
-                const fileUrls = entries.filter(entry => entry.isFile()).map(file => pathToFileURL(currentFolder + sep + file.name));
+                const fileUrls = entries
+                    .filter(entry => entry.isFile())
+                    .filter(entry => entry.name.endsWith(".pv") || entry.name.endsWith(".pvl") || entry.name.endsWith(".pvc"))
+                    .map(file => pathToFileURL(currentFolder + sep + file.name));
                 await Promise.all(fileUrls.map(fileUrl => this.parseLibraryDependencies({ uri: fileUrl.toString()})));
 
                 this.discoveredFolders.add(currentFolder);

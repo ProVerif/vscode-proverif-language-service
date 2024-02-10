@@ -1,12 +1,13 @@
-import {assert, expect} from "chai";
+import {assert, expect, should} from "chai";
 
 import {Location, Position, Range} from "vscode-languageserver";
 import {MockDocumentManager} from "./mocks/mock_document_manager";
 import {getReferences} from "../src/references";
 import {getSignatureHelp} from "../src/signature_help";
+import {number} from "vscode-languageserver/lib/common/utils/is";
 
 describe('references', function () {
-    const assertSignatureDefinitionFound = async (code: string, signatureInvoked: Position, parameters: string[], activeParameter: number) => {
+    const assertSignatureDefinitionFound = async (code: string, signatureInvoked: Position, definitionLabel: string, parameters: string[], activeParameter: number) => {
         const uri = 'main.pv';
 
         const documentManager = new MockDocumentManager();
@@ -21,16 +22,37 @@ describe('references', function () {
         expect(signatureHelp.signatures.length).to.equal(1)
         const signature = signatureHelp.signatures[0]
 
+        expect(signature.label).to.contain(definitionLabel)
+        expect(signature.label).to.contain(parameters.join(","));
         expect(signature.parameters.length).to.equal(parameters.length);
-        expect(signature.parameters.map(parameter => parameter.label)).deep.equal(parameters);
 
-        expect(signature.activeParameter).to.equal(activeParameter);
+        if (signature.parameters.length > 0) {
+            const start = signature.parameters[0].label[0]
+            expect(start).to.equal(definitionLabel.length + 1)
+
+            let currentIndex = Number(start)
+            signature.parameters.forEach((parameter, index) => {
+                expect(parameter.label[0]).to.equal(currentIndex)
+                expect(parameter.label[1]).to.equal(Number(currentIndex) + parameters[index].length)
+                currentIndex += parameters[index].length + 1
+            })
+        }
+
+        expect(signatureHelp.activeParameter).to.equal(activeParameter);
+        should().equal(signature.activeParameter, undefined)
     };
 
     it("finds table signature definition", async () => {
         const code = `table Ids(nat).\nprocess \nget Ids(`;
         const signatureInvoked = {line: 2, character: 8};
 
-        await assertSignatureDefinitionFound(code, signatureInvoked, ['nat'], 0);
+        await assertSignatureDefinitionFound(code, signatureInvoked, 'Ids', ['nat'], 0);
+    });
+
+    it("finds let signature definition", async () => {
+        const code = `let P(arg: nat) = 0.\nprocess \nP(`;
+        const signatureInvoked = {line: 2, character: 2};
+
+        await assertSignatureDefinitionFound(code, signatureInvoked, 'P', ['nat'], 0);
     });
 });

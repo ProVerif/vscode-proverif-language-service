@@ -2,17 +2,19 @@ import {
     BasicpatternContext,
     EqlistContext,
     Extended_equationContext,
-    ForallvartypeContext, MayfailvartypeContext,
+    ForallvartypeContext,
+    MayfailvartypeContext,
     MayfailvartypeseqContext,
     NeidentseqContext,
     NemayfailvartypeseqContext,
     NepatternseqContext,
     NetypeidseqContext,
     NevartypeContext,
-    OnevartypeContext, TermContext,
+    OnevartypeContext,
     TpatternContext,
     TpatternseqContext,
-    TreducContext, TypeidContext,
+    TreducContext,
+    TypeidContext,
     TypeidseqContext
 } from "../parser-proverif/ProverifParser";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";

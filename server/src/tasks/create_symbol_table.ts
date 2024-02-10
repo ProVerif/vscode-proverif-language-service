@@ -1,9 +1,10 @@
 import {AbstractParseTreeVisitor, ParseTree} from "antlr4ts/tree";
 import {ProverifParserVisitor} from "../parser-proverif/ProverifParserVisitor";
-import {Extended_equationContext, LibContext, TprocessContext} from "../parser-proverif/ProverifParser";
+import {LibContext, TprocessContext} from "../parser-proverif/ProverifParser";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";
 import {
-    collecMayfailvartypeseq, collectBasicpattern,
+    collecMayfailvartypeseq,
+    collectBasicpattern,
     collectEqlist,
     collectNeidentseq,
     collectNemayfailvartypeseq,
@@ -11,7 +12,9 @@ import {
     collectTPattern,
     collectTPatternSeq,
     collectTreduc,
-    collectTypeidseq, getType, TypedTerminal
+    collectTypeidseq,
+    getType,
+    TypedTerminal
 } from "./ident_collectors";
 
 

@@ -15,6 +15,7 @@ import {rename} from "./rename";
 import {getReferences} from "./references";
 import {getSemanticTokens} from './semantic_token_provider';
 import {getDocumentLinks} from "./document_links";
+import {getSignatureHelp} from "./signature_help";
 
 const connection = createConnection(ProposedFeatures.all);
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
@@ -42,6 +43,7 @@ connection.onInitialize((params: InitializeParams) => {
             documentLinkProvider: {},
             referencesProvider: {},
             renameProvider: { },
+            signatureHelpProvider: { triggerCharacters: ['('], retriggerCharacters: [',', ', '] }
             /**
             semanticTokensProvider: {
                 documentSelector: null, // use client-side definition
@@ -92,6 +94,17 @@ connection.onDocumentLinks(async params => {
 
     return await getDocumentLinks(parseResult);
 });
+
+connection.onSignatureHelp(async params => {
+    console.log("calling", params)
+    const signatureHelp = await getSignatureHelp(params.textDocument, params.position, documentManager)
+    if (!signatureHelp) {
+        console.log("not found")
+        return undefined
+    }
+
+    return signatureHelp
+})
 
 connection.languages.semanticTokens.on(async params => {
     const parseResult = await documentManager.getParseResult(params.textDocument);

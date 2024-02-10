@@ -25,7 +25,7 @@ export const getSignatureHelp = async (identifier: TextDocumentIdentifier, posit
         return undefined;
     }
 
-    const parameters: ParameterInformation[] =  (definitionSymbol.symbol.parameters ?? []).map(parameter => ({ label: parameter?.text ?? "" }))
-    const signature: SignatureInformation = { label: definitionSymbol.symbol.node.text, parameters, activeParameter: 0 }
-    return { signatures: [signature], activeSignature: 0, activeParameter: 0 }
-}
+    const parameters: ParameterInformation[] =  (definitionSymbol.symbol.parameters ?? []).map(parameter => ({ label: parameter?.text ?? "" }));
+    const signature: SignatureInformation = { label: definitionSymbol.symbol.node.text, parameters, activeParameter: 0 };
+    return { signatures: [signature], activeSignature: 0, activeParameter: 0 };
+};

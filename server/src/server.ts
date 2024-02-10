@@ -96,15 +96,15 @@ connection.onDocumentLinks(async params => {
 });
 
 connection.onSignatureHelp(async params => {
-    console.log("calling", params)
-    const signatureHelp = await getSignatureHelp(params.textDocument, params.position, documentManager)
+    console.log("calling", params);
+    const signatureHelp = await getSignatureHelp(params.textDocument, params.position, documentManager);
     if (!signatureHelp) {
-        console.log("not found")
-        return undefined
+        console.log("not found");
+        return undefined;
     }
 
-    return signatureHelp
-})
+    return signatureHelp;
+});
 
 connection.languages.semanticTokens.on(async params => {
     const parseResult = await documentManager.getParseResult(params.textDocument);

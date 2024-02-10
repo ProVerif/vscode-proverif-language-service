@@ -1,6 +1,6 @@
 import {assert, expect} from "chai";
 
-import {createSymbolTable, SymbolType} from "../src/tasks/create_symbol_table";
+import {createSymbolTable, DeclarationType} from "../src/tasks/create_symbol_table";
 import {parseProverif} from "../src/tasks/parse_proverif";
 
 describe('parser', function () {
@@ -20,7 +20,7 @@ describe('parser', function () {
 
         const variables = await symbolTable.getSymbols();
         expect(variables.length).to.equal(2);
-        expect(variables.filter(v => v.type === SymbolType.Channel).length).to.equal(2);
+        expect(variables.filter(v => v.declaration === DeclarationType.Channel).length).to.equal(2);
     });
 
     it("collects declaration & process symbols", async () => {

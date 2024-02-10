@@ -15,7 +15,7 @@ import {rename} from "./rename";
 import {getReferences} from "./references";
 import {getSemanticTokens} from './semantic_token_provider';
 import {getDocumentLinks} from "./document_links";
-import {getSignatureHelp} from "./signature_help";
+import {getActiveParameter, getSignatureHelp} from "./signature_help";
 
 const connection = createConnection(ProposedFeatures.all);
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
@@ -96,7 +96,13 @@ connection.onDocumentLinks(async params => {
 });
 
 connection.onSignatureHelp(async params => {
-    console.log("calling", params);
+    if (params.context?.isRetrigger && params.context.activeSignatureHelp) {
+        const activeParameter = await getActiveParameter(params.textDocument, params.position, documentManager) ?? 0;
+        return { ...params.context.activeSignatureHelp, activeParameter };
+    }
+
+    // TODO: Deal with case when signature is opened using ctrl shift space, notably not at first parameter position
+    // TODO: Ensure signature help is closed again when outside method scope (check for RParen?)
     const signatureHelp = await getSignatureHelp(params.textDocument, params.position, documentManager);
     if (!signatureHelp) {
         console.log("not found");

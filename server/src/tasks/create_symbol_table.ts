@@ -1,9 +1,9 @@
 import {AbstractParseTreeVisitor, ParseTree} from "antlr4ts/tree";
 import {ProverifParserVisitor} from "../parser-proverif/ProverifParserVisitor";
-import {LibContext, TprocessContext} from "../parser-proverif/ProverifParser";
+import {Extended_equationContext, LibContext, TprocessContext} from "../parser-proverif/ProverifParser";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";
 import {
-    collecMayfailvartypeseq,
+    collecMayfailvartypeseq, collectBasicpattern,
     collectEqlist,
     collectNeidentseq,
     collectNemayfailvartypeseq,
@@ -11,7 +11,7 @@ import {
     collectTPattern,
     collectTPatternSeq,
     collectTreduc,
-    collectTypeidseq
+    collectTypeidseq, getType, TypedTerminal
 } from "./ident_collectors";
 
 
@@ -24,9 +24,10 @@ export const createSymbolTable = (context: ParseTree): CreateSymbolTableResult =
     return {symbolTable: symbolTableVisitor.visit(context)};
 };
 
-export enum SymbolType {
+export enum DeclarationType {
     External = 'external',
     Variable = 'variable',
+    Parameter = 'parameter',
 
     Const = 'const',
     Channel = 'channel',
@@ -40,8 +41,9 @@ export enum SymbolType {
     Let = 'let',
     LetFun = 'letfun',
     Define = 'define',
-    DefineArgument = 'define_argument',
-    ExpandArgument = 'expand_argument'
+    DefineParameter = 'define-parameter',
+    Expand = 'expand',
+    ExpandParameter = 'expand-parameter',
 }
 
 class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> implements ProverifParserVisitor<ProverifSymbolTable> {
@@ -56,88 +58,71 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
     }
 
     public visitLib = (ctx: LibContext) => {
-        const neidentseq = ctx.neidentseq();
-        if (neidentseq && (ctx.CONST() || ctx.CHANNEL() || ctx.FREE())) {
-            let type = SymbolType.Variable;
-            if (ctx.CONST()) type = SymbolType.Const;
-            else if (ctx.CHANNEL()) type = SymbolType.Channel;
-            else if (ctx.FREE()) type = SymbolType.Free;
-
-            collectNeidentseq(neidentseq).forEach(identifier => {
-                this.registerVariable(identifier, type);
+        if (ctx.CONST() || ctx.FREE()) {
+            const declarationType = ctx.CONST() ? DeclarationType.Const : DeclarationType.Free;
+            collectNeidentseq(ctx.neidentseq()).forEach(identifier => {
+                this.registerTerminal(identifier, declarationType, getType(ctx.typeid()));
             });
-        }
-
-        const identifier = ctx.IDENT();
-        if (identifier && (ctx.TYPE() || ctx.FUN() || ctx.EVENT() || ctx.PREDICATE() || ctx.TABLE() || ctx.LET() || ctx.LETFUN() || ctx.DEFINE())) {
-            let type = SymbolType.Variable;
-            if (ctx.TYPE()) type = SymbolType.Type;
-            else if (ctx.FUN()) type = SymbolType.Fun;
-            else if (ctx.EVENT()) type = SymbolType.Event;
-            else if (ctx.PREDICATE()) type = SymbolType.Predicate;
-            else if (ctx.TABLE()) type = SymbolType.Table;
-            else if (ctx.LET()) type = SymbolType.Let;
-            else if (ctx.LETFUN()) type = SymbolType.LetFun;
-            else if (ctx.DEFINE()) type = SymbolType.Define;
-
-            this.registerVariable(identifier, type);
+        } else if (ctx.CHANNEL()) {
+            collectNeidentseq(ctx.neidentseq()).forEach(identifier => {
+                this.registerTerminal(identifier, DeclarationType.Channel);
+            });
+        } else if (ctx.TYPE()) {
+            this.registerTerminal(ctx.IDENT(), DeclarationType.Type);
+        } else if (ctx.FUN()) {
+            const parameters = collectTypeidseq(ctx.typeidseq());
+            this.registerTerminal(ctx.IDENT(), DeclarationType.Fun, getType(ctx.typeid()), parameters);
+        } else if (ctx.EVENT() || ctx.PREDICATE() || ctx.TABLE() || ctx.DEFINE()) {
+            const declarationType =
+                ctx.EVENT() ? DeclarationType.Event :
+                    (ctx.PREDICATE() ? DeclarationType.Predicate :
+                        (ctx.TABLE() ? DeclarationType.Table : DeclarationType.Define));
+            const parameters = collectTypeidseq(ctx.typeidseq());
+            this.registerTerminal(ctx.IDENT(), declarationType, undefined, parameters);
 
             if (ctx.DEFINE()) {
                 this.withContext(ctx, () => {
-                    collectTypeidseq(ctx.typeidseq()).forEach(identifier => {
-                        this.registerVariable(identifier, SymbolType.DefineArgument);
+                    parameters.forEach(identifier => {
+                        this.registerTerminal(identifier, DeclarationType.DefineParameter);
                     });
                 });
             }
-
-            const mayfailvartypeseq = ctx.mayfailvartypeseq();
-            if (mayfailvartypeseq && (ctx.LET() || ctx.LETFUN())) {
-                this.withContext(ctx, () => {
-                    collecMayfailvartypeseq(mayfailvartypeseq).forEach(identifier => {
-                        this.registerVariable(identifier, SymbolType.Variable);
-                    });
-                });
-            }
-        }
-
-        if (ctx.EXPAND()) {
-            collectTypeidseq(ctx.typeidseq()).forEach(identifier => {
-                this.registerVariable(identifier, SymbolType.ExpandArgument);
+        } else if (ctx.EXPAND()) {
+            const parameters = collectTypeidseq(ctx.typeidseq());
+            parameters.forEach(identifier => {
+                this.registerTerminal(identifier, DeclarationType.DefineParameter);
             });
-        }
-
-        const treduc = ctx.treduc();
-        if (treduc && (ctx.REDUCTION())) {
+        } else if (ctx.LET() || ctx.LETFUN()) {
+            const declarationType = ctx.LET() ? DeclarationType.Let : DeclarationType.LetFun;
+            const parameters = collecMayfailvartypeseq(ctx.mayfailvartypeseq());
+            this.registerTerminal(ctx.IDENT(), declarationType, undefined, parameters.map(typedTerminal => typedTerminal.type));
             this.withContext(ctx, () => {
-                collectTreduc(treduc).forEach(identifier => {
-                    this.registerVariable(identifier);
+                parameters.forEach(typedTerminal => {
+                    this.registerTypedTerminal(typedTerminal, DeclarationType.Parameter);
                 });
             });
-        }
-
-        const eqlist = ctx.eqlist();
-        if (eqlist && ctx.EQUATION()) {
+        } else if (ctx.REDUCTION()) {
             this.withContext(ctx, () => {
-                collectEqlist(eqlist).forEach(identifier => {
-                    this.registerVariable(identifier);
+                collectTreduc(ctx.treduc()).forEach(typedTerminal => {
+                    this.registerTypedTerminal(typedTerminal, DeclarationType.Parameter);
                 });
             });
-        }
-
-        const nevartype = ctx.nevartype();
-        if (nevartype && (ctx.NOUNIF() || ctx.SELECT() || ctx.QUERY() || ctx.NONINTERF() || ctx.NOT() || ctx.lemma())) {
+        } else if (ctx.EQUATION()) {
             this.withContext(ctx, () => {
-                collectNevartype(nevartype).forEach(identifier => {
-                    this.registerVariable(identifier);
+                collectEqlist(ctx.eqlist()).forEach(typedTerminal => {
+                    this.registerTypedTerminal(typedTerminal, DeclarationType.Parameter);
                 });
             });
-        }
-
-        const nemayfailvartypeseq = ctx.nemayfailvartypeseq();
-        if (nemayfailvartypeseq && (ctx.ELIMTRUE())) {
+        } else if (ctx.NOUNIF() || ctx.SELECT() || ctx.QUERY() || ctx.NONINTERF() || ctx.NOT() || ctx.lemma()) {
             this.withContext(ctx, () => {
-                collectNemayfailvartypeseq(nemayfailvartypeseq).forEach(identifier => {
-                    this.registerVariable(identifier);
+                collectNevartype(ctx.nevartype()).forEach(typedTerminal => {
+                    this.registerTypedTerminal(typedTerminal, DeclarationType.Parameter);
+                });
+            });
+        } else if (ctx.ELIMTRUE()) {
+            this.withContext(ctx, () => {
+                collectNemayfailvartypeseq(ctx.nemayfailvartypeseq()).forEach(typedTerminal => {
+                    this.registerTypedTerminal(typedTerminal, DeclarationType.Parameter);
                 });
             });
         }
@@ -148,43 +133,46 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
     public visitTprocess = (ctx: TprocessContext) => {
         return this.withContext(ctx, () => {
             const tpattern = ctx.tpattern();
-            if (tpattern && (ctx.IN() || ctx.LET())) {
-                collectTPattern(tpattern).forEach(identifier => {
-                    this.registerVariable(identifier);
+            if (ctx.LET() || ctx.IN()) {
+                collectTPattern(ctx.tpattern()).forEach(typedTerminal => {
+                    this.registerTypedTerminal(typedTerminal, DeclarationType.Parameter);
                 });
-            }
 
-            const tpatternseq = ctx.tpatternseq();
-            if (tpatternseq && (ctx.GET())) {
-                collectTPatternSeq(tpatternseq).forEach(identifier => {
-                    this.registerVariable(identifier);
+                if (ctx.LET()) {
+                    collectNevartype(ctx.nevartype()).forEach(typedTerminal => {
+                        this.registerTypedTerminal(typedTerminal, DeclarationType.Parameter);
+                    });
+                }
+            } else if (ctx.GET()) {
+                collectTPatternSeq(ctx.tpatternseq()).forEach(typedTerminal => {
+                    this.registerTypedTerminal(typedTerminal, DeclarationType.Parameter);
                 });
-            }
-
-            const nevartype = ctx.nevartype();
-            if (tpattern && (ctx.LET())) {
-                collectNevartype(nevartype).forEach(identifier => {
-                    this.registerVariable(identifier);
-                });
-            }
-
-            const identifier = ctx.IDENT();
-            if (identifier.length === 1 && (ctx.NEW() || ctx.RANDOM())) {
-                this.registerVariable(identifier[0]);
-            }
-
-            const basicPattern = ctx.basicpattern();
-            const basicPatternIdent = basicPattern?.IDENT();
-            if (ctx.LEFTARROW() && basicPatternIdent) {
-                this.registerVariable(basicPatternIdent);
+            } else if (ctx.NEW() || ctx.RANDOM()) {
+                const type = getType(ctx.typeid());
+                this.registerTerminal(ctx.IDENT()[0], DeclarationType.Parameter, type);
+            } else if (ctx.LEFTARROW()) {
+                const typedTerminal = collectBasicpattern(ctx.basicpattern());
+                this.registerTypedTerminal(typedTerminal, DeclarationType.Parameter);
             }
 
             return this.visitChildren(ctx);
         });
     };
 
-    private registerVariable(identifier: TerminalNode, type: SymbolType = SymbolType.Variable) {
-        this.symbolTable.addSymbol(identifier, type, this.context);
+    private registerTerminal(identifier: TerminalNode | undefined, declaration: DeclarationType, type?: ParseTree, parameters?: (ParseTree | undefined)[]) {
+        if (!identifier) {
+            return;
+        }
+
+        this.symbolTable.addSymbol(identifier, declaration, type, parameters, this.context);
+    }
+
+    private registerTypedTerminal(identifier: TypedTerminal | undefined, declaration: DeclarationType, parameters?: (ParseTree | undefined)[]) {
+        if (!identifier) {
+            return;
+        }
+
+        this.symbolTable.addSymbol(identifier.terminal, declaration, identifier.type, parameters, this.context);
     }
 
     private withContext<T>(context: undefined | ParseTree, action: () => T): T {
@@ -200,15 +188,17 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
 
 export type ProverifSymbol = {
     node: TerminalNode
-    type: SymbolType
+    declaration: DeclarationType
+    type?: ParseTree
+    parameters?: (ParseTree | undefined)[]
     context?: ParseTree
 }
 
 export class ProverifSymbolTable {
     private symbols: ProverifSymbol[] = [];
 
-    public addSymbol(node: TerminalNode, type: SymbolType, context?: ParseTree) {
-        this.symbols.push({node, type, context});
+    public addSymbol(node: TerminalNode, declaration: DeclarationType, type?: ParseTree, parameters?: (ParseTree | undefined)[], context?: ParseTree) {
+        this.symbols.push({node, declaration, type, parameters, context});
     }
 
     public findClosestSymbol(node: ParseTree): ProverifSymbol | undefined {

@@ -2,21 +2,26 @@ import {
     BasicpatternContext,
     EqlistContext,
     Extended_equationContext,
-    ForallvartypeContext,
+    ForallvartypeContext, MayfailvartypeContext,
     MayfailvartypeseqContext,
     NeidentseqContext,
     NemayfailvartypeseqContext,
     NepatternseqContext,
     NetypeidseqContext,
     NevartypeContext,
-    OnevartypeContext,
+    OnevartypeContext, TermContext,
     TpatternContext,
     TpatternseqContext,
-    TreducContext,
+    TreducContext, TypeidContext,
     TypeidseqContext
 } from "../parser-proverif/ProverifParser";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";
+import {ParseTree} from "antlr4ts/tree/ParseTree";
 
+
+export const getType = (ctx?: TypeidContext): TerminalNode|undefined => {
+    return ctx?.IDENT() ?? ctx?.CHANNEL()
+}
 
 export const collectNeidentseq = (ctx?: NeidentseqContext): TerminalNode[] => {
     if (!ctx) {
@@ -55,7 +60,7 @@ export const collectNetypeidseq = (ctx?: NetypeidseqContext): TerminalNode[] => 
     return [...base, ...collectNetypeidseq(netypeidseq)];
 };
 
-export const collectNevartype = (ctx?: NevartypeContext): TerminalNode[] => {
+export const collectNevartype = (ctx?: NevartypeContext): TypedTerminal[] => {
     if (!ctx) {
         return [];
     }
@@ -66,16 +71,22 @@ export const collectNevartype = (ctx?: NevartypeContext): TerminalNode[] => {
     ];
 };
 
-export const collectOnevartype = (ctx?: OnevartypeContext): TerminalNode[] => {
+export const collectOnevartype = (ctx?: OnevartypeContext): TypedTerminal[] => {
     if (!ctx) {
         return [];
     }
 
-    return [ctx.IDENT(), ...collectNeidentseq(ctx.neidentseq())];
+    const identifiers = [ctx.IDENT(), ...collectNeidentseq(ctx.neidentseq())];
+    const type = getType(ctx.typeid())
+    return identifiers.map(identifier => ({terminal: identifier, type }))
 };
 
 
-export const collectTPatternSeq = (ctx: TpatternseqContext): TerminalNode[] => {
+export const collectTPatternSeq = (ctx?: TpatternseqContext): TypedTerminal[] => {
+    if (!ctx) {
+        return  []
+    }
+
     const nepatternseq = ctx.nepatternseq();
     if (nepatternseq) {
         return collectNepatternseq(nepatternseq);
@@ -84,10 +95,15 @@ export const collectTPatternSeq = (ctx: TpatternseqContext): TerminalNode[] => {
     return [];
 };
 
-export const collectTPattern = (ctx: TpatternContext): TerminalNode[] => {
+export const collectTPattern = (ctx?: TpatternContext): TypedTerminal[] => {
+    if (!ctx) {
+        return []
+    }
+
     const basicPattern = ctx.basicpattern();
     if (basicPattern) {
-        return collectBasicpattern(basicPattern);
+        const typedTerminal = collectBasicpattern(basicPattern);
+        return typedTerminal ? [typedTerminal] : []
     }
 
     // either direct declaration or declaration with a wrapped data function
@@ -102,7 +118,7 @@ export const collectTPattern = (ctx: TpatternContext): TerminalNode[] => {
     return tpatterns.map(collectTPattern).flat();
 };
 
-export const collectNepatternseq = (ctx: NepatternseqContext): TerminalNode[] => {
+export const collectNepatternseq = (ctx: NepatternseqContext): TypedTerminal[] => {
     const tpatternIdents = collectTPattern(ctx.tpattern());
     const nepatternseq = ctx.nepatternseq();
     if (nepatternseq) {
@@ -112,17 +128,22 @@ export const collectNepatternseq = (ctx: NepatternseqContext): TerminalNode[] =>
     return tpatternIdents;
 };
 
-export const collectBasicpattern = (ctx: BasicpatternContext): TerminalNode[] => {
-    const ident = ctx.IDENT();
-    if (ident) {
-        return [ident];
+export const collectBasicpattern = (ctx?: BasicpatternContext): TypedTerminal|undefined => {
+    if (!ctx) {
+        return undefined
     }
 
-    return [];
+    const ident = ctx.IDENT();
+    if (ident) {
+        const type = getType(ctx.typeid())
+        return { terminal: ident, type: ctx.typeid()};
+    }
+
+    return undefined;
 };
 
-export const collecMayfailvartypeseq = (ctx: MayfailvartypeseqContext): TerminalNode[] => {
-    const nemayfailvartypeseq = ctx.nemayfailvartypeseq();
+export const collecMayfailvartypeseq = (ctx?: MayfailvartypeseqContext): TypedTerminal[] => {
+    const nemayfailvartypeseq = ctx?.nemayfailvartypeseq();
 
     if (nemayfailvartypeseq) {
         return collectNemayfailvartypeseq(nemayfailvartypeseq);
@@ -131,8 +152,24 @@ export const collecMayfailvartypeseq = (ctx: MayfailvartypeseqContext): Terminal
     return [];
 };
 
-export const collectNemayfailvartypeseq = (ctx: NemayfailvartypeseqContext): TerminalNode[] => {
-    const identifiers = collectNeidentseq(ctx.mayfailvartype().neidentseq());
+export type TypedTerminal = {
+    terminal: TerminalNode
+    type?: ParseTree
+}
+
+export const collectMayfailvartype = (ctx: MayfailvartypeContext): TypedTerminal[] => {
+    const identifiers = collectNeidentseq(ctx.neidentseq());
+    const type = getType(ctx.typeid());
+
+    return identifiers.map(identifier => ({ terminal: identifier, type}))
+}
+
+export const collectNemayfailvartypeseq = (ctx?: NemayfailvartypeseqContext): TypedTerminal[] => {
+    if (!ctx) {
+        return []
+    }
+
+    const identifiers = collectMayfailvartype(ctx.mayfailvartype());
 
     const nemayfailvartypeseq = ctx.nemayfailvartypeseq();
     if (nemayfailvartypeseq) {
@@ -142,7 +179,7 @@ export const collectNemayfailvartypeseq = (ctx: NemayfailvartypeseqContext): Ter
     return [...identifiers];
 };
 
-export const collectForallvartype = (ctx: ForallvartypeContext): TerminalNode[] => {
+export const collectForallvartype = (ctx: ForallvartypeContext): TypedTerminal[] => {
     const nevartype = ctx.nevartype();
     if (nevartype) {
         return collectNevartype(nevartype);
@@ -151,11 +188,12 @@ export const collectForallvartype = (ctx: ForallvartypeContext): TerminalNode[] 
     return [];
 };
 
-export const collectExtendedEquation = (ctx: Extended_equationContext): TerminalNode[] => {
-    const identifiers: TerminalNode[] = [];
+export const collectExtendedEquation = (ctx: Extended_equationContext): TypedTerminal[] => {
+    const identifiers: TypedTerminal[] = [];
     const identifier = ctx.IDENT();
     if (identifier) {
-        identifiers.push(identifier);
+        // this does not infer types, although it would be nice!
+        identifiers.push({ terminal: identifier, type: ctx.term() });
     }
 
     const extended_equation = ctx.extended_equation();
@@ -166,7 +204,11 @@ export const collectExtendedEquation = (ctx: Extended_equationContext): Terminal
     return [...identifiers];
 };
 
-export const collectTreduc = (ctx: TreducContext): TerminalNode[] => {
+export const collectTreduc = (ctx?: TreducContext): TypedTerminal[] => {
+    if (!ctx) {
+        return []
+    }
+
     const identifiers = [...collectForallvartype(ctx.forallvartype()), ...collectExtendedEquation(ctx.extended_equation())];
 
     const nemayfailvartypeseq = ctx.treduc();
@@ -177,7 +219,11 @@ export const collectTreduc = (ctx: TreducContext): TerminalNode[] => {
     return [...identifiers];
 };
 
-export const collectEqlist = (ctx: EqlistContext): TerminalNode[] => {
+export const collectEqlist = (ctx?: EqlistContext): TypedTerminal[] => {
+    if (!ctx) {
+        return []
+    }
+
     const identifiers = [...collectForallvartype(ctx.forallvartype()), ...collectExtendedEquation(ctx.extended_equation())];
 
     const eqlist = ctx.eqlist();

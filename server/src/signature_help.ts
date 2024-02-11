@@ -8,7 +8,7 @@ import {
 } from "vscode-languageserver";
 import {DocumentManagerInterface} from "./document_manager";
 import {DefinitionSymbol, getDefinitionSymbolFromPosition} from "./go_to_definition";
-import {getSignaturePosition} from "./parseTree/get_signature_position";
+import {getSignaturePosition, SignaturePosition} from "./parseTree/get_signature_position";
 
 export const getSignatureHelp = async (identifier: TextDocumentIdentifier, position: Position, documentManager: DocumentManagerInterface): Promise<SignatureHelp | undefined> => {
     const parseResult = await documentManager.getParseResult(identifier);
@@ -35,11 +35,11 @@ export const getSignatureHelp = async (identifier: TextDocumentIdentifier, posit
 const createOffsetLabels = (definitionSymbol: DefinitionSymbol) => {
     const parameterLabels = (definitionSymbol.symbol.parameters ?? []).map(parameter => {
         if (!parameter) {
-            return ""
+            return "";
         }
 
         const typeSuffix = parameter.type ? ": " + parameter.type.text : "";
-        return parameter.node.text + typeSuffix
+        return parameter.node.text + typeSuffix;
     });
 
 
@@ -56,18 +56,4 @@ const createOffsetLabels = (definitionSymbol: DefinitionSymbol) => {
         parameters,
         signatureLabel: `${signatureText}(${parameterLabels.join(", ")})`
     };
-};
-
-export const getActiveParameter = async (identifier: TextDocumentIdentifier, position: Position, documentManager: DocumentManagerInterface): Promise<uinteger | undefined> => {
-    const parseResult = await documentManager.getParseResult(identifier);
-    if (!parseResult) {
-        return undefined;
-    }
-
-    const signaturePosition = getSignaturePosition(parseResult.parser.inputStream, position);
-    if (!signaturePosition) {
-        return undefined;
-    }
-
-    return signaturePosition.parameterPosition;
 };

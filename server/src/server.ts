@@ -15,7 +15,7 @@ import {rename} from "./rename";
 import {getReferences} from "./references";
 import {getSemanticTokens} from './semantic_token_provider';
 import {getDocumentLinks} from "./document_links";
-import {getActiveParameter, getSignatureHelp} from "./signature_help";
+import {getSignatureHelp} from "./signature_help";
 
 const connection = createConnection(ProposedFeatures.all);
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
@@ -96,15 +96,6 @@ connection.onDocumentLinks(async params => {
 });
 
 connection.onSignatureHelp(async params => {
-    if (params.context?.isRetrigger && params.context.activeSignatureHelp) {
-        const activeParameter = await getActiveParameter(params.textDocument, params.position, documentManager);
-        if (activeParameter === undefined) {
-            return undefined;
-        }
-
-        return { ...params.context.activeSignatureHelp, activeParameter };
-    }
-
     const signatureHelp = await getSignatureHelp(params.textDocument, params.position, documentManager);
     if (!signatureHelp) {
         console.log("not found");

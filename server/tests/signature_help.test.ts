@@ -23,7 +23,7 @@ describe('signature help', function () {
         const signature = signatureHelp.signatures[0]
 
         expect(signature.label).to.contain(definitionLabel)
-        expect(signature.label).to.contain(parameters.join(","));
+        expect(signature.label).to.contain(parameters.join(", "));
         expect(signature.parameters.length).to.equal(parameters.length);
 
         if (signature.parameters.length > 0) {
@@ -34,7 +34,7 @@ describe('signature help', function () {
             signature.parameters.forEach((parameter, index) => {
                 expect(parameter.label[0]).to.equal(currentIndex)
                 expect(parameter.label[1]).to.equal(Number(currentIndex) + parameters[index].length)
-                currentIndex += parameters[index].length + 1
+                currentIndex += parameters[index].length + 2
             })
         }
 
@@ -53,13 +53,13 @@ describe('signature help', function () {
         const code = `let P(arg: nat) = 0.\nprocess \nP(`;
         const signatureInvoked = {line: 2, character: 2};
 
-        await assertSignatureDefinitionFound(code, signatureInvoked, 'P', ['nat'], 0);
+        await assertSignatureDefinitionFound(code, signatureInvoked, 'P', ['arg: nat'], 0);
     });
 
     it("finds second argument position", async () => {
-        const code = `let P(arg: nat, arg2: nat) = 0.\nprocess \nP(0,`;
+        const code = `let P(arg: nat, arg2:nat) = 0.\nprocess \nP(0,`;
         const signatureInvoked = {line: 2, character: 4};
 
-        await assertSignatureDefinitionFound(code, signatureInvoked, 'P', ['nat', 'nat'], 1);
+        await assertSignatureDefinitionFound(code, signatureInvoked, 'P', ['arg: nat', 'arg2: nat'], 1);
     });
 });

@@ -7,8 +7,8 @@ import {
     uinteger
 } from "vscode-languageserver";
 import {DocumentManagerInterface} from "./document_manager";
-import {getDefinitionSymbolFromPosition} from "./go_to_definition";
-import {getSignaturePosition} from "./parseTree/get_terminal_before_position";
+import {DefinitionSymbol, getDefinitionSymbolFromPosition} from "./go_to_definition";
+import {getSignaturePosition} from "./parseTree/get_signature_position";
 
 export const getSignatureHelp = async (identifier: TextDocumentIdentifier, position: Position, documentManager: DocumentManagerInterface): Promise<SignatureHelp | undefined> => {
     const parseResult = await documentManager.getParseResult(identifier);
@@ -26,25 +26,35 @@ export const getSignatureHelp = async (identifier: TextDocumentIdentifier, posit
         return undefined;
     }
 
-    const parameterLabels = (definitionSymbol.symbol.parameters ?? []).map(parameter => parameter?.text ?? "");
-    const {parameters, signatureLabel} = createOffsetLabels(parameterLabels, definitionSymbol.symbol.node.text);
+    const {parameters, signatureLabel} = createOffsetLabels(definitionSymbol);
 
     const signature: SignatureInformation = {label: signatureLabel, parameters};
     return {signatures: [signature], activeSignature: 0, activeParameter: signaturePosition.parameterPosition};
 };
 
-const createOffsetLabels = (parameterLabels: string[], signatureText: string) => {
+const createOffsetLabels = (definitionSymbol: DefinitionSymbol) => {
+    const parameterLabels = (definitionSymbol.symbol.parameters ?? []).map(parameter => {
+        if (!parameter) {
+            return ""
+        }
+
+        const typeSuffix = parameter.type ? ": " + parameter.type.text : "";
+        return parameter.node.text + typeSuffix
+    });
+
+
     const parameters: ParameterInformation[] = [];
+    const signatureText = definitionSymbol.symbol.node.text;
     let currentOffset = signatureText.length + 1;
     for (let i = 0; i < parameterLabels.length; i++) {
         const parameterLabel = parameterLabels[i];
         parameters.push({label: [currentOffset, currentOffset + parameterLabel.length]});
-        currentOffset += parameterLabel.length + 1;
+        currentOffset += parameterLabel.length + 2;
     }
 
     return {
         parameters,
-        signatureLabel: `${signatureText}(${parameterLabels.join(",")})`
+        signatureLabel: `${signatureText}(${parameterLabels.join(", ")})`
     };
 };
 

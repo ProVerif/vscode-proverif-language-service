@@ -97,12 +97,14 @@ connection.onDocumentLinks(async params => {
 
 connection.onSignatureHelp(async params => {
     if (params.context?.isRetrigger && params.context.activeSignatureHelp) {
-        const activeParameter = await getActiveParameter(params.textDocument, params.position, documentManager) ?? 0;
+        const activeParameter = await getActiveParameter(params.textDocument, params.position, documentManager);
+        if (activeParameter === undefined) {
+            return undefined;
+        }
+
         return { ...params.context.activeSignatureHelp, activeParameter };
     }
 
-    // TODO: Deal with case when signature is opened using ctrl shift space, notably not at first parameter position
-    // TODO: Ensure signature help is closed again when outside method scope (check for RParen?)
     const signatureHelp = await getSignatureHelp(params.textDocument, params.position, documentManager);
     if (!signatureHelp) {
         console.log("not found");

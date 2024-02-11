@@ -3,39 +3,39 @@ import {TokenStream} from "antlr4ts/TokenStream";
 import {Token} from "antlr4ts";
 import {ProverifLexer} from "../parser-proverif/ProverifLexer";
 
-export const getPositionOfTokenBeforeLastLParen = (tokens: TokenStream, position: Position): Position | undefined => {
-    let lastToken: Token|undefined = undefined;
-    let nextLastToken: Token|undefined = undefined;
-    for (let i = 0; i < tokens.size; i++) {
+export type SignaturePosition = {
+    signatureToken: Token
+    signatureTokenPosition: Position
+    parameterPosition: uinteger
+}
+
+export const getSignaturePosition = (tokens: TokenStream, position: Position): SignaturePosition|undefined => {
+    let currentSignatureToken: Token|undefined = undefined;
+    let commasBeforePositionInCurrentSignature: uinteger = 0;
+    for (let i = 1; i < tokens.size; i++) {
         const token = tokens.get(i); // lookup seems to be O(1)
         if (token.line >= position.line + 1 && token.charPositionInLine >= position.character) {
             break;
         }
 
+        const previousToken = tokens.get(i-1);
         if (token.type === ProverifLexer.LPAREN) {
-            lastToken = nextLastToken;
-        } else {
-            nextLastToken = token;
+            currentSignatureToken = previousToken;
+            commasBeforePositionInCurrentSignature = 0;
+        } else if (token.type === ProverifLexer.RPAREN) {
+            currentSignatureToken = undefined;
+        } else if (token.type === ProverifLexer.COMMA) {
+            commasBeforePositionInCurrentSignature++;
         }
     }
 
-    return lastToken ? Position.create(lastToken.line-1, lastToken.charPositionInLine) : undefined;
-};
-
-export const countCommasAfterLParenButBeforeToken = (tokens: TokenStream, position: Position): uinteger | undefined => {
-    let commaCount: uinteger = 0;
-    for (let i = 0; i < tokens.size; i++) {
-        const token = tokens.get(i); // lookup seems to be O(1)
-        if (token.line >= position.line + 1 && token.charPositionInLine >= position.character) {
-            break;
-        }
-
-        if (token.type === ProverifLexer.COMMA) {
-            commaCount++;
-        } else if (token.type === ProverifLexer.LPAREN) {
-            commaCount = 0;
-        }
+    if (!currentSignatureToken) {
+        return undefined;
     }
 
-    return commaCount;
+    return {
+        signatureToken: currentSignatureToken,
+        signatureTokenPosition: Position.create(currentSignatureToken.line-1, currentSignatureToken.charPositionInLine),
+        parameterPosition: commasBeforePositionInCurrentSignature
+    };
 };

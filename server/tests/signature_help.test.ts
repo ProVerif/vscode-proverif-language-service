@@ -6,7 +6,7 @@ import {getReferences} from "../src/references";
 import {getSignatureHelp} from "../src/signature_help";
 import {number} from "vscode-languageserver/lib/common/utils/is";
 
-describe('references', function () {
+describe('signature help', function () {
     const assertSignatureDefinitionFound = async (code: string, signatureInvoked: Position, definitionLabel: string, parameters: string[], activeParameter: number) => {
         const uri = 'main.pv';
 
@@ -54,5 +54,12 @@ describe('references', function () {
         const signatureInvoked = {line: 2, character: 2};
 
         await assertSignatureDefinitionFound(code, signatureInvoked, 'P', ['nat'], 0);
+    });
+
+    it("finds second argument position", async () => {
+        const code = `let P(arg: nat, arg2: nat) = 0.\nprocess \nP(0,`;
+        const signatureInvoked = {line: 2, character: 4};
+
+        await assertSignatureDefinitionFound(code, signatureInvoked, 'P', ['nat', 'nat'], 1);
     });
 });

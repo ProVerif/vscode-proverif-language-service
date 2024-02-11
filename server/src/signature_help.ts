@@ -8,10 +8,7 @@ import {
 } from "vscode-languageserver";
 import {DocumentManagerInterface} from "./document_manager";
 import {getDefinitionSymbolFromPosition} from "./go_to_definition";
-import {
-    countCommasAfterLParenButBeforeToken,
-    getPositionOfTokenBeforeLastLParen
-} from "./parseTree/get_terminal_before_position";
+import {getSignaturePosition} from "./parseTree/get_terminal_before_position";
 
 export const getSignatureHelp = async (identifier: TextDocumentIdentifier, position: Position, documentManager: DocumentManagerInterface): Promise<SignatureHelp | undefined> => {
     const parseResult = await documentManager.getParseResult(identifier);
@@ -19,30 +16,36 @@ export const getSignatureHelp = async (identifier: TextDocumentIdentifier, posit
         return undefined;
     }
 
-    const positionOfTokenBefore = getPositionOfTokenBeforeLastLParen(parseResult.parser.inputStream, position);
-    if (!positionOfTokenBefore) {
+    const signaturePosition = getSignaturePosition(parseResult.parser.inputStream, position);
+    if (!signaturePosition) {
         return undefined;
     }
 
-    const definitionSymbol = await getDefinitionSymbolFromPosition(identifier, positionOfTokenBefore, documentManager);
+    const definitionSymbol = await getDefinitionSymbolFromPosition(identifier, signaturePosition.signatureTokenPosition, documentManager);
     if (!definitionSymbol) {
         return undefined;
     }
 
-    const parameterLabels =  (definitionSymbol.symbol.parameters ?? []).map(parameter => parameter?.text ?? "");
-    let signatureLabel = definitionSymbol.symbol.node.text + "(";
+    const parameterLabels = (definitionSymbol.symbol.parameters ?? []).map(parameter => parameter?.text ?? "");
+    const {parameters, signatureLabel} = createOffsetLabels(parameterLabels, definitionSymbol.symbol.node.text);
 
+    const signature: SignatureInformation = {label: signatureLabel, parameters};
+    return {signatures: [signature], activeSignature: 0, activeParameter: signaturePosition.parameterPosition};
+};
+
+const createOffsetLabels = (parameterLabels: string[], signatureText: string) => {
     const parameters: ParameterInformation[] = [];
-    let currentOffset = signatureLabel.length;
+    let currentOffset = signatureText.length + 1;
     for (let i = 0; i < parameterLabels.length; i++) {
         const parameterLabel = parameterLabels[i];
-        parameters.push({ label: [currentOffset, currentOffset + parameterLabel.length]});
+        parameters.push({label: [currentOffset, currentOffset + parameterLabel.length]});
         currentOffset += parameterLabel.length + 1;
     }
-    signatureLabel += parameterLabels.join(",") + ")";
 
-    const signature: SignatureInformation = { label: signatureLabel, parameters };
-    return { signatures: [signature], activeSignature: 0, activeParameter: 0 };
+    return {
+        parameters,
+        signatureLabel: `${signatureText}(${parameterLabels.join(",")})`
+    };
 };
 
 export const getActiveParameter = async (identifier: TextDocumentIdentifier, position: Position, documentManager: DocumentManagerInterface): Promise<uinteger | undefined> => {
@@ -51,10 +54,10 @@ export const getActiveParameter = async (identifier: TextDocumentIdentifier, pos
         return undefined;
     }
 
-    const positionOfTokenBefore = countCommasAfterLParenButBeforeToken(parseResult.parser.inputStream, position);
-    if (!positionOfTokenBefore) {
+    const signaturePosition = getSignaturePosition(parseResult.parser.inputStream, position);
+    if (!signaturePosition) {
         return undefined;
     }
 
-    return positionOfTokenBefore;
+    return signaturePosition.parameterPosition;
 };

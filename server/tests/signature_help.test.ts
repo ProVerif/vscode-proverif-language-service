@@ -62,4 +62,11 @@ describe('signature help', function () {
 
         await assertSignatureDefinitionFound(code, signatureInvoked, 'P', ['arg: nat', 'arg2: nat'], 1);
     });
+
+    it("finds within other brackets", async () => {
+        const code = `fun hash(nat): bitstring.\nprocess \nout(c, (hash(`;
+        const signatureInvoked = {line: 2, character: 13};
+
+        await assertSignatureDefinitionFound(code, signatureInvoked, 'hash', ['nat'], 0);
+    });
 });

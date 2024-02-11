@@ -9,16 +9,17 @@ export type SignaturePosition = {
     parameterPosition: uinteger
 }
 
-export const getSignaturePosition = (tokens: TokenStream, position: Position): SignaturePosition|undefined => {
-    let currentSignatureToken: Token|undefined = undefined;
+export const getSignaturePosition = (tokens: TokenStream, position: Position): SignaturePosition | undefined => {
+    let currentSignatureToken: Token | undefined = undefined;
     let commasBeforePositionInCurrentSignature: uinteger = 0;
     for (let i = 1; i < tokens.size; i++) {
         const token = tokens.get(i); // lookup seems to be O(1)
+        const previousToken = tokens.get(i - 1);
+
         if (token.line >= position.line + 1 && token.charPositionInLine >= position.character) {
             break;
         }
 
-        const previousToken = tokens.get(i-1);
         if (token.type === ProverifLexer.LPAREN) {
             currentSignatureToken = previousToken;
             commasBeforePositionInCurrentSignature = 0;
@@ -35,7 +36,7 @@ export const getSignaturePosition = (tokens: TokenStream, position: Position): S
 
     return {
         signatureToken: currentSignatureToken,
-        signatureTokenPosition: Position.create(currentSignatureToken.line-1, currentSignatureToken.charPositionInLine),
+        signatureTokenPosition: Position.create(currentSignatureToken.line - 1, currentSignatureToken.charPositionInLine + 1),
         parameterPosition: commasBeforePositionInCurrentSignature
     };
 };

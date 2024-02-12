@@ -40,7 +40,7 @@ describe('go to definition', function () {
 
     it("finds global scope variable", async () => {
         const code = `channel c. channel d. process \nout(c, c)`;
-        const click = {line: 1, character: 5};
+        const click = {line: 1, character: 4};
         const target = {line: 0, character: 8};
 
         await assertSingleFileNavigation(code, click, target, 1);
@@ -48,7 +48,7 @@ describe('go to definition', function () {
 
     it("override local scope variable", async () => {
         const code = `channel c. process \nnew c:channel; \nout(c, c)`;
-        const click = {line: 2, character: 5};
+        const click = {line: 2, character: 4};
         const target = {line: 1, character: 4};
 
         await assertSingleFileNavigation(code, click, target, 1);
@@ -56,7 +56,7 @@ describe('go to definition', function () {
 
     it("pattern variable", async () => {
         const code = `channel c. process \nin(c, b:bitstring); \nout(c, b)`;
-        const click = {line: 2, character: 8};
+        const click = {line: 2, character: 7};
         const target = {line: 1, character: 6};
 
         await assertSingleFileNavigation(code, click, target, 1);
@@ -64,7 +64,7 @@ describe('go to definition', function () {
 
     it("complex pattern variable", async () => {
         const code = `channel c. process \nin(c, (=2, b:bitstring)); \nout(c, b)`;
-        const click = {line: 2, character: 8};
+        const click = {line: 2, character: 7};
         const target = {line: 1, character: 11};
 
         await assertSingleFileNavigation(code, click, target, 1);
@@ -72,7 +72,7 @@ describe('go to definition', function () {
 
     it("override variable", async () => {
         const code = `channel c. free b: bitstring. process \nin(c, b:bitstring); \nout(c, b)`;
-        const click = {line: 2, character: 8};
+        const click = {line: 2, character: 7};
         const target = {line: 1, character: 6};
 
         await assertSingleFileNavigation(code, click, target, 1);
@@ -80,7 +80,7 @@ describe('go to definition', function () {
 
     it("do not override match variable", async () => {
         const code = `channel c. free b: bitstring. process \nin(c, =b); \nout(c, b)`;
-        const click = {line: 2, character: 8};
+        const click = {line: 2, character: 7};
         const target = {line: 0, character: 16};
 
         await assertSingleFileNavigation(code, click, target, 1);
@@ -105,7 +105,7 @@ process System`;
 
     it("consider query variables", async () => {
         const code = `free b: bitstring.\nquery x:bitstring; attacker(x). process 0`;
-        const click = {line: 1, character: 29};
+        const click = {line: 1, character: 28};
         const target = {line: 1, character: 6};
 
         await assertSingleFileNavigation(code, click, target, 1);
@@ -113,7 +113,7 @@ process System`;
 
     it("consider let arguments", async () => {
         const code = `let Proc(c: channel) = \nin(c, b:bitstring).\nprocess 0`;
-        const click = {line: 1, character: 4};
+        const click = {line: 1, character: 3};
         const target = {line: 0, character: 9};
 
         await assertSingleFileNavigation(code, click, target, 1);
@@ -133,7 +133,7 @@ process System`;
 
         const uri = 'main.pv';
         const code = 'process \nout(c, c)';
-        const click = {line: 1, character: 5};
+        const click = {line: 1, character: 4};
         const target = {line: 0, character: 8};
 
         const documentManager = new MockDocumentManager();

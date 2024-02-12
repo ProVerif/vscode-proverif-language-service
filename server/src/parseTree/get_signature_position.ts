@@ -36,7 +36,7 @@ export const getSignaturePosition = (tokens: TokenStream, position: Position): S
 
     return {
         signatureToken: currentSignatureToken,
-        signatureTokenPosition: Position.create(currentSignatureToken.line - 1, currentSignatureToken.charPositionInLine + 1),
+        signatureTokenPosition: Position.create(currentSignatureToken.line - 1, currentSignatureToken.charPositionInLine),
         parameterPosition: commasBeforePositionInCurrentSignature
     };
 };

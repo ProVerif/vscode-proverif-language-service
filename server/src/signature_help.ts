@@ -26,6 +26,11 @@ export const getSignatureHelp = async (identifier: TextDocumentIdentifier, posit
         return undefined;
     }
 
+    // prevent self to show help
+    if (definitionSymbol.symbol.node.symbol === signaturePosition.signatureToken) {
+        return undefined;
+    }
+
     const {parameters, signatureLabel} = createOffsetLabels(definitionSymbol);
 
     const signature: SignatureInformation = {label: signatureLabel, parameters};

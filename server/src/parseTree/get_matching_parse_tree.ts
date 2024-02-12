@@ -39,7 +39,6 @@ const getMatchingParseTreeInternal = (parseTree: ParseTree, caretPosition: Caret
 const checkCaretPositionOverlapsToken = (caretPosition: CaretPosition, token: Token) => {
     return token.text &&
         token.line === caretPosition.line &&
-        token.charPositionInLine <= caretPosition.column &&
-        token.charPositionInLine + (token.text?.length ?? 0) >= caretPosition.column;
-
+        caretPosition.column >= token.charPositionInLine &&
+        caretPosition.column < token.charPositionInLine + token.text.length;
 };

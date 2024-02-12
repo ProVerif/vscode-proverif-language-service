@@ -7,12 +7,16 @@ import {getSignatureHelp} from "../src/signature_help";
 import {number} from "vscode-languageserver/lib/common/utils/is";
 
 describe('signature help', function () {
-    const assertSignatureDefinitionFound = async (code: string, signatureInvoked: Position, definitionLabel: string, parameters: string[], activeParameter: number) => {
+    const getSignatureHelpFrom = async (code: string, signatureInvoked: Position) => {
         const uri = 'main.pv';
 
         const documentManager = new MockDocumentManager();
         documentManager.parse(uri, code);
-        const signatureHelp = await getSignatureHelp({uri}, signatureInvoked, documentManager);
+        return await getSignatureHelp({uri}, signatureInvoked, documentManager);
+    }
+
+    const assertSignatureDefinitionFound = async (code: string, signatureInvoked: Position, definitionLabel: string, parameters: string[], activeParameter: number) => {
+        const signatureHelp = await getSignatureHelpFrom(code, signatureInvoked)
 
         assert.isDefined(signatureHelp);
         if (!signatureHelp) {
@@ -68,5 +72,13 @@ describe('signature help', function () {
         const signatureInvoked = {line: 2, character: 13};
 
         await assertSignatureDefinitionFound(code, signatureInvoked, 'hash', ['nat'], 0);
+    });
+
+    it("finds not self", async () => {
+        const code = `let P(arg: nat) = 0.\nprocess 0`;
+        const signatureInvoked = {line: 0, character: 6};
+
+        const signatureHelp = await getSignatureHelpFrom(code, signatureInvoked);
+        should().equal(signatureHelp, undefined)
     });
 });

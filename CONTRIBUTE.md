@@ -49,13 +49,15 @@ Lastly, the language server waits for the user to click on an identifier, and th
 
 Process:
 - Bump versions in the `package.json` (optionally in `server` and `client` too), and run `npm install`.
+- Extend `CHANGELOG.md`.
+- Run `vsce package` to generate the `.vsix`. 
 - Commit and push to GitHub.
-- Create a release on GitHub.
-- [automatic] CI publishes extension to https://marketplace.visualstudio.com/vscode and https://open-vsx.org/
+- Create a release on GitHub, using the `CHANGELOG.md` text and the generated `.vsix`.
+- [automatic] CI publishes extension to https://marketplace.visualstudio.com/vscode and https://open-vsx.org/.
 
-You may generate `.vsix` manually with `vsce package`. You can generate the authentication tokens needed for the release as described [here](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) and [here](https://open-vsx.org/user-settings/tokens).
+You can generate the authentication tokens needed for the release as described [here](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) and [here](https://open-vsx.org/user-settings/tokens).
 
- You can manage members of the ProVerif organization [here](https://marketplace.visualstudio.com/manage/publishers/proverif?noPrompt=true) and [here](https://open-vsx.org/user-settings/namespaces).
+You can manage members of the ProVerif organization [here](https://marketplace.visualstudio.com/manage/publishers/proverif?noPrompt=true) and [here](https://open-vsx.org/user-settings/namespaces).
 
 ## Development path
 

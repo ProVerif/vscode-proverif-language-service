@@ -89,13 +89,13 @@ connection.onDefinition(async (params) => {
 });
 
 connection.onHover(async (params) => {
-    const hover = await getHover(params.textDocument, params.position, documentManager)
+    const hover = await getHover(params.textDocument, params.position, documentManager);
     if (!hover) {
-        return undefined
+        return undefined;
     }
 
-    return hover
-})
+    return hover;
+});
 
 connection.onDocumentLinks(async params => {
     const parseResult = await documentManager.getParseResult(params.textDocument);

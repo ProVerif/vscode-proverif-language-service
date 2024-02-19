@@ -1,5 +1,5 @@
 import {
-    Hover, LocationLink,
+    Hover, LocationLink, MarkupContent, MarkupKind,
     ParameterInformation,
     Position,
     SignatureHelp,
@@ -30,18 +30,30 @@ export const getHover = async (identifier: TextDocumentIdentifier, position: Pos
 
 const constructHover = (definitionSymbol: ProverifSymbol, source: ParseTree): Hover | undefined => {
     const range = getRange(source);
-    const contents = getFullName(definitionSymbol);
+    const fullName = getFullName(definitionSymbol);
+    const contents = createProverifMarkupContent(fullName);
 
     return {range, contents};
 };
 
-const getFullName = (definitionSymbol: ProverifSymbol): string => {
-    const declarationPrefix = getDeclarationPrefix(definitionSymbol.declaration)
-    const name = definitionSymbol.node.text
-    const parametersString = getParametersString(definitionSymbol.parameters)
-    const typeSuffix = getTypeSuffix(definitionSymbol.type)
+const createProverifMarkupContent = (proverifCode: string): MarkupContent => {
+    return {
+        kind: MarkupKind.Markdown,
+        value: [
+            '```pv',
+            proverifCode,
+            '```'
+        ].join('\n')
+    };
+};
 
-    return declarationPrefix + name + parametersString + typeSuffix
+const getFullName = (definitionSymbol: ProverifSymbol): string => {
+    const declarationPrefix = getDeclarationPrefix(definitionSymbol.declaration);
+    const name = definitionSymbol.node.text;
+    const parametersString = getParametersString(definitionSymbol.parameters);
+    const typeSuffix = getTypeSuffix(definitionSymbol.type);
+
+    return declarationPrefix + name + parametersString + typeSuffix;
 };
 
 const getDeclarationPrefix = (declarationType: DeclarationType): string => {
@@ -49,24 +61,24 @@ const getDeclarationPrefix = (declarationType: DeclarationType): string => {
         case DeclarationType.Parameter:
         case DeclarationType.DefineParameter:
         case DeclarationType.ExpandParameter:
-            return "";
+            return "(parameter) ";
         default:
             return `${declarationType} `;
     }
 };
 
-const getParametersString = (parameters?: (ProverifSymbolParameter|undefined)[]): string => {
+const getParametersString = (parameters?: (ProverifSymbolParameter | undefined)[]): string => {
     if (!parameters) {
         return "";
     }
 
     const parameterListString = parameters
         .map(parameter => parameter ? parameter.node.text + getTypeSuffix(parameter.type) : "")
-        .join(", ")
+        .join(", ");
 
-    return `(${parameterListString})`
-}
+    return `(${parameterListString})`;
+};
 
 const getTypeSuffix = (type?: ParseTree) => {
-    return type ? ": " + type.text : ""
-}
+    return type ? ": " + type.text : "";
+};

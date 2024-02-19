@@ -16,6 +16,7 @@ import {getReferences} from "./references";
 import {getSemanticTokens} from './semantic_token_provider';
 import {getDocumentLinks} from "./document_links";
 import {getSignatureHelp} from "./signature_help";
+import {getHover} from "./hover";
 
 const connection = createConnection(ProposedFeatures.all);
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
@@ -41,9 +42,10 @@ connection.onInitialize((params: InitializeParams) => {
             textDocumentSync: TextDocumentSyncKind.Full,
             definitionProvider: true,
             documentLinkProvider: {},
-            referencesProvider: {},
-            renameProvider: { },
-            signatureHelpProvider: { triggerCharacters: ['('], retriggerCharacters: [',', ', '] }
+            referencesProvider: true,
+            renameProvider: true,
+            signatureHelpProvider: { triggerCharacters: ['('], retriggerCharacters: [',', ', '] },
+            hoverProvider: true
             /**
             semanticTokensProvider: {
                 documentSelector: null, // use client-side definition
@@ -86,6 +88,15 @@ connection.onDefinition(async (params) => {
     return [definitionLink];
 });
 
+connection.onHover(async (params) => {
+    const hover = await getHover(params.textDocument, params.position, documentManager)
+    if (!hover) {
+        return undefined
+    }
+
+    return hover
+})
+
 connection.onDocumentLinks(async params => {
     const parseResult = await documentManager.getParseResult(params.textDocument);
     if (!parseResult) {
@@ -98,7 +109,6 @@ connection.onDocumentLinks(async params => {
 connection.onSignatureHelp(async params => {
     const signatureHelp = await getSignatureHelp(params.textDocument, params.position, documentManager);
     if (!signatureHelp) {
-        console.log("not found");
         return undefined;
     }
 

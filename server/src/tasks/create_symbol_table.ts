@@ -28,8 +28,6 @@ export const createSymbolTable = (context: ParseTree): CreateSymbolTableResult =
 };
 
 export enum DeclarationType {
-    External = 'external',
-    Variable = 'variable',
     Parameter = 'parameter',
 
     Const = 'const',

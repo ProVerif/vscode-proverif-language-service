@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.5.0
+
+Add hover.
+
+
 ## v1.4.0
 
 Add signature help.

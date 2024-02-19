@@ -7,12 +7,12 @@ Add signature help.
 
 ## v1.3.1
 
-Restrict find references to ProVerif files.
+Restrict reference discovery to ProVerif files.
 
 
 ## v1.3.0
 
-Introduce find all references and rename functionality.
+Introduce find all references and rename.
 
 
 ## v1.2.4
@@ -70,9 +70,9 @@ Properly document functionality & publicly release extension.
 
 ## v1.0.1
 
-Fix bug with long proofs
+Fix bug with long proofs.
 
 
 ## v1.0.0
 
-Initial release
+Initial release.

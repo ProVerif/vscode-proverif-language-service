@@ -1,0 +1,38 @@
+{
+    "comments": {
+		// there is only a block comment
+        "blockComment": [ "(*", "*)" ]
+    },
+    "brackets": [
+        ["{", "}"],
+        ["[", "]"],
+        ["(", ")"]
+    ],
+    "autoClosingPairs": [
+        ["{", "}"],
+        ["[", "]"],
+        ["(", ")"],
+        ["\"", "\""],
+        ["(*", "*)"],
+    ],
+    // same as autoClosingPairs, but without the comment bracket
+    "surroundingPairs": [
+        ["{", "}"],
+        ["[", "]"],
+        ["(", ")"],
+        ["\"", "\""]
+    ],
+    "indentationRules": {
+        // indent on brackets {([ equal / diff = <> and implication/equivalence ==> <-> <=>
+        "increaseIndentPattern": "^.*({|\\(|\\[|=|<>|==>|<->|<=>)$",
+        // decrease indent when lib ends; disabled as sometimes surprising
+        // "decreaseIndentPattern": "^.*\\.$"
+    },
+    "onEnterRules": [
+        {
+            // indent after first semicolon for lib rules 
+            "beforeText": "^\\s*(nounif|noselect|select|query|noninterf|not|elimtrue|lemma|axiom|restriction).*?;$",
+            "action": { "indent": "indent" }
+        }
+    ]
+}

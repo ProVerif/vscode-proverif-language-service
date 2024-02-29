@@ -31,7 +31,8 @@
 					".pv",
 					".pvl",
 					".pcv"
-				]
+				],
+				"configuration": "./language-configuration.json"
 			}
 		],
 		"configuration": {

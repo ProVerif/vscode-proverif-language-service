@@ -211,7 +211,7 @@
       "end": "#",
       "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
       "patterns": [
-        { "include": "#comments" },       
+        { "include": "#comments" },
         { "include": "#one_var_decl" },
         { "include": "#new_decl" },
         { "include": "#letinsimple" },
@@ -223,13 +223,29 @@
       ]
     },
     {
-      "//comment": "Declaration of queries,not,nounif,lemmas,restrictions,axioms,noninterf,weaksecret",
-      "begin": "(nounif|select|noselect|query|axiom|lemma|restriction|not|weaksecret)",
-      "end": "(;)",
+      "//comment": "Declaration of nounifselect,query,noninterf,not,lemma",
+      "begin": "(nounif|noselect|select|query|noninterf|not|axiom|lemma|restriction)",
+      "end": "(\\.)",
       "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
       "endCaptures": { "1": { "name": "keyword.proverif" } },
       "patterns": [
-        { "include": "#vars_decl" }
+        { "include": "#comments" },
+        { "include": "#vars_decl" },
+        { "include": "#keywords_query" },
+        { "include": "#slash_value" },
+				{ "include": "#options" }
+      ]
+    },
+    {
+      "//comment" : "Declaration of weaksecret",
+      "begin": "(weaksecret)",
+      "end": "(\\.)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.proverif" }
+      },
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#variable_ident" }
       ]
     },
     {
@@ -293,6 +309,12 @@
 				"1": { "name": "entity.name.function.proverif" }
       }
     },
+    "variable_ident": {
+      "match" : "([a-zA-Z][a-zA-Z'0-9_]*)",
+      "captures": {
+				"1": { "name": "variable.other.proverif" }
+      }
+    },
     "comments": {
 			"name": "comment.multiline",
 			"begin": "\\(\\*",
@@ -323,6 +345,10 @@
           "name": "variable.other.proverif"
         }
       ]
+    },
+    "slash_value": {
+      "match": "\\/\\s*(\\d+)",
+      "captures": { "1": { "name": "constant.numeric.proverif" } }
     },
     "forall": {
       "begin": "(forall)",

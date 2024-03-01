@@ -10,13 +10,10 @@
 		{ "include": "#comments" },
     {
       "//comment" : "Declaration of functions",
-      "begin" : "(fun)(?=(\\s|\\n))",
-      "end"   : "(\\.)",
+      "begin" : "(fun)",
+      "end"   : "\\.",
       "beginCaptures": {
         "1": { "name": "keyword.control.proverif" }
-      },
-      "endCaptures": {
-        "1": { "name": "keyword.proverif" }
       },
       "patterns": [
         { "include": "#comments"},
@@ -51,23 +48,15 @@
           ]
         },
         {
-          "begin" : "([a-zA-Z][a-zA-Z'0-9_]*)",
-          "end"   : "(:)",
-          "beginCaptures" : {
-            "1": {
-              "name": "entity.name.function.proverif"
-            }
-          },
-          "endCaptures" : {
-            "1": {
-              "name": "keyword.control.proverif"
-            }
-          },
-          "patterns": [
+          "begin" : "\\(",
+          "end"   : "\\)",
+          "patterns" : [
             { "include": "#comments"},
             { "include": "#type_ident" }
           ]
-        }
+        },
+        { "include": "#fun_ident" },
+        { "include": "#options" }
       ]
     },
     {

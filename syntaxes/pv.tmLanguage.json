@@ -1,0 +1,59 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "pv",
+	"scopeName": "source.pv",
+	"fileTypes": [
+		"pv",
+		"pvl"
+	],
+	"patterns": [
+		{ "include": "#comments" },
+		{
+			"//comment": "Declarations nounif, select, query, noninterf, not, lemma",
+			"begin": "(nounif|noselect|select|query|noninterf|not|lemma|axiom|restriction)",
+			"end": "\\.",
+			"beginCaptures": {
+				"1": { "name": "keyword.control.proverif" }
+			},
+			"patterns": [
+				{ "include": "#nevartype_semi" }
+			]
+		}
+	],
+	"repository": {
+		"identifier_variable": {
+			"name": "variable.other.proverif",
+			"match": "[a-zA-Z'0-9_]+"
+		},
+		"nevartype_semi": {
+			"begin": "",
+			"end": ";",
+			"patterns": [{ "include": "#nevartype" }]
+		},
+		"nevartype": {
+			"match": "((?:[a-zA-Z'0-9_]+\\s*,?\\s*)+)\\s*:\\s*([a-zA-Z'0-9_]+)",
+			"captures": {
+				"1": { "patterns": [{ "include": "#identifier_variable" }] },
+				"2": { "name": "entity.name.type.proverif" }
+			}
+		},
+		"comments": {
+			"patterns": [
+				{
+					"name": "comment.line.documentation.pv",
+					"begin": "\\(\\*",
+					"end": "\\*\\)",
+					"patterns": [{ "include": "#commentContents" }]
+				}
+			]
+		},
+		"commentContents": {
+			"patterns": [
+				{
+					"match": "\\b(TODO|FIXME|XXX|NOTE)\\b:?",
+					"name": "keyword.todo.pv"
+				}
+			]
+		}
+	}
+}

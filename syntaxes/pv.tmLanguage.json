@@ -9,9 +9,20 @@
 	"patterns": [
 		{ "include": "#comments" },
     {
+      "//comment": "Declaration of type",
+      "begin": "(type)\\s+",
+      "end": "(?=\\.)",
+      "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
+      "patterns": [
+        { "include": "#comments"},
+        { "include": "#options"},
+        { "include": "#type_ident" }
+      ]
+    },
+    {
       "//comment" : "Declaration of functions",
       "begin" : "(fun)\\s+",
-      "end"   : "\\.",
+      "end": "(?=\\.)",
       "beginCaptures": {
         "1": { "name": "keyword.control.proverif" }
       },
@@ -23,18 +34,39 @@
           "patterns" : [
             { "include": "#comments"},
             { "include": "#reduc"},
+            { "include": "#options" },
             { "include": "#type_ident" }
           ]
         },
         { "include": "#parenthesis_typeseq" },
-        { "include": "#fun_ident" },
-        { "include": "#options" }
+        { "include": "#options" },
+        { "include": "#fun_ident" }
+      ]
+    },
+    {
+      "//comment" : "Declaration of const, free, channels",
+      "begin" : "(const|free|channel)\\s+",
+      "end": "(?=\\.)",
+      "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
+      "patterns": [
+        { "include": "#comments" },
+        { 
+          "begin": ":",
+          "end": "(?=\\.)",
+          "patterns": [
+            { "include": "#comments"},
+            { "include": "#options" },
+            { "include": "#type_ident" }
+          ]
+        },
+        { "include": "#options" },
+        { "include": "#variable_ident" }
       ]
     },
     {
       "//comment": "Declaration of reduc and equations",
       "begin" : "(reduc|equation)\\s+",
-      "end": "\\.",
+      "end": "(?=\\.)",
       "beginCaptures": {
         "1": {
           "name": "keyword.control.proverif"
@@ -44,9 +76,7 @@
         { "include": "#comments"},
         { "include": "#options" },
         { "include": "#forall" },
-        { "include": "#letinsimple" },
-        { "include": "#boolean"},
-        { "include": "#nat"}
+        { "include": "#extended_equation" }
       ]
     },
     {
@@ -83,36 +113,6 @@
         { "include": "#comments"},
         { "include": "#parenthesis_funseq" },
         { "include": "#fun_ident" }
-      ]
-    },
-    {
-      "//comment" : "Declaration of const, free, channels",
-      "begin" : "(const|free|channel)\\s+",
-      "end": "(?=\\.)",
-      "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
-      "patterns": [
-        { "include": "#comments" },
-        { 
-          "begin": ":",
-          "end": "(?=\\.)",
-          "patterns": [
-            { "include": "#comments"},
-            { "include": "#options" },
-            { "include": "#type_ident" }
-          ]
-        },
-        { "include": "#variable_ident" }
-      ]
-    },
-    {
-      "//comment": "Declaration of type",
-      "begin": "(type)\\s+",
-      "end": "(?=\\.)",
-      "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
-      "patterns": [
-        { "include": "#comments"},
-        { "include": "#options"},
-        { "include": "#type_ident" }
       ]
     },
     {
@@ -298,10 +298,19 @@
       "match": "\\/\\s*(\\d+)",
       "captures": { "1": { "name": "constant.numeric.proverif" } }
     },
+    "extended_equation": {
+      "patterns": [
+				{
+          "match": "(\\b(let|in)\\b)",
+          "name": "keyword.operator.proverif"
+				},
+        { "include": "#term" }
+      ]
+    },
     "forall": {
       "begin": "(forall)",
-      "end": "(;)",
-      "captures": { "1": { "name": "keyword.control.proverif" } },
+      "end": ";",
+      "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
       "patterns": [
         { "include": "#comments"},
         { "include": "#vars_decl" }
@@ -343,6 +352,19 @@
         }
       ]
     },
+    "term": {
+			"patterns": [
+				{
+          "match": "(\\b(fail|choice|diff)\\b)",
+          "name": "keyword.operator.proverif"
+				},
+        {
+          "name": "keyword.operator.arithmetic.proverif",
+          "match": "(-|^|\\+)"
+        },
+        { "include": "#nat"}
+			]
+		},
     "boolean": {
 			"patterns": [
 				{

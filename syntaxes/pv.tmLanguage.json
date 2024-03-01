@@ -73,14 +73,11 @@
     {
       "//comment": "Declaration of reduc and equations",
       "begin" : "(reduc|equation)(?=(\\s|\\n))",
-      "end": "(\\.)",
+      "end": "\\.",
       "beginCaptures": {
         "1": {
           "name": "keyword.control.proverif"
         }
-      },
-      "endCaptures": {
-        "1": { "name": "keyword.proverif" }
       },
       "patterns": [ 
         { "include": "#comments"},
@@ -94,12 +91,11 @@
     {
       "//comment": "Declaration of set parameters",
       "begin" : "(set)\\s+(\\w+)",
-      "end": "(\\.)",
+      "end": "\\.",
       "beginCaptures": { 
         "1": { "name": "keyword.control.proverif" },
         "2": { "name": "storage.modifier" } 
       },
-      "endCaptures": { "1": { "name": "keyword.proverif" } },
       "patterns": [
         { "include": "#comments" },
         { "include": "#boolean"},
@@ -118,12 +114,11 @@
     {
       "//comment": "Declaration of expand",
       "begin" : "(expand)\\s+(\\w+)",
-      "end": "(\\.)",
+      "end": "\\.",
       "beginCaptures": { 
         "1": { "name": "keyword.control.proverif" },
         "2": { "name": "entity.name.function.proverif" } 
       },
-      "endCaptures": { "1": { "name": "keyword.proverif" } },
       "patterns": [
         { "include": "#comments"},
         { "include": "#boolean"},
@@ -133,31 +128,27 @@
     {
       "//comment" : "Declaration of const, free, channels",
       "begin" : "(const|free|channel)(?=(\\s|\\n))",
-      "end"   : "(\\.)",
+      "end"   : "\\.",
       "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
-      "endCaptures": { "1": { "name": "keyword.proverif" } },
       "patterns": [
         { "include": "#comments" },
         { 
-          "begin": "(:)",
+          "begin": ":",
           "end": "(?=\\.)",
-          "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
-          "endCaptures": { "1": { "name": "keyword.proverif" } },
           "patterns": [
-            { "include": "#options" },
             { "include": "#comments"},
+            { "include": "#options" },
             { "include": "#type_ident" }
           ]
         },
-        { "include": "#fun_ident" }
+        { "include": "#variable_ident" }
       ]
     },
     {
       "//comment": "Declaration of type",
       "begin": "(type)(?!\\w)",
-      "end": "(\\.)",
+      "end": "\\.",
       "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
-      "endCaptures": { "1": { "name": "keyword.proverif" } },
       "patterns": [
         { "include": "#comments"},
         { "include": "#options"},
@@ -167,9 +158,8 @@
     {
       "//comment": "Declaration of clauses, elimtrue",
       "begin" : "(clauses|elimtrue)(?=(\\s|\\n))",
-      "end": "(\\.)",
+      "end": "\\.",
       "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
-      "endCaptures": { "1": { "name": "keyword.proverif" } },
       "patterns": [
         { "include": "#comments"},
         { "include": "#boolean"},
@@ -184,12 +174,9 @@
     {
       "//comment" : "Declaration of events, tables, predicate",
       "begin" : "(event|table|pred)(?=(\\s|\\n))",
-      "end"   : "(\\.)",
+      "end"   : "\\.",
       "beginCaptures": {
         "1": { "name": "keyword.control.proverif" }
-      },
-      "endCaptures": {
-        "1": { "name": "keyword.proverif" }
       },
       "patterns": [
         { "include": "#comments"},
@@ -201,8 +188,8 @@
             { "include": "#type_ident" }
           ]
         },
-        { "include": "#options" },
-        { "include": "#fun_ident" }
+        { "include": "#fun_ident" },
+        { "include": "#options" }
       ]
     },
     {
@@ -225,9 +212,8 @@
     {
       "//comment": "Declaration of nounifselect,query,noninterf,not,lemma",
       "begin": "(nounif|noselect|select|query|noninterf|not|axiom|lemma|restriction)",
-      "end": "(\\.)",
+      "end": "\\.",
       "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
-      "endCaptures": { "1": { "name": "keyword.proverif" } },
       "patterns": [
         { "include": "#comments" },
         { "include": "#vars_decl" },
@@ -239,7 +225,7 @@
     {
       "//comment" : "Declaration of weaksecret",
       "begin": "(weaksecret)",
-      "end": "(\\.)",
+      "end": "\\.",
       "beginCaptures": {
         "1": { "name": "keyword.control.proverif" }
       },
@@ -264,13 +250,10 @@
     {
       "//comment" : "Declaration of let and letfun and def",
       "begin": "(let|letfun)\\s+([a-zA-Z][a-zA-Z'0-9_]*)",
-      "end": "(\\.)",
+      "end": "\\.",
       "beginCaptures": {
         "1": { "name": "keyword.control.proverif" },
         "2": { "name": "entity.name.function.proverif" }
-      },
-      "endCaptures": {
-        "1": { "name": "keyword.proverif" }
       },
       "patterns": [
         { "include": "#comments" },
@@ -506,7 +489,7 @@
             { "include": "#type_ident" }
           ]
         },
-        { "include": "#fun_ident" },
+        { "include": "#variable_ident" },
         { "include": "#vars_options" }
       ]
     },

@@ -10,7 +10,7 @@
 		{ "include": "#comments" },
     {
       "//comment" : "Declaration of functions",
-      "begin" : "(fun)",
+      "begin" : "(fun)\\s+",
       "end"   : "\\.",
       "beginCaptures": {
         "1": { "name": "keyword.control.proverif" }
@@ -18,50 +18,22 @@
       "patterns": [
         { "include": "#comments"},
         {
-          "begin" : "(?<=:)",
+          "begin" : ":",
           "end"   : "(?=\\.)",
           "patterns" : [
-            { "include": "#options" },
             { "include": "#comments"},
-            {
-              "//comment": "Declaration of reduc",
-              "begin" : "(reduc)(?=(\\s|\\n))",
-              "end": "(?=\\.)",
-              "beginCaptures": {
-                "1": {
-                  "name": "keyword.control.proverif"
-                }
-              },
-              "patterns": [ 
-                { "include": "#comments"},
-                { "include": "#options" },
-                { "include": "#forall_mayfail" },
-                { "include": "#letinsimple" },
-                { "include": "#boolean"},
-                { 
-                  "match" : "otherwise",
-                  "name": "keyword.control.proverif"
-                }
-              ]
-            },
+            { "include": "#reduc"},
             { "include": "#type_ident" }
           ]
         },
-        {
-          "begin" : "\\(",
-          "end"   : "\\)",
-          "patterns" : [
-            { "include": "#comments"},
-            { "include": "#type_ident" }
-          ]
-        },
+        { "include": "#parenthesis_typeseq" },
         { "include": "#fun_ident" },
         { "include": "#options" }
       ]
     },
     {
       "//comment": "Declaration of reduc and equations",
-      "begin" : "(reduc|equation)(?=(\\s|\\n))",
+      "begin" : "(reduc|equation)\\s+",
       "end": "\\.",
       "beginCaptures": {
         "1": {
@@ -94,7 +66,7 @@
     {
       "//comment": "Declaration of cryptoverif lines",
       "name": "string markup.deleted",
-      "begin" : "(proba|proof|letproba|implementation)(?!\\w)",
+      "begin" : "(proba|proof|letproba|implementation)\\s+",
       "end": "\\.",
       "patterns": [
         { "include": "#comments"}
@@ -102,22 +74,21 @@
     },
     {
       "//comment": "Declaration of expand",
-      "begin" : "(expand)\\s+(\\w+)",
+      "begin" : "(expand)\\s+",
       "end": "\\.",
       "beginCaptures": { 
-        "1": { "name": "keyword.control.proverif" },
-        "2": { "name": "entity.name.function.proverif" } 
+        "1": { "name": "keyword.control.proverif" }
       },
       "patterns": [
         { "include": "#comments"},
-        { "include": "#boolean"},
-        { "include": "#nat"}
+        { "include": "#parenthesis_funseq" },
+        { "include": "#fun_ident" }
       ]
     },
     {
       "//comment" : "Declaration of const, free, channels",
-      "begin" : "(const|free|channel)(?=(\\s|\\n))",
-      "end"   : "\\.",
+      "begin" : "(const|free|channel)\\s+",
+      "end": "(?=\\.)",
       "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
       "patterns": [
         { "include": "#comments" },
@@ -135,8 +106,8 @@
     },
     {
       "//comment": "Declaration of type",
-      "begin": "(type)(?!\\w)",
-      "end": "\\.",
+      "begin": "(type)\\s+",
+      "end": "(?=\\.)",
       "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
       "patterns": [
         { "include": "#comments"},
@@ -147,36 +118,25 @@
     {
       "//comment": "Declaration of clauses, elimtrue",
       "begin" : "(clauses|elimtrue)(?=(\\s|\\n))",
-      "end": "\\.",
+      "end": "(?=\\.)",
       "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
       "patterns": [
         { "include": "#comments"},
         { "include": "#boolean"},
         { "include": "#nat" },
-        { 
-          "match": ";|->",
-          "name": "keyword.control.proverif"
-        },
         { "include": "#forall" }
       ]
     },
     {
       "//comment" : "Declaration of events, tables, predicate",
       "begin" : "(event|table|pred)(?=(\\s|\\n))",
-      "end"   : "\\.",
+      "end": "(?=\\.)",
       "beginCaptures": {
         "1": { "name": "keyword.control.proverif" }
       },
       "patterns": [
         { "include": "#comments"},
-        {
-          "begin" : "\\(",
-          "end"   : "\\)",
-          "patterns" : [
-            { "include": "#comments"},
-            { "include": "#type_ident" }
-          ]
-        },
+        { "include": "#parenthesis_typeseq" },
         { "include": "#fun_ident" },
         { "include": "#options" }
       ]
@@ -201,7 +161,7 @@
     {
       "//comment": "Declaration of nounifselect,query,noninterf,not,lemma",
       "begin": "(nounif|noselect|select|query|noninterf|not|axiom|lemma|restriction)",
-      "end": "\\.",
+      "end": "(?=\\.)",
       "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
       "patterns": [
         { "include": "#comments" },
@@ -214,7 +174,7 @@
     {
       "//comment" : "Declaration of weaksecret",
       "begin": "(weaksecret)",
-      "end": "\\.",
+      "end": "(?=\\.)",
       "beginCaptures": {
         "1": { "name": "keyword.control.proverif" }
       },
@@ -239,7 +199,7 @@
     {
       "//comment" : "Declaration of let and letfun and def",
       "begin": "(let|letfun)\\s+([a-zA-Z][a-zA-Z'0-9_]*)",
-      "end": "\\.",
+      "end": "(?=\\.)",
       "beginCaptures": {
         "1": { "name": "keyword.control.proverif" },
         "2": { "name": "entity.name.function.proverif" }
@@ -286,6 +246,22 @@
       "captures": {
 				"1": { "name": "variable.other.proverif" }
       }
+    },
+    "parenthesis_funseq": {
+      "begin" : "\\(",
+      "end"   : "\\)",
+      "patterns" : [
+        { "include": "#comments"},
+        { "include": "#fun_ident" }
+      ]
+    },
+    "parenthesis_typeseq": {
+      "begin" : "\\(",
+      "end"   : "\\)",
+      "patterns" : [
+        { "include": "#comments"},
+        { "include": "#type_ident" }
+      ]
     },
     "comments": {
 			"name": "comment.multiline",
@@ -398,6 +374,27 @@
           "name": "constant.numeric.proverif"
         }
       }
+    },
+    "reduc": {
+      "//comment": "Declaration of reduc",
+      "begin" : "(reduc)\\s+",
+      "end": "(?=\\.)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.proverif"
+        }
+      },
+      "patterns": [ 
+        { "include": "#comments"},
+        { "include": "#options" },
+        { "include": "#forall_mayfail" },
+        { "include": "#letinsimple" },
+        { "include": "#boolean"},
+        { 
+          "match" : "otherwise",
+          "name": "keyword.control.proverif"
+        }
+      ]
     },
     "letinsimple": {
       "begin": "(let)\\s+([a-zA-Z][a-zA-Z'0-9_]*)\\s+(=)",

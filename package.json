@@ -35,6 +35,13 @@
 				"configuration": "./language-configuration.json"
 			}
 		],
+		"grammars": [
+            {
+                "language": "pv",
+                "scopeName": "source.pv",
+                "path": "./syntaxes/pv.tmLanguage.json"
+            }
+        ],
 		"configuration": {
 			"title": "ProVerif",
 			"properties": {

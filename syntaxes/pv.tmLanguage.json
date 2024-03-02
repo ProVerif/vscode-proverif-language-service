@@ -190,12 +190,48 @@
 				{ "include": "#options" }
       ]
     },
+    {
+      "//comment": "Declaration of noninterf",
+      "begin": "(\\b(noninterf)\\b)",
+      "end": "(?=\\.)",
+      "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#nevartype" },
+        { "include": "#niseq" },
+				{ "include": "#options" }
+      ]
+    },
+    {
+      "//comment" : "Declaration of weaksecret",
+      "begin": "(\\b(weaksecret)\\b)",
+      "end": "(?=\\.)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.proverif" }
+      },
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#variable_ident" }
+      ]
+    },
+    {
+      "//comment": "Declaration of not",
+      "begin": "(\\b(not)\\b)",
+      "end": "(?=\\.)",
+      "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#nevartype" },
+        { "include": "#gterm" },
+				{ "include": "#options" }
+      ]
+    },
 
 
 
     {
       "//comment": "Declaration of noninterf,not,lemma",
-      "begin": "(\\b(query|noninterf|not|axiom|lemma|restriction)\\b)",
+      "begin": "(\\b(axiom|lemma|restriction)\\b)",
       "end": "(?=\\.)",
       "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
       "patterns": [
@@ -265,18 +301,6 @@
         { "include": "#boolean" },
         { "include": "#nat" },
         { "include": "#options" }
-      ]
-    },
-    {
-      "//comment" : "Declaration of weaksecret",
-      "begin": "(weaksecret)",
-      "end": "(?=\\.)",
-      "beginCaptures": {
-        "1": { "name": "keyword.control.proverif" }
-      },
-      "patterns": [
-        { "include": "#comments" },
-        { "include": "#variable_ident" }
       ]
     },
     {
@@ -465,6 +489,41 @@
         }
 			]
 		},
+    "gterm": {
+			"patterns": [
+        {
+          "match": "(\\b(table|phase|event|inj\\-event|table|let|in|new|attacker|mess)\\b)",
+          "name": "keyword.control.proverif"
+        },
+        {
+          "match": "(\\b(choice|diff|not)\\b)",
+          "name": "keyword.operator.proverif"
+        },
+        {
+          "match": "(\\b(true|false)\\b)",
+          "name": "constant.language.proverif"
+        },
+        {
+          "match": "(-|\\+)",
+          "name": "keyword.operator.arithmetic.proverif"
+        },
+        {
+          "match": "(<|>|<=|>=|=|<>|\\|\\||&&)",
+          "name": "keyword.operator.comparison.proverif"
+        },
+        {
+          "match": "(\\b([0-9]+)\\b)",
+          "name": "constant.numeric.proverif"
+        },
+        {
+          "begin": "\\(",
+          "end": "\\)",
+          "patterns": [
+            { "include": "#gterm" }
+          ]
+        }
+			]
+		},
     "gformat": {
       "patterns": [
         { "include": "#comments" },
@@ -623,6 +682,22 @@
           "name": "keyword.control.proverif"
         },
         { "include": "#options"}
+      ]
+    },
+    "niseq":{
+      "patterns": [
+        { "include": "#comments"},
+        {
+          "begin": "\\(",
+          "end": "\\)",
+          "patterns": [
+            { "include": "#term" }
+          ]
+        },
+        {
+          "match": "(\\b(among)\\b)",
+          "name": "keyword.control.proverif"
+        }
       ]
     },
 

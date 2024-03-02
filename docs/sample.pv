@@ -64,4 +64,6 @@ axiom key:key_t; table(Storage(key)).
 restriction key:key_t; attacker(key).
 
 process
+  new key: key_t;
+  phase 2; 
 0

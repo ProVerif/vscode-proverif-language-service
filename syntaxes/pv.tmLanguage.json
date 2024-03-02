@@ -315,19 +315,12 @@
     },
     {
       "//comment": "Declaration of the main process",
-      "begin": "(process|equivalence)(?=(\\s|\\n))",
+      "begin": "(\\b(process|equivalence)\\b)",
       "end": "#",
       "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
       "patterns": [
         { "include": "#comments" },
-        { "include": "#one_var_decl" },
-        { "include": "#new_decl" },
-        { "include": "#letinsimple" },
-        { "include": "#diff_terms" },
-        { "include": "#keywords" },
-        { "include": "#boolean" },
-        { "include": "#nat" },
-        { "include": "#options" }
+        { "include": "#tprocess" }
       ]
     }
   ],

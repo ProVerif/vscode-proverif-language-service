@@ -25,6 +25,8 @@ pred pConfirmedPriv(key_t)[solveOnce].
 channel public.
 channel public2.
 
+table Storage(key_t).
+
 letfun no_conversion(key: key_t) = key. 
 let publish(key: key_t or fail) = out(public, key). 
 
@@ -32,9 +34,13 @@ set attacker = passive.
 set reconstructTrace = 2.
 set privateCommOnPublicTerms = false.
 
-select key:key_t; let key2 = convert(key2) in mess(cell_tally( *e_id), *x) phase 2 / 8000 [ignoreAFewTimes].
-noselect key:key_t; let key2 = convert(key2) in mess(cell_tally( *e_id), *x) / 8000 [ignoreAFewTimes].
-nounif x:bitstring; mess(new cprivR1,*x) [ignoreAFewTimes].
+select key:key_t; let key2 = convert(key) in table(Storage(key)) phase 2 / 8000 [conclusion].
+noselect key:key_t; let key2 = convert(key) in event(Confirmed()) / 8000 [conclusion].
+nounif x:bitstring; mess(public, x) [ignoreAFewTimes].
+
+query attacker(key_c).
+query event(Confirmed()).
+query key: key_t; inj-event(Confirmed2(key)) ==> inj-event(Confirmed2(key)).
 
 process
 0

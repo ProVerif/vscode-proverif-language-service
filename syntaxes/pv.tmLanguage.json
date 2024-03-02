@@ -178,6 +178,18 @@
 				{ "include": "#options" }
       ]
     },
+    {
+      "//comment": "Declaration of query",
+      "begin": "(\\b(query)\\b)",
+      "end": "(?=\\.)",
+      "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#nevartype" },
+        { "include": "#tquery" },
+				{ "include": "#options" }
+      ]
+    },
 
 
 
@@ -600,6 +612,17 @@
             { "include": "#gformat" }
           ]
         }
+      ]
+    },
+    "tquery": {
+      "patterns": [
+        { "include": "#comments"},
+        { "include": "#gterm" },
+        {
+          "match": "(\\b(public_vars|secret|putbegin|event|inj-event|attacker)\\b)",
+          "name": "keyword.control.proverif"
+        },
+        { "include": "#options"}
       ]
     },
 

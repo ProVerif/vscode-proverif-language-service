@@ -590,12 +590,19 @@
         { "include": "#comments" },
         { "include": "#new_decl" },
         {
-          "match": "(\\b(foreach|yield|if|then|in|out|let|suchthat|insert|get|event|phase|sync)\\b)",
+          "match": "(\\b(foreach|yield|if|then|else|in|out|let|suchthat|insert|get|event|phase|sync)\\b)",
           "name": "keyword.control.proverif"
         },
         {
           "match": "!",
           "name": "keyword.control.proverif"
+        },
+        {
+          "begin": "\\(",
+          "end": "\\)",
+          "patterns": [
+            { "include": "#tprocess" }
+          ]
         },
         { "include": "#pterm" },
         { "include": "#options" }

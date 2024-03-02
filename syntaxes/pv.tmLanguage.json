@@ -301,19 +301,15 @@
         { "include": "#fun_ident" }
       ]
     },
-
-
-
     {
       "//comment": "Declaration of lemma",
-      "begin": "(\\b(axiom|lemma|restriction)\\b)",
+      "begin" : "(\\b(axiom|lemma|restriction)\\b)",
       "end": "(?=\\.)",
       "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
       "patterns": [
-        { "include": "#comments" },
+        { "include": "#comments"},
         { "include": "#nevartype" },
-        { "include": "#keywords_query" },
-        { "include": "#slash_value" },
+        { "include": "#tlemma"},
         { "include": "#options" }
       ]
     },
@@ -602,6 +598,16 @@
         },
         { "include": "#pterm" },
         { "include": "#options" }
+      ]
+    },
+    "tlemma": {
+      "patterns": [
+        { "include": "#comments" },
+        {
+          "match": "(\\b(for|public_vars|secret)\\b)",
+          "name": "keyword.control.proverif"
+        },
+        { "include": "#gterm" }
       ]
     },
     "nevartype": {

@@ -59,6 +59,9 @@ def MyMacro(type_1, type_2, type_converter) {
 }
 expand MyMacro(key_t, key2_t, converter).
 
+lemma key:key_t, key2: key2_t; mess(public,key) [induction,fullSat].
+axiom key:key_t; table(Storage(key)).
+restriction key:key_t; attacker(key).
 
 process
 0

@@ -165,8 +165,35 @@
         { "include": "#storage_ident"}
       ]
     },
+    {
+      "//comment": "Declaration of nounif and select",
+      "begin": "(\\b(nounif|noselect|select)\\b)",
+      "end": "(?=\\.)",
+      "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#nevartype" },
+        { "include": "#tfnebindingseq" },
+        { "include": "#slash_value" },
+				{ "include": "#options" }
+      ]
+    },
 
 
+
+    {
+      "//comment": "Declaration of noninterf,not,lemma",
+      "begin": "(\\b(query|noninterf|not|axiom|lemma|restriction)\\b)",
+      "end": "(?=\\.)",
+      "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#nevartype" },
+        { "include": "#keywords_query" },
+        { "include": "#slash_value" },
+				{ "include": "#options" }
+      ]
+    },
     {
       "//comment" : "Declaration of channels",
       "begin" : "(channel)\\s+",
@@ -226,19 +253,6 @@
         { "include": "#boolean" },
         { "include": "#nat" },
         { "include": "#options" }
-      ]
-    },
-    {
-      "//comment": "Declaration of nounifselect,query,noninterf,not,lemma",
-      "begin": "(nounif|noselect|select|query|noninterf|not|axiom|lemma|restriction)",
-      "end": "(?=\\.)",
-      "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
-      "patterns": [
-        { "include": "#comments" },
-        { "include": "#nevartype" },
-        { "include": "#keywords_query" },
-        { "include": "#slash_value" },
-				{ "include": "#options" }
       ]
     },
     {
@@ -393,6 +407,13 @@
         {
           "match": "(\\b([0-9]+)\\b)",
           "name": "constant.numeric.proverif"
+        },
+        {
+          "begin": "\\(",
+          "end": "\\)",
+          "patterns": [
+            { "include": "#term" }
+          ]
         }
 			]
 		},
@@ -422,9 +443,44 @@
           "match": "(\\b([0-9]+)\\b)",
           "name": "constant.numeric.proverif"
         },
-        { "include": "#new_decl" }
+        { "include": "#new_decl" },
+        {
+          "begin": "\\(",
+          "end": "\\)",
+          "patterns": [
+            { "include": "#pterm" }
+          ]
+        }
 			]
 		},
+    "gformat": {
+      "patterns": [
+        { "include": "#comments" },
+        {
+          "match": "(\\b(choice|new|let|in)\\b)",
+          "name": "keyword.control.proverif"
+        },
+        {
+          "match": "(\\+)",
+          "name": "keyword.operator.arithmetic.proverif"
+        },
+        {
+          "match": "!",
+          "name": "keyword.control.proverif"
+        },
+        {
+          "match": "(\\b([0-9]+)\\b)",
+          "name": "constant.numeric.proverif"
+        },
+        {
+          "begin": "\\(",
+          "end": "\\)",
+          "patterns": [
+            { "include": "#gformat" }
+          ]
+        }
+      ]
+    },
     "forallvartype": {
       "begin": "(forall)",
       "end": ";",
@@ -433,21 +489,6 @@
         { "include": "#comments"},
         { "include": "#nevartype" }
       ]
-    },
-    "nevartype": {
-      "match": "([\\s,a-zA-Z0-9'_]*)(:)\\s*([a-zA-Z0-9'_]*)",
-      "captures":{
-        "1": { 
-          "patterns": [
-            { 
-              "match": "[a-zA-Z0-9'_]*",
-              "name": "variable.other.proverif"
-            }
-          ]
-        },
-        "2": { "name": "keyword.control.proverif" },
-        "3": { "name": "entity.name.type.proverif" }
-      }
     },
     "tprocess": {
       "patterns": [
@@ -465,20 +506,33 @@
         { "include": "#options" }
       ]
     },
-    "nevartypeorfail": {
-      "match": "([\\s,a-zA-Z0-9'_]*)(:)\\s*([a-zA-Z0-9'_]*)(\\s+or\\s+fail)?",
+    "nevartype": {
+      "match": "([\\s,a-zA-Z0-9'_]+):\\s*([a-zA-Z0-9'_]+)",
       "captures":{
         "1": { 
           "patterns": [
             { 
-              "match": "[a-zA-Z0-9'_]*",
+              "match": "[a-zA-Z0-9'_]+",
               "name": "variable.other.proverif"
             }
           ]
         },
-        "2": { "name": "keyword.control.proverif" },
-        "3": { "name": "entity.name.type.proverif" },
-        "4": { "name": "keyword.control.proverif" }
+        "2": { "name": "entity.name.type.proverif" }
+      }
+    },
+    "nevartypeorfail": {
+      "match": "([\\s,a-zA-Z0-9'_]+):\\s*([a-zA-Z0-9'_]+)(\\s+or\\s+fail)?",
+      "captures":{
+        "1": { 
+          "patterns": [
+            { 
+              "match": "[a-zA-Z0-9'_]+",
+              "name": "variable.other.proverif"
+            }
+          ]
+        },
+        "2": { "name": "entity.name.type.proverif" },
+        "3": { "name": "keyword.control.proverif" }
       }
     },
     "new_decl": {
@@ -500,6 +554,52 @@
         },
         { "include": "#variable_ident" },
         { "include": "#vars_options" }
+      ]
+    },
+    "tfnebindingseq": {
+      "patterns": [
+        { "include": "#comments" },
+        {
+          "begin": "(let)",
+          "end": "(in)",
+          "beginCaptures": {"1": {"name": "keyword.control.proverif" }},
+          "endCaptures": {"1": {"name": "keyword.control.proverif" }},
+          "patterns": [
+            { "include": "#comments"},
+            { "include": "#gformat" }
+          ]
+        },
+        {
+          "begin": "<-",
+          "end": ";",
+          "patterns": [
+            { "include": "#comments"},
+            { "include": "#gformat" }
+          ]
+        },
+        {
+          "begin": "(\\b(table|event|mess)\\b)\\s*\\(",
+          "end": "\\)(\\s*phase\\s*[0-9]+)?",
+          "beginCaptures": {"1": {"name": "keyword.control.proverif" }},
+          "endCaptures": {
+            "1": {
+              "patterns": [
+                {
+                  "match": "phase",
+                  "name": "keyword.control.proverif"
+                },
+                {
+                  "match": "[0-9]+",
+                  "name": "constant.numeric.proverif"
+                }
+              ]
+            }
+          },
+          "patterns": [
+            { "include": "#comments"},
+            { "include": "#gformat" }
+          ]
+        }
       ]
     },
 

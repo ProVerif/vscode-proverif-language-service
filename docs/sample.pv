@@ -25,6 +25,9 @@ pred pConfirmedPriv(key_t)[solveOnce].
 channel public.
 channel public2.
 
+letfun no_conversion(key: key_t) = key. 
+let publish(key: key_t or fail) = out(public, key). 
+
 equation forall key,key':key_t; 
 	key = key'.
 

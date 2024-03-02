@@ -1,13 +1,13 @@
 {
-	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
-	"name": "pv",
-	"scopeName": "source.pv",
-	"fileTypes": [
-		"pv",
-		"pvl"
-	],
-	"patterns": [
-		{ "include": "#comments" },
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "pv",
+  "scopeName": "source.pv",
+  "fileTypes": [
+    "pv",
+    "pvl"
+  ],
+  "patterns": [
+    { "include": "#comments" },
     {
       "//comment": "Declaration of type",
       "begin": "(\\b(type)\\b)",
@@ -175,7 +175,7 @@
         { "include": "#nevartype" },
         { "include": "#tfnebindingseq" },
         { "include": "#slash_value" },
-				{ "include": "#options" }
+        { "include": "#options" }
       ]
     },
     {
@@ -187,7 +187,7 @@
         { "include": "#comments" },
         { "include": "#nevartype" },
         { "include": "#tquery" },
-				{ "include": "#options" }
+        { "include": "#options" }
       ]
     },
     {
@@ -199,7 +199,7 @@
         { "include": "#comments" },
         { "include": "#nevartype" },
         { "include": "#niseq" },
-				{ "include": "#options" }
+        { "include": "#options" }
       ]
     },
     {
@@ -223,7 +223,7 @@
         { "include": "#comments" },
         { "include": "#nevartype" },
         { "include": "#gterm" },
-				{ "include": "#options" }
+        { "include": "#options" }
       ]
     },
 
@@ -239,7 +239,7 @@
         { "include": "#nevartype" },
         { "include": "#keywords_query" },
         { "include": "#slash_value" },
-				{ "include": "#options" }
+        { "include": "#options" }
       ]
     },
     {
@@ -316,8 +316,8 @@
         { "include": "#nevartype" }
       ]
     }
-	],
-	"repository": {
+  ],
+  "repository": {
     "type_ident": {
       "match" : "([a-zA-Z'0-9_]+)",
       "name": "entity.name.type.proverif"
@@ -359,13 +359,13 @@
       ]
     },
     "comments": {
-			"name": "comment.multiline",
-			"begin": "\\(\\*",
-			"end": "\\*\\)",
+      "name": "comment.multiline",
+      "begin": "\\(\\*",
+      "end": "\\*\\)",
       "patterns": [
         { "include": "#comments" }
       ]
-		},
+    },
     "options": {
       "begin": "\\[",
       "end": "\\]",
@@ -395,15 +395,15 @@
     },
     "extended_equation": {
       "patterns": [
-				{
+        {
           "match": "(\\b(let|in)\\b)",
           "name": "keyword.control.proverif"
-				},
+        },
         { "include": "#term" }
       ]
     },
     "settings": {
-			"patterns": [
+      "patterns": [
         {
           "match": "(\\b(true|false)\\b)",
           "name": "constant.language.proverif"
@@ -420,14 +420,14 @@
           "match" : "([a-zA-Z'0-9_]+)",
           "name": "support.constant.proverif"
         }
-			]
-		},
+      ]
+    },
     "term": {
-			"patterns": [
-				{
+      "patterns": [
+        {
           "match": "(\\b(fail|choice|diff|not)\\b)",
           "name": "keyword.operator.proverif"
-				},
+        },
         {
           "match": "(\\b(true|false)\\b)",
           "name": "constant.language.proverif"
@@ -451,18 +451,18 @@
             { "include": "#term" }
           ]
         }
-			]
-		},
+      ]
+    },
     "pterm": {
-			"patterns": [
-				{
+      "patterns": [
+        {
           "match": "(\\b(if|then|let|suchthat|event|insert|get)\\b)",
           "name": "keyword.control.proverif"
-				},
-				{
+        },
+        {
           "match": "(\\b(choice|diff|not)\\b)",
           "name": "keyword.operator.proverif"
-				},
+        },
         {
           "match": "(\\b(true|false)\\b)",
           "name": "constant.language.proverif"
@@ -487,10 +487,10 @@
             { "include": "#pterm" }
           ]
         }
-			]
-		},
+      ]
+    },
     "gterm": {
-			"patterns": [
+      "patterns": [
         {
           "match": "(\\b(table|phase|event|inj\\-event|table|let|in|new|attacker|mess)\\b)",
           "name": "keyword.control.proverif"
@@ -522,8 +522,8 @@
             { "include": "#gterm" }
           ]
         }
-			]
-		},
+      ]
+    },
     "gformat": {
       "patterns": [
         { "include": "#comments" },
@@ -742,25 +742,25 @@
       ]
     },
     "boolean": {
-			"patterns": [
-				{
-					"match": "(=|==>|\\|\\||<|<=|>=|>|&&)",
+      "patterns": [
+        {
+          "match": "(=|==>|\\|\\||<|<=|>=|>|&&)",
           "name": "keyword.operator.comparison"
-				},
-				{
-					"match": "\\b(and|not|or)\\b",
-					"captures": {
-						"1": {
-							"name": "support.function.pervasives.boolean-operatons.proverif"
-						}
-					}
-				},
+        },
+        {
+          "match": "\\b(and|not|or)\\b",
+          "captures": {
+            "1": {
+              "name": "support.function.pervasives.boolean-operatons.proverif"
+            }
+          }
+        },
         {
           "match": "(\\b(true|false)\\b)",
           "name": "constant.language"
         }
-			]
-		},
+      ]
+    },
     "nat": {
       "match": "(?<!\\w)([0-9]+)(?!\\w)",
       "captures": {
@@ -877,5 +877,5 @@
         { "include": "#nat" }
       ]
     }
-	}
+  }
 }

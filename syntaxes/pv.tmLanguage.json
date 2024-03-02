@@ -10,7 +10,7 @@
 		{ "include": "#comments" },
     {
       "//comment": "Declaration of type",
-      "begin": "(type)\\s+",
+      "begin": "(\\b(type)\\b)",
       "end": "(?=\\.)",
       "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
       "patterns": [
@@ -21,7 +21,7 @@
     },
     {
       "//comment" : "Declaration of functions",
-      "begin" : "(fun)\\s+",
+      "begin" : "(\\b(fun)\\b)",
       "end": "(?=\\.)",
       "beginCaptures": {
         "1": { "name": "keyword.control.proverif" }
@@ -44,8 +44,24 @@
       ]
     },
     {
-      "//comment" : "Declaration of const, free, channels",
-      "begin" : "(const|free|channel)\\s+",
+      "//comment": "Declaration of reduc and equations",
+      "begin" : "(\\b(reduc|equation)\\b)",
+      "end": "(?=\\.)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.proverif"
+        }
+      },
+      "patterns": [ 
+        { "include": "#comments"},
+        { "include": "#options" },
+        { "include": "#forallvartype" },
+        { "include": "#extended_equation" }
+      ]
+    },
+    {
+      "//comment" : "Declaration of const, free",
+      "begin" : "(\\b(const|free)\\b)",
       "end": "(?=\\.)",
       "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
       "patterns": [
@@ -64,19 +80,42 @@
       ]
     },
     {
-      "//comment": "Declaration of reduc and equations",
-      "begin" : "(reduc|equation)\\s+",
+      "//comment" : "Declaration of events, predicate",
+      "begin" : "(\\b(event|pred)\\b)",
       "end": "(?=\\.)",
       "beginCaptures": {
-        "1": {
-          "name": "keyword.control.proverif"
-        }
+        "1": { "name": "keyword.control.proverif" }
       },
-      "patterns": [ 
+      "patterns": [
         { "include": "#comments"},
-        { "include": "#options" },
-        { "include": "#forall" },
-        { "include": "#extended_equation" }
+        { "include": "#parenthesis_typeseq" },
+        { "include": "#fun_ident" },
+        { "include": "#options" }
+      ]
+    },
+    {
+      "//comment" : "Declaration of tables",
+      "begin" : "(\\b(table)\\b)",
+      "end": "(?=\\.)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.proverif" }
+      },
+      "patterns": [
+        { "include": "#comments"},
+        { "include": "#parenthesis_typeseq" },
+        { "include": "#fun_ident" }
+      ]
+    },
+
+
+    {
+      "//comment" : "Declaration of channels",
+      "begin" : "(channel)\\s+",
+      "end": "(?=\\.)",
+      "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#variable_ident" }
       ]
     },
     {
@@ -124,21 +163,7 @@
         { "include": "#comments"},
         { "include": "#boolean"},
         { "include": "#nat" },
-        { "include": "#forall" }
-      ]
-    },
-    {
-      "//comment" : "Declaration of events, tables, predicate",
-      "begin" : "(event|table|pred)(?=(\\s|\\n))",
-      "end": "(?=\\.)",
-      "beginCaptures": {
-        "1": { "name": "keyword.control.proverif" }
-      },
-      "patterns": [
-        { "include": "#comments"},
-        { "include": "#parenthesis_typeseq" },
-        { "include": "#fun_ident" },
-        { "include": "#options" }
+        { "include": "#forallvartype" }
       ]
     },
     {
@@ -165,7 +190,7 @@
       "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
       "patterns": [
         { "include": "#comments" },
-        { "include": "#vars_decl" },
+        { "include": "#nevartype" },
         { "include": "#keywords_query" },
         { "include": "#slash_value" },
 				{ "include": "#options" }
@@ -193,7 +218,7 @@
       },
       "patterns":[
         { "include": "#comments" },
-        { "include": "#vars_decl" }
+        { "include": "#nevartype" }
       ]
     },
     {
@@ -224,7 +249,7 @@
             
           ]
         },
-        { "include": "#vars_decl" }
+        { "include": "#nevartype" }
       ]
     }
 	],
@@ -302,20 +327,60 @@
       "patterns": [
 				{
           "match": "(\\b(let|in)\\b)",
-          "name": "keyword.operator.proverif"
+          "name": "keyword.control.proverif"
 				},
         { "include": "#term" }
       ]
     },
-    "forall": {
+    "term": {
+			"patterns": [
+				{
+          "match": "(\\b(fail|choice|diff|not)\\b)",
+          "name": "keyword.operator.proverif"
+				},
+        {
+          "match": "(\\b(true|false)\\b)",
+          "name": "constant.language.proverif"
+        },
+        {
+          "match": "(-|\\+)",
+          "name": "keyword.operator.arithmetic.proverif"
+        },
+        {
+          "match": "(=|<>|\\|\\||&&)",
+          "name": "keyword.operator.comparison.proverif"
+        },
+        {
+          "match": "(\\b([0-9]+)\\b)",
+          "name": "constant.numeric.proverif"
+        }
+			]
+		},
+    "forallvartype": {
       "begin": "(forall)",
       "end": ";",
       "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
       "patterns": [
         { "include": "#comments"},
-        { "include": "#vars_decl" }
+        { "include": "#nevartype" }
       ]
     },
+    "nevartype": {
+      "match": "([a-zA-Z][\\s,a-zA-Z0-9'_]*)(:)\\s*([a-zA-Z][a-zA-Z0-9'_]*)",
+      "captures":{
+        "1": { 
+          "patterns": [
+            { 
+              "match": "[a-zA-Z][a-zA-Z0-9'_]*",
+              "name": "variable.other.proverif"
+            }
+          ]
+        },
+        "2": { "name": "keyword.control.proverif" },
+        "3": { "name": "entity.name.type.proverif" }
+      }
+    },
+
     "forall_mayfail": {
       "begin": "(forall)",
       "end": "(;)",
@@ -345,35 +410,18 @@
       "patterns": [
         { "include": "#comments"},
         { "include": "#options" },
-        { "include": "#forall" },
+        { "include": "#forallvartype" },
         { 
           "match" : "otherwise",
           "name": "keyword.control.proverif"
         }
       ]
     },
-    "term": {
-			"patterns": [
-				{
-          "match": "(\\b(fail|choice|diff)\\b)",
-          "name": "keyword.operator.proverif"
-				},
-        {
-          "name": "keyword.operator.arithmetic.proverif",
-          "match": "(-|^|\\+)"
-        },
-        { "include": "#nat"}
-			]
-		},
     "boolean": {
 			"patterns": [
 				{
 					"match": "(=|==>|\\|\\||<|<=|>=|>|&&)",
-					"captures": {
-						"1": {
-							"name": "support.function.pervasives.boolean-operatons.proverif"
-						}
-					}
+          "name": "keyword.operator.comparison"
 				},
 				{
 					"match": "\\b(and|not|or)\\b",
@@ -384,7 +432,7 @@
 					}
 				},
         {
-          "match": "(?<!\\w)true|false(?!\\w)",
+          "match": "(\\b(true|false)\\b)",
           "name": "constant.language"
         }
 			]
@@ -453,21 +501,6 @@
           "name":  "keyword.control.proverif"
         }
       ]    
-    },
-    "vars_decl": {
-      "match": "([a-zA-Z][\\s,a-zA-Z0-9'_]*)(:)\\s*([a-zA-Z][a-zA-Z0-9'_]*)",
-      "captures":{
-        "1": { 
-          "patterns": [
-            { 
-              "match": "[a-zA-Z][a-zA-Z0-9'_]*",
-              "name": "variable.other.proverif"
-            }
-          ]
-        },
-        "2": { "name": "keyword.control.proverif" },
-        "3": { "name": "entity.name.type.proverif" }
-      }
     },
     "one_var_decl": {
       "match": "([a-zA-Z_][a-zA-Z0-9'_]*)(:)\\s*([a-zA-Z][a-zA-Z0-9'_]*)",

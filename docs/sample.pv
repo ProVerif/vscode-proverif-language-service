@@ -32,8 +32,9 @@ set attacker = passive.
 set reconstructTrace = 2.
 set privateCommOnPublicTerms = false.
 
-equation forall key,key':key_t; 
-	key = key'.
+select key:key_t; let key2 = convert(key2) in mess(cell_tally( *e_id), *x) phase 2 / 8000 [ignoreAFewTimes].
+noselect key:key_t; let key2 = convert(key2) in mess(cell_tally( *e_id), *x) / 8000 [ignoreAFewTimes].
+nounif x:bitstring; mess(new cprivR1,*x) [ignoreAFewTimes].
 
 process
 0

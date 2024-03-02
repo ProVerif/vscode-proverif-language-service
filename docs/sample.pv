@@ -42,5 +42,10 @@ query attacker(key_c).
 query event(Confirmed()).
 query key: key_t; inj-event(Confirmed2(key)) ==> inj-event(Confirmed2(key)).
 
+noninterf key_f2 among (key_f).
+
+not key: key_t; attacker(key).
+not key: key_t; mess(public, key).
+
 process
 0

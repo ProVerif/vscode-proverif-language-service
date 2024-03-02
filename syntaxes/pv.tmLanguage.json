@@ -33,7 +33,23 @@
           "end"   : "(?=\\.)",
           "patterns" : [
             { "include": "#comments"},
-            { "include": "#reduc"},
+            {
+              "begin" : "(\\b(reduc)\\b)",
+              "end"   : "(?=\\.)",
+              "beginCaptures": {
+                "1": { "name": "keyword.control.proverif" }
+              },
+              "patterns" : [
+                { "include": "#comments"},
+                {
+                  "match": "(\\b(otherwise)\\b)",
+                  "name": "keyword.control.proverif"
+                },
+                { "include": "#forallmayfailvartype" },
+                { "include": "#extended_equation" },
+                { "include": "#options" }
+              ]
+            },
             { "include": "#options" },
             { "include": "#type_ident" }
           ]
@@ -340,14 +356,6 @@
     "storage_ident": {
       "match" : "([a-zA-Z'0-9_]+)",
       "name": "storage.modifier.proverif"
-    },
-    "parenthesis_funseq": {
-      "begin" : "\\(",
-      "end"   : "\\)",
-      "patterns" : [
-        { "include": "#comments"},
-        { "include": "#fun_ident" }
-      ]
     },
     "parenthesis_typeseq": {
       "begin" : "\\(",
@@ -724,183 +732,6 @@
           "match": "(\\b(among)\\b)",
           "name": "keyword.control.proverif"
         }
-      ]
-    },
-
-
-
-
-
-    "forall_mayfail": {
-      "begin": "(forall)",
-      "end": "(;)",
-      "captures": { "1": { "name": "keyword.control.proverif" } },
-      "patterns": [
-        { "include": "#comments" },
-        {
-          "match": "([\\s,a-zA-Z0-9'_]*)(:)\\s*([a-zA-Z'0-9_]+)(\\s+(or)\\s+(fail))?",
-          "captures":{
-            "1": { 
-              "patterns": [
-                { 
-                  "match": "[a-zA-Z'0-9_]+",
-                  "name": "variable.other.proverif"
-                }
-              ]
-            },
-            "2": { "name": "keyword.control.proverif" },
-            "3": { "name": "entity.name.type.proverif" },
-            "4": { "name": "keyword.control.proverif" },
-            "5": { "name": "constant.language" }
-          }
-        }
-      ]
-    },
-    "reduc_rules": {
-      "patterns": [
-        { "include": "#comments"},
-        { "include": "#options" },
-        { "include": "#forallvartype" },
-        { 
-          "match" : "otherwise",
-          "name": "keyword.control.proverif"
-        }
-      ]
-    },
-    "boolean": {
-      "patterns": [
-        {
-          "match": "(=|==>|\\|\\||<|<=|>=|>|&&)",
-          "name": "keyword.operator.comparison"
-        },
-        {
-          "match": "\\b(and|not|or)\\b",
-          "captures": {
-            "1": {
-              "name": "support.function.pervasives.boolean-operatons.proverif"
-            }
-          }
-        },
-        {
-          "match": "(\\b(true|false)\\b)",
-          "name": "constant.language"
-        }
-      ]
-    },
-    "nat": {
-      "match": "(?<!\\w)([0-9]+)(?!\\w)",
-      "captures": {
-        "1": {
-          "name": "constant.numeric.proverif"
-        }
-      }
-    },
-    "reduc": {
-      "//comment": "Declaration of reduc",
-      "begin" : "(reduc)\\s+",
-      "end": "(?=\\.)",
-      "beginCaptures": {
-        "1": {
-          "name": "keyword.control.proverif"
-        }
-      },
-      "patterns": [ 
-        { "include": "#comments"},
-        { "include": "#options" },
-        { "include": "#forall_mayfail" },
-        { "include": "#letinsimple" },
-        { "include": "#boolean"},
-        { 
-          "match" : "otherwise",
-          "name": "keyword.control.proverif"
-        }
-      ]
-    },
-    "letinsimple": {
-      "begin": "(let)\\s+([a-zA-Z'0-9_]+)\\s+(=)",
-      "end": "(\\s|^)(in)(\\s|\\n)",
-      "beginCaptures": {
-        "1": { "name": "keyword.control.proverif" },
-        "2": { "name": "variable.other.proverif" },
-        "3": { "name": "support.function.pervasives.boolean-operatons.proverif" }
-      },
-      "endCaptures": { "2": { "name": "keyword.control.proverif" } },
-      "patterns":[
-        { "include": "#comments" },
-        { "include": "#new_decl" },
-        { "include": "#one_var_decl" },
-        { "include": "#letinsimple" },
-        { "include": "#keywords" },
-        { "include": "#boolean" },
-        { "include": "#nat" }
-      ]    
-    },
-    "letinsimple_query": {
-      "begin": "(let)\\s+([a-zA-Z'0-9_]+)\\s+(=)",
-      "end": "(\\s|^)(in)(\\s|\\n)",
-      "beginCaptures": {
-        "1": { "name": "keyword.control.proverif" },
-        "2": { "name": "variable.other.proverif" },
-        "3": { "name": "support.function.pervasives.boolean-operatons.proverif" }
-      },
-      "endCaptures": { "2": { "name": "keyword.control.proverif" } },
-      "patterns":[
-        { "include": "#comments" },
-        { 
-          "match": "new",
-          "name":  "keyword.control.proverif"
-        }
-      ]    
-    },
-    "one_var_decl": {
-      "match": "([a-zA-Z0-9'_]*)(:)\\s*([a-zA-Z0-9'_]*)",
-      "captures":{
-        "1": { "name": "variable.other.proverif" },
-        "2": { "name": "keyword.control.proverif" },
-        "3": { "name": "entity.name.type.proverif" }
-      }
-    },
-    "keywords": {
-      "patterns": [
-        {
-          "match": "(?<!\\w)(if|then|let|else|in|event|out|get|insert|suchthat|phase|sync)(?!\\w)",
-          "captures": {
-            "1": { "name": "keyword.control.proverif" }
-          }
-        },
-        {
-          "match": "([;!])",
-          "captures": {
-            "1": { "name": "keyword.control.proverif" }
-          }
-        }
-      ]
-    },
-    "keywords_query": {
-      "patterns": [
-        {
-          "match": "(?<!\\w)(attacker|mess|table|event|among|public_vars|inj-event|new|secret|putbegin)(?!\\w)",
-          "captures": {
-            "1": { "name": "keyword.control.proverif" }
-          }
-        },
-        {
-          "match": "([;!])",
-          "captures": {
-            "1": { "name": "keyword.control.proverif" }
-          }
-        }
-      ]
-    },
-    "diff_terms":{
-      "begin": "(choice|diff)\\s*\\[",
-      "end": "\\]",
-      "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
-      "patterns": [
-        { "include": "#comments" },
-        { "include": "#diff_terms" },
-        { "include": "#one_var_decl" },
-        { "include": "#nat" }
       ]
     }
   }

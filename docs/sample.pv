@@ -3,8 +3,10 @@ type key_t [private].
 
 fun convert(key_t): key2_t.
 fun reverse(key2_t): key_t
-	reduc forall key:key_t; 
-		reverse(convert(key)) = key [private].
+  reduc forall key:key_t; 
+    reverse(convert(key)) = key
+  otherwise forall key: key_t;
+    reverse(convert(key)) = key [private].
 
 reduc forall key: key_t; let g = convert(key) in convert2(g) = true.
 equation forall key: key_t; let g = convert(key) in true.
@@ -66,4 +68,4 @@ restriction key:key_t; attacker(key).
 process
   new key: key_t;
   phase 2; 
-0
+  0

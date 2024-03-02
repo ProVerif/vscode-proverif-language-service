@@ -291,7 +291,8 @@
       "beginCaptures": {
         "1": { "name": "keyword.control.proverif" }
       },
-      "patterns":[
+      "patterns": [
+        { "include": "#comments"},
         {
           "begin" : "{",
           "end": "(?=})",
@@ -410,6 +411,7 @@
     },
     "extended_equation": {
       "patterns": [
+        { "include": "#comments" },
         {
           "match": "(\\b(let|in)\\b)",
           "name": "keyword.control.proverif"
@@ -419,6 +421,7 @@
     },
     "settings": {
       "patterns": [
+        { "include": "#comments" },
         {
           "match": "(\\b(true|false)\\b)",
           "name": "constant.language.proverif"
@@ -439,6 +442,7 @@
     },
     "term": {
       "patterns": [
+        { "include": "#comments" },
         {
           "match": "(\\b(fail|choice|diff|not)\\b)",
           "name": "keyword.operator.proverif"
@@ -470,6 +474,7 @@
     },
     "pterm": {
       "patterns": [
+        { "include": "#comments" },
         {
           "match": "(\\b(if|then|let|suchthat|event|insert|get)\\b)",
           "name": "keyword.control.proverif"
@@ -506,6 +511,7 @@
     },
     "gterm": {
       "patterns": [
+        { "include": "#comments" },
         {
           "match": "(\\b(table|phase|event|inj\\-event|table|let|in|new|attacker|mess)\\b)",
           "name": "keyword.control.proverif"

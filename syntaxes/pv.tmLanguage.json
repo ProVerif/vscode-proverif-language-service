@@ -230,7 +230,7 @@
     },
     {
       "//comment" : "Declaration of def",
-      "begin": "(def)\\s+([a-zA-Z][a-zA-Z'0-9_]*)",
+      "begin": "(def)\\s+([a-zA-Z'0-9_]*)",
       "end": "(?={)",
       "beginCaptures": {
         "1": { "name": "keyword.control.proverif" },
@@ -244,19 +244,19 @@
 	],
 	"repository": {
     "type_ident": {
-      "match" : "([a-zA-Z][a-zA-Z'0-9_]*)",
+      "match" : "([a-zA-Z'0-9_]*)",
       "captures": {
 				"1": { "name": "entity.name.type.proverif" }
       }
     },
     "fun_ident": {
-      "match" : "([a-zA-Z][a-zA-Z'0-9_]*)",
+      "match" : "([a-zA-Z'0-9_]*)",
       "captures": {
 				"1": { "name": "entity.name.function.proverif" }
       }
     },
     "variable_ident": {
-      "match" : "([a-zA-Z][a-zA-Z'0-9_]*)",
+      "match" : "([a-zA-Z'0-9_]*)",
       "captures": {
 				"1": { "name": "variable.other.proverif" }
       }
@@ -300,7 +300,7 @@
       "patterns": [
         { "include": "#comments"},
         {
-          "match": "[a-zA-Z][a-zA-Z'0-9_]*",
+          "match": "[a-zA-Z'0-9_]*",
           "name": "entity.name.tag.proverif"
         }
       ]
@@ -311,7 +311,7 @@
       "patterns": [
         { "include": "#comments"},
         {
-          "match": "[a-zA-Z][a-zA-Z'0-9_]*",
+          "match": "[a-zA-Z'0-9_]*",
           "name": "variable.other.proverif"
         }
       ]
@@ -363,12 +363,12 @@
       ]
     },
     "nevartype": {
-      "match": "([a-zA-Z][\\s,a-zA-Z0-9'_]*)(:)\\s*([a-zA-Z][a-zA-Z0-9'_]*)",
+      "match": "([\\s,a-zA-Z0-9'_]*)(:)\\s*([a-zA-Z0-9'_]*)",
       "captures":{
         "1": { 
           "patterns": [
             { 
-              "match": "[a-zA-Z][a-zA-Z0-9'_]*",
+              "match": "[a-zA-Z0-9'_]*",
               "name": "variable.other.proverif"
             }
           ]
@@ -390,12 +390,12 @@
       ]
     },
     "nevartypeorfail": {
-      "match": "([a-zA-Z][\\s,a-zA-Z0-9'_]*)(:)\\s*([a-zA-Z][a-zA-Z0-9'_]*)(\\s+or\\s+fail)?",
+      "match": "([\\s,a-zA-Z0-9'_]*)(:)\\s*([a-zA-Z0-9'_]*)(\\s+or\\s+fail)?",
       "captures":{
         "1": { 
           "patterns": [
             { 
-              "match": "[a-zA-Z][a-zA-Z0-9'_]*",
+              "match": "[a-zA-Z0-9'_]*",
               "name": "variable.other.proverif"
             }
           ]
@@ -413,12 +413,12 @@
       "patterns": [
         { "include": "#comments" },
         {
-          "match": "([a-zA-Z][\\s,a-zA-Z0-9'_]*)(:)\\s*([a-zA-Z][a-zA-Z'0-9_]*)(\\s+(or)\\s+(fail))?",
+          "match": "([\\s,a-zA-Z0-9'_]*)(:)\\s*([a-zA-Z'0-9_]*)(\\s+(or)\\s+(fail))?",
           "captures":{
             "1": { 
               "patterns": [
                 { 
-                  "match": "[a-zA-Z][a-zA-Z'0-9_]*",
+                  "match": "[a-zA-Z'0-9_]*",
                   "name": "variable.other.proverif"
                 }
               ]
@@ -492,7 +492,7 @@
       ]
     },
     "letinsimple": {
-      "begin": "(let)\\s+([a-zA-Z][a-zA-Z'0-9_]*)\\s+(=)",
+      "begin": "(let)\\s+([a-zA-Z'0-9_]*)\\s+(=)",
       "end": "(\\s|^)(in)(\\s|\\n)",
       "beginCaptures": {
         "1": { "name": "keyword.control.proverif" },
@@ -511,7 +511,7 @@
       ]    
     },
     "letinsimple_query": {
-      "begin": "(let)\\s+([a-zA-Z][a-zA-Z'0-9_]*)\\s+(=)",
+      "begin": "(let)\\s+([a-zA-Z'0-9_]*)\\s+(=)",
       "end": "(\\s|^)(in)(\\s|\\n)",
       "beginCaptures": {
         "1": { "name": "keyword.control.proverif" },
@@ -528,7 +528,7 @@
       ]    
     },
     "one_var_decl": {
-      "match": "([a-zA-Z_][a-zA-Z0-9'_]*)(:)\\s*([a-zA-Z][a-zA-Z0-9'_]*)",
+      "match": "([a-zA-Z_][a-zA-Z0-9'_]*)(:)\\s*([a-zA-Z0-9'_]*)",
       "captures":{
         "1": { "name": "variable.other.proverif" },
         "2": { "name": "keyword.control.proverif" },

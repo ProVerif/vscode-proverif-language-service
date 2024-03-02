@@ -47,5 +47,12 @@ noninterf key_f2 among (key_f).
 not key: key_t; attacker(key).
 not key: key_t; mess(public, key).
 
+param cryptoverif.
+
+elimtrue key: key_t or fail; pConfirmed2(key).
+
+clauses forall key: key_t; pConfirmed2(key);
+        forall key: key_t; pConfirmed2(key).
+
 process
 0

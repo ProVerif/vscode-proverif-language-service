@@ -3,6 +3,4 @@ Any contributor to this project contributes under the MIT license.
 
 Some of the code used here is originally written by Alessio Stralla and published under the Apache license. The code originates from an articles series introducing [antrl](https://github.com/Strumenta/article-antlr4-c3) and how to implement the [go to definition functionality](https://github.com/Strumenta/article-lsp-go-to-definition). 
 
-The grammer of ProVerif is copied over from [ProVerif](https://gitlab.inria.fr/bblanche/proverif), and falls under GNU.
-
-The TextMate grammar is copied over from [another vscode extension](https://github.com/georgio/proverif-vscode), and falls under GNU.
+The grammer of ProVerif (`pitparser.mly`) is copied over from [ProVerif](https://gitlab.inria.fr/bblanche/proverif), and falls under GNU.

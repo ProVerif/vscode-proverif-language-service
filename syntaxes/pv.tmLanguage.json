@@ -268,6 +268,39 @@
         { "include": "#term"}
       ]
     },
+    {
+      "//comment" : "Declaration of def",
+      "begin": "(\\b(def)\\b)",
+      "end": "}",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.proverif" }
+      },
+      "patterns":[
+        {
+          "begin" : "{",
+          "end": "(?=})",
+          "patterns" : [{ "include": "$self"}]
+        },
+        { "include": "#fun_ident" }
+      ]
+    },
+    {
+      "//comment": "Declaration of expand",
+      "begin" : "(\\b(expand)\\b)",
+      "end": "(?=\\.)",
+      "beginCaptures": { 
+        "1": { "name": "keyword.control.proverif" }
+      },
+      "patterns": [
+        { "include": "#comments"},
+        {
+          "begin" : "\\(",
+          "end"   : "\\)",
+          "patterns" : [{ "include": "#comments"}]
+        },
+        { "include": "#fun_ident" }
+      ]
+    },
 
 
 
@@ -285,19 +318,6 @@
       ]
     },
     {
-      "//comment": "Declaration of expand",
-      "begin" : "(expand)\\s+",
-      "end": "\\.",
-      "beginCaptures": { 
-        "1": { "name": "keyword.control.proverif" }
-      },
-      "patterns": [
-        { "include": "#comments"},
-        { "include": "#parenthesis_funseq" },
-        { "include": "#fun_ident" }
-      ]
-    },
-    {
       "//comment": "Declaration of the main process",
       "begin": "(process|equivalence)(?=(\\s|\\n))",
       "end": "#",
@@ -312,19 +332,6 @@
         { "include": "#boolean" },
         { "include": "#nat" },
         { "include": "#options" }
-      ]
-    },
-    {
-      "//comment" : "Declaration of def",
-      "begin": "(def)\\s+([a-zA-Z'0-9_]+)",
-      "end": "(?={)",
-      "beginCaptures": {
-        "1": { "name": "keyword.control.proverif" },
-        "2": { "name": "entity.name.function.proverif" }
-      },
-      "patterns":[
-        { "include": "#comments" },
-        { "include": "#nevartype" }
       ]
     }
   ],

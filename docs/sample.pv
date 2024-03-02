@@ -54,5 +54,11 @@ elimtrue key: key_t or fail; pConfirmed2(key).
 clauses forall key: key_t; pConfirmed2(key);
         forall key: key_t; pConfirmed2(key).
 
+def MyMacro(type_1, type_2, type_converter) {
+  fun type_converter(type_1): type_2.
+}
+expand MyMacro(key_t, key2_t, converter).
+
+
 process
 0

@@ -226,19 +226,24 @@
         { "include": "#options" }
       ]
     },
-
-
-
     {
-      "//comment": "Declaration of noninterf,not,lemma",
-      "begin": "(\\b(axiom|lemma|restriction)\\b)",
+      "//comment": "Declaration of cryptoverif lines",
+      "begin" : "(\\b(param|proba|proof|letproba|implementation)\\b)",
+      "end": "\\.",
+      "patterns": [
+        { "include": "#comments"},
+        { "include": "source.cv"}
+      ]
+    },
+    {
+      "//comment": "Declaration of elimtrue",
+      "begin": "(\\b(elimtrue)\\b)",
       "end": "(?=\\.)",
       "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
       "patterns": [
         { "include": "#comments" },
-        { "include": "#nevartype" },
-        { "include": "#keywords_query" },
-        { "include": "#slash_value" },
+        { "include": "#nevartypeorfail" },
+        { "include": "#term" },
         { "include": "#options" }
       ]
     },
@@ -253,12 +258,30 @@
       ]
     },
     {
-      "//comment": "Declaration of cryptoverif lines",
-      "name": "string markup.deleted",
-      "begin" : "(proba|proof|letproba|implementation)\\s+",
-      "end": "\\.",
+      "//comment": "Declaration of clauses",
+      "begin" : "(\\b(clauses)\\b)",
+      "end": "(?=\\.)",
+      "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
       "patterns": [
-        { "include": "#comments"}
+        { "include": "#comments"},
+        { "include": "#forallmayfailvartype" },
+        { "include": "#term"}
+      ]
+    },
+
+
+
+    {
+      "//comment": "Declaration of lemma",
+      "begin": "(\\b(axiom|lemma|restriction)\\b)",
+      "end": "(?=\\.)",
+      "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#nevartype" },
+        { "include": "#keywords_query" },
+        { "include": "#slash_value" },
+        { "include": "#options" }
       ]
     },
     {
@@ -272,18 +295,6 @@
         { "include": "#comments"},
         { "include": "#parenthesis_funseq" },
         { "include": "#fun_ident" }
-      ]
-    },
-    {
-      "//comment": "Declaration of clauses, elimtrue",
-      "begin" : "(clauses|elimtrue)(?=(\\s|\\n))",
-      "end": "(?=\\.)",
-      "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
-      "patterns": [
-        { "include": "#comments"},
-        { "include": "#boolean"},
-        { "include": "#nat" },
-        { "include": "#forallvartype" }
       ]
     },
     {
@@ -553,12 +564,21 @@
       ]
     },
     "forallvartype": {
-      "begin": "(forall)",
+      "begin": "(\\b(forall)\\b)",
       "end": ";",
       "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
       "patterns": [
         { "include": "#comments"},
         { "include": "#nevartype" }
+      ]
+    },
+    "forallmayfailvartype": {
+      "begin": "(\\b(forall)\\b)",
+      "end": ";",
+      "beginCaptures": { "1": { "name": "keyword.control.proverif" } },
+      "patterns": [
+        { "include": "#comments"},
+        { "include": "#nevartypeorfail" }
       ]
     },
     "tprocess": {

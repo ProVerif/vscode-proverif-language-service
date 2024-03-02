@@ -76,12 +76,16 @@ Go to definition:
 - [x] Invalidate cache of consumers when library stored
 - [ ] Support additional ways of declaring variables (e.g. in REDUCTION lib)
 
+Support writing ProVerif:
+- [x] Configure language
+- [x] Add syntax highlighting
+- [ ] Add semantic tokens (`connection.languages.semanticTokens`)
+- [ ] Support syntactical autocomplete (`connection.onCompletion`)
+- [ ] Support semantical autocomplete (see https://tomassetti.me/code-completion-with-antlr4-c3/#chapter12)
+
 Refactorings:
 - [ ] Introduce refactoring for free c: channel to replace with channel c
-- [ ] Introduce rename refactorings
-
-Code completion:
-- [ ] Override connection.onCompletion to return keywords, variables, ...; see https://tomassetti.me/code-completion-with-antlr4-c3/#chapter12
+- [x] Introduce rename refactorings
 
 Integrate Testing output:
 - [ ] Integrate with [VSCode testing](https://code.visualstudio.com/api/extension-guides/testing) to show output of proverif nicely.

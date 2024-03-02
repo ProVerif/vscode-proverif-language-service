@@ -14,15 +14,14 @@ Visual Studio Code extension for ProVerif files (.pv, .pvl, .pcv).
 ![Screenshot showing how the extension shows errors from ProVerif](./docs/sample.png)
 
 Functionality:
-- Highlights the first syntax errors ProVerif finds with the corresponding error. For libraries, see below.
+- Adds syntax highlighting.
+- Highlights the first syntax error ProVerif finds. For libraries, see below.
 - Hover over an identifier to learn more about it.
 - Press `CTRL` and click on an identifier to navigate to its definition or find all references of the definition.
 - Press `F2` to rename an identifier.
 - Press `CTRL`+`SHIFT`+`Space` to show signature help (automatically shown when typing `(`)
 - Press `CTRL`+`SHIFT`+`B` to execute ProVerif over the currently opened file.
 - Configure the proverif bin in the settings, else it is taken from the `$PATH`.
-
-Use in combination with https://github.com/georgio/proverif-vscode to get syntax highlighting.
 
 Settings:
 - `Proverif Path`: Custom path to the proverif binary.

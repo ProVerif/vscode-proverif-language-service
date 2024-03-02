@@ -1,0 +1,32 @@
+type key2_t.
+type key_t [private].
+
+fun convert(key_t): key2_t.
+fun reverse(key2_t): key_t
+	reduc forall key:key_t; 
+		reverse(convert(key)) = key [private].
+
+reduc forall key: key_t; let g = convert(key) in convert2(g) = true.
+equation forall key: key_t; let g = convert(key) in true.
+
+const key_c: key_t.
+const key_c2: key_t[private].
+free key_f: key_t.
+free key_f2: key_t[private].
+
+event Confirmed.
+event Confirmed2(key_t).
+event ConfirmedPriv(key_t)[solveOnce].
+
+pred pConfirmed.
+pred pConfirmed2(key_t).
+pred pConfirmedPriv(key_t)[solveOnce].
+
+channel public.
+channel public2.
+
+equation forall key,key':key_t; 
+	key = key'.
+
+process
+0

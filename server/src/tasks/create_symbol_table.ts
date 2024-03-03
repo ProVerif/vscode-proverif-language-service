@@ -136,12 +136,12 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
     public visitTreducmayfail = (ctx: TreducmayfailContext) => {
         this.withContext(ctx, () => {
             collectForallmayfailvartype(ctx.forallmayfailvartype()).forEach(typedTerminal => {
-                this.registerTypedTerminal(typedTerminal, DeclarationType.Parameter)
-            })
-        })
+                this.registerTypedTerminal(typedTerminal, DeclarationType.Parameter);
+            });
+        });
 
         return this.visitChildren(ctx);
-    }
+    };
 
     public visitTprocess = (ctx: TprocessContext) => {
         return this.withContext(ctx, () => {

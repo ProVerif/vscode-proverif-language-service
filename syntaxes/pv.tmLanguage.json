@@ -540,7 +540,7 @@
       "patterns": [
         { "include": "#comments" },
         {
-          "match": "(\\b(table|phase|event|inj\\-event|table|let|in|new|attacker|mess)\\b)",
+          "match": "(\\b(table|phase|event|inj\\-event|table|let|in|new|attacker|mess|is_nat)\\b)",
           "name": "keyword.control.proverif"
         },
         {

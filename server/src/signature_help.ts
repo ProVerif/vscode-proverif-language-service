@@ -3,12 +3,11 @@ import {
     Position,
     SignatureHelp,
     SignatureInformation,
-    TextDocumentIdentifier,
-    uinteger
+    TextDocumentIdentifier
 } from "vscode-languageserver";
 import {DocumentManagerInterface} from "./document_manager";
 import {DefinitionSymbol, getDefinitionSymbolFromPosition} from "./go_to_definition";
-import {getSignaturePosition, SignaturePosition} from "./parseTree/get_signature_position";
+import {getSignaturePosition} from "./parseTree/get_signature_position";
 
 export const getSignatureHelp = async (identifier: TextDocumentIdentifier, position: Position, documentManager: DocumentManagerInterface): Promise<SignatureHelp | undefined> => {
     const parseResult = await documentManager.getParseResult(identifier);

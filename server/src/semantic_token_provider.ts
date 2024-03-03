@@ -38,6 +38,7 @@ const getTokenType = (declarationType: DeclarationType): number | undefined => {
         case DeclarationType.Variable:
             return tokenTypes.indexOf('variable');
         case DeclarationType.Fun:
+        case DeclarationType.Let:
         case DeclarationType.LetFun:
         case DeclarationType.Event:
         case DeclarationType.Table:

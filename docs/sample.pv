@@ -11,4 +11,4 @@ query attacker(message).
 
 process
   new key: key_t;
-  out(c, enc(key, message))
+  out(d, enc(key, message))

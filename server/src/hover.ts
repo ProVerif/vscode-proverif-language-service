@@ -52,7 +52,7 @@ const getDeclarationPrefix = (declarationType: DeclarationType): string => {
         case DeclarationType.Parameter:
         case DeclarationType.DefineParameter:
         case DeclarationType.ExpandParameter:
-            return "parameter ";
+            return "(parameter) ";
         case DeclarationType.Variable:
             return "(variable) ";
         default:

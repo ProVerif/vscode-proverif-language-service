@@ -1,6 +1,11 @@
 import {AbstractParseTreeVisitor, ParseTree} from "antlr4ts/tree";
 import {ProverifParserVisitor} from "../parser-proverif/ProverifParserVisitor";
-import {LibContext, TprocessContext, TreducmayfailContext} from "../parser-proverif/ProverifParser";
+import {
+    LibContext,
+    TprocessContext,
+    TreducmayfailContext,
+    TreducotherwiseContext
+} from "../parser-proverif/ProverifParser";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";
 import {
     collecMayfailvartypeseq,
@@ -134,6 +139,16 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
     };
 
     public visitTreducmayfail = (ctx: TreducmayfailContext) => {
+        this.withContext(ctx, () => {
+            collectForallmayfailvartype(ctx.forallmayfailvartype()).forEach(typedTerminal => {
+                this.registerTypedTerminal(typedTerminal, DeclarationType.Parameter);
+            });
+        });
+
+        return this.visitChildren(ctx);
+    };
+
+    public visitTreducotherwise = (ctx: TreducotherwiseContext) => {
         this.withContext(ctx, () => {
             collectForallmayfailvartype(ctx.forallmayfailvartype()).forEach(typedTerminal => {
                 this.registerTypedTerminal(typedTerminal, DeclarationType.Parameter);

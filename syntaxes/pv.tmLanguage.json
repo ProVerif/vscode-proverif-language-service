@@ -347,7 +347,7 @@
       ]
     },
     {
-      "//comment" : "Declaration of parameter (shown on hover, defined by language server)",
+      "//comment" : "Declaration of parameter and variables (shown on hover by language server)",
       "begin" : "(\\(parameter\\)|\\(variable\\))",
       "end": "\\.",
       "patterns": [

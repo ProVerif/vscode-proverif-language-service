@@ -39,7 +39,7 @@ export enum DeclarationType {
     Type = 'type',
     Fun = 'fun',
     Event = 'event',
-    Predicate = 'predicate',
+    Predicate = 'pred',
     Table = 'table',
     Let = 'let',
     LetFun = 'letfun',

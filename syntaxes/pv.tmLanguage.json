@@ -4,7 +4,8 @@
   "scopeName": "source.pv",
   "fileTypes": [
     "pv",
-    "pvl"
+    "pvl",
+    "pcv"
   ],
   "patterns": [
     { "include": "#comments" },

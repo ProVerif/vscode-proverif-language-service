@@ -1,0 +1,71 @@
+type key2_t.
+type key_t [private].
+
+fun convert(key_t): key2_t.
+fun reverse(key2_t): key_t
+  reduc forall key:key_t; 
+    reverse(convert(key)) = key
+  otherwise forall key: key_t;
+    reverse(convert(key)) = key [private].
+
+reduc forall key: key_t; let g = convert(key) in convert2(g) = true.
+equation forall key: key_t; let g = convert(key) in true.
+
+const key_c: key_t.
+const key_c2: key_t[private].
+free key_f: key_t.
+free key_f2: key_t[private].
+
+event Confirmed.
+event Confirmed2(key_t).
+event ConfirmedPriv(key_t)[solveOnce].
+
+pred pConfirmed.
+pred pConfirmed2(key_t).
+pred pConfirmedPriv(key_t)[solveOnce].
+
+channel public.
+channel public2.
+
+table Storage(key_t).
+
+letfun no_conversion(key: key_t) = key. 
+let publish(key: key_t or fail) = out(public, key). 
+
+set attacker = passive.
+set reconstructTrace = 2.
+set privateCommOnPublicTerms = false.
+
+select key:key_t; let key2 = convert(key) in table(Storage(key)) phase 2 / 8000 [conclusion].
+noselect key:key_t; let key2 = convert(key) in event(Confirmed()) / 8000 [conclusion].
+nounif x:bitstring; mess(public, x) [ignoreAFewTimes].
+
+query attacker(key_c).
+query event(Confirmed()).
+query key: key_t; inj-event(Confirmed2(key)) ==> inj-event(Confirmed2(key)).
+
+noninterf key_f2 among (key_f).
+
+not key: key_t; attacker(key).
+not key: key_t; mess(public, key).
+
+param cryptoverif.
+
+elimtrue key: key_t or fail; pConfirmed2(key).
+
+clauses forall key: key_t; pConfirmed2(key);
+        forall key: key_t; pConfirmed2(key).
+
+def MyMacro(type_1, type_2, type_converter) {
+  fun type_converter(type_1): type_2.
+}
+expand MyMacro(key_t, key2_t, converter).
+
+lemma key:key_t, key2: key2_t; mess(public,key) [induction,fullSat].
+axiom key:key_t; table(Storage(key)).
+restriction key:key_t; attacker(key).
+
+process
+  new key: key_t;
+  phase 2; 
+  0

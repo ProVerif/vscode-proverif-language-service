@@ -1,11 +1,12 @@
 import {AbstractParseTreeVisitor, ParseTree} from "antlr4ts/tree";
 import {ProverifParserVisitor} from "../parser-proverif/ProverifParserVisitor";
-import {LibContext, TprocessContext} from "../parser-proverif/ProverifParser";
+import {LibContext, TprocessContext, TreducmayfailContext} from "../parser-proverif/ProverifParser";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";
 import {
     collecMayfailvartypeseq,
     collectBasicpattern,
     collectEqlist,
+    collectForallmayfailvartype,
     collectNeidentseq,
     collectNemayfailvartypeseq,
     collectNevartype,
@@ -131,6 +132,16 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
 
         return this.visitChildren(ctx);
     };
+
+    public visitTreducmayfail = (ctx: TreducmayfailContext) => {
+        this.withContext(ctx, () => {
+            collectForallmayfailvartype(ctx.forallmayfailvartype()).forEach(typedTerminal => {
+                this.registerTypedTerminal(typedTerminal, DeclarationType.Parameter)
+            })
+        })
+
+        return this.visitChildren(ctx);
+    }
 
     public visitTprocess = (ctx: TprocessContext) => {
         return this.withContext(ctx, () => {

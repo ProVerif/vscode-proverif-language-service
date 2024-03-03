@@ -13,7 +13,7 @@ import {DocumentManager, DocumentManagerInterface,} from "./document_manager";
 import {getDefinitionLink} from "./go_to_definition";
 import {rename} from "./rename";
 import {getReferences} from "./references";
-import {getSemanticTokens} from './semantic_token_provider';
+import {getSemanticTokens, tokenModifier, tokenTypes} from './semantic_token_provider';
 import {getDocumentLinks} from "./document_links";
 import {getSignatureHelp} from "./signature_help";
 import {getHover} from "./hover";
@@ -45,15 +45,13 @@ connection.onInitialize((params: InitializeParams) => {
             referencesProvider: true,
             renameProvider: true,
             signatureHelpProvider: { triggerCharacters: ['('], retriggerCharacters: [',', ', '] },
-            hoverProvider: true
-            /**
+            hoverProvider: true,
             semanticTokensProvider: {
                 documentSelector: null, // use client-side definition
                 legend: {tokenModifiers: tokenModifier, tokenTypes: tokenTypes},
                 full: true,
                 range: false
             },
-             **/
         },
     };
 
@@ -122,11 +120,13 @@ connection.languages.semanticTokens.on(async params => {
         return new ResponseError(2, 'Parsing failed', undefined);
     }
 
-    const semanticTokens = getSemanticTokens(parseResult);
+    const semanticTokens = await getSemanticTokens(parseResult, documentManager);
     if (!semanticTokens) {
         connection.console.error("Retrieving semantic tokens failed.");
         return new ResponseError(3, 'Semantic tokens extraction failed', undefined);
     }
+
+    console.log(semanticTokens)
 
     return semanticTokens;
 });

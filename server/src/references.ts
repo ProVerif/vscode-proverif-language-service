@@ -6,7 +6,7 @@ import {
     getDefinitionSymbolFromMatch,
     getDefinitionSymbolFromPosition
 } from "./go_to_definition";
-import {collectMatchingTerminals} from "./parseTree/collect_matching_terminals";
+import {collectMatchingTerminals} from "./parseTree/collect_terminals";
 import {ParseTree} from "antlr4ts/tree";
 import {getRange} from "./parseTree/get_range";
 import {nonNullable} from "./utils/array";

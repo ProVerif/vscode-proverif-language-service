@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.6.0
+
+Add language configuration, TextMate grammar and semantic tokens.
+
+
 ## v1.5.0
 
 Add hover.

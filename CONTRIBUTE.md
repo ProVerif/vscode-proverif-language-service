@@ -41,9 +41,15 @@ The architecture is inspired by an article series by [tomassetti](https://tomass
 
 The language server first lexes and parses the ProVerif code. Both the lexer as well as the parser are specified in Antl3r grammar, as this has good tool support to generate corresponding TypeScript code. The lexer is written by hand. The parser is transpiled from ProVerif's original `pitparser.mly` file using a python script called `pitparser-transpile-g4.py`.
 
-Then, the language server builds up the symbol table. To do this, relevant grammar rules have to implemented manually. For most this should be done; some more obscure are however not done yet. As long as not all rules are implemented, navigation might fail or be wrong.
+Then, the language server builds up the symbol table. To do this, relevant grammar rules have to implemented manually. For most rules this should be done; some more obscure rules are however not implemented. As long as not all rules are implemented, navigation might fail or be wrong.
 
 Lastly, the language server waits for the user to click on an identifier, and then picks the closest element in the symbol table. 
+
+## How it works: Syntax highlighting
+
+Syntax highlighting works primarily over the TextMate grammar in [./syntaxes/pv.tmLanguage.json](./syntaxes/pv.tmLanguage.json). As TextMate works quite differently to antlr, the rules are translated by hand. Details of the rules have been ommitted, to save on complexity. The primary task of the antlr grammar is to identify keywords, operators and types.
+
+While the TextMate grammar is fast, it is unable to precisely color. For example, some expressions allow both variables as well as functions to be referenced, which cannot be easily expressed in the grammar. For this, the language server implements semantic tokens: It scans the whole file, and returns a list of tokens it recognises as functions, variables and parameters. VSCode then adjusts the colors appropriately.
 
 ## Publish
 

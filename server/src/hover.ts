@@ -1,18 +1,9 @@
-import {
-    Hover, LocationLink, MarkupContent, MarkupKind,
-    ParameterInformation,
-    Position,
-    SignatureHelp,
-    SignatureInformation,
-    TextDocumentIdentifier,
-    uinteger
-} from "vscode-languageserver";
+import {Hover, MarkupContent, MarkupKind, Position, TextDocumentIdentifier} from "vscode-languageserver";
 import {DocumentManagerInterface} from "./document_manager";
-import {DefinitionSymbol, getDefinitionSymbolFromPosition} from "./go_to_definition";
-import {getSignaturePosition, SignaturePosition} from "./parseTree/get_signature_position";
+import {getDefinitionSymbolFromPosition} from "./go_to_definition";
 import {ParseTree} from "antlr4ts/tree";
 import {getRange} from "./parseTree/get_range";
-import {DeclarationType, ProverifSymbol, ProverifSymbolParameter} from "./tasks/create_symbol_table";
+import {ProverifSymbol, ProverifSymbolParameter} from "./tasks/create_symbol_table";
 
 export const getHover = async (identifier: TextDocumentIdentifier, position: Position, documentManager: DocumentManagerInterface): Promise<Hover | undefined> => {
     const definitionSymbol = await getDefinitionSymbolFromPosition(identifier, position, documentManager);

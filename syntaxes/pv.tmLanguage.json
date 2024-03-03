@@ -401,7 +401,16 @@
       "begin": "\\(\\*",
       "end": "\\*\\)",
       "patterns": [
-        { "include": "#comments" }
+        { "include": "#comments" },
+        { "include": "#commentContents"}
+      ]
+    },
+    "commentContents": {
+      "patterns": [
+        {
+          "match": "\\b(TODO|FIXME|XXX|NOTE)\\b:?",
+          "name": "keyword.todo.pv"
+        }
       ]
     },
     "options": {

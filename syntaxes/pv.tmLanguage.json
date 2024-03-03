@@ -498,7 +498,7 @@
       "patterns": [
         { "include": "#comments" },
         {
-          "match": "(\\b(if|then|let|suchthat|event|insert|get)\\b)",
+          "match": "(\\b(if|then|let|suchthat|event|insert|get|new)\\b)",
           "name": "keyword.control.proverif"
         },
         {
@@ -521,7 +521,6 @@
           "match": "(\\b([0-9]+)\\b)",
           "name": "constant.numeric.proverif"
         },
-        { "include": "#new_decl" },
         {
           "match": ":\\s*([a-zA-Z0-9'_]+)",
           "captures":{
@@ -622,9 +621,8 @@
     "tprocess": {
       "patterns": [
         { "include": "#comments" },
-        { "include": "#new_decl" },
         {
-          "match": "(\\b(foreach|yield|if|then|else|in|out|let|suchthat|insert|get|event|phase|sync)\\b)",
+          "match": "(\\b(foreach|yield|if|then|else|in|out|let|suchthat|insert|get|event|phase|sync|new)\\b)",
           "name": "keyword.control.proverif"
         },
         {
@@ -680,27 +678,6 @@
         "2": { "name": "entity.name.type.proverif" },
         "3": { "name": "keyword.control.proverif" }
       }
-    },
-    "new_decl": {
-      "begin": "(\\b(new)\\b)",
-      "end": "(?=;)",
-      "captures": {
-        "1": { "name": "keyword.control.proverif" }
-      },
-      "patterns": [
-        { "include": "#comments"},
-        {
-          "begin": ":",
-          "end": "(?=;)",
-          "patterns": [
-            { "include": "#comments"},
-            { "include": "#options" },
-            { "include": "#type_ident" }
-          ]
-        },
-        { "include": "#variable_ident" },
-        { "include": "#vars_options" }
-      ]
     },
     "tfnebindingseq": {
       "patterns": [

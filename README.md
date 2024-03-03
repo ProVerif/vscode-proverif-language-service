@@ -14,7 +14,7 @@ Visual Studio Code extension for ProVerif files (.pv, .pvl, .pcv).
 ![Screenshot showing how the extension shows errors from ProVerif](./docs/sample.png)
 
 Functionality:
-- Adds syntax highlighting.
+- Adds semantic syntax highlighting.
 - Highlights the first syntax error ProVerif finds. For libraries, see below.
 - Hover over an identifier to learn more about it.
 - Press `CTRL` and click on an identifier to navigate to its definition or find all references of the definition.

@@ -345,6 +345,22 @@
         { "include": "#comments" },
         { "include": "#tprocess" }
       ]
+    },
+    {
+      "//comment" : "Declaration of parameter (shown on hover, defined by language server)",
+      "begin" : "(\\(parameter\\)|\\(variable\\))",
+      "end": "\\.",
+      "patterns": [
+        { "include": "#comments" },
+        {
+          "begin": ":",
+          "end": "(?=\\.)",
+          "patterns": [
+            { "include": "#type_ident" }
+          ]
+        },
+        { "include": "#variable_ident" }
+      ]
     }
   ],
   "repository": {

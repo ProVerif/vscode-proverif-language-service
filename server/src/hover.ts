@@ -3,7 +3,7 @@ import {DocumentManagerInterface} from "./document_manager";
 import {getDefinitionSymbolFromPosition} from "./go_to_definition";
 import {ParseTree} from "antlr4ts/tree";
 import {getRange} from "./parseTree/get_range";
-import {ProverifSymbol, ProverifSymbolParameter} from "./tasks/create_symbol_table";
+import {DeclarationType, ProverifSymbol, ProverifSymbolParameter} from "./tasks/create_symbol_table";
 
 export const getHover = async (identifier: TextDocumentIdentifier, position: Position, documentManager: DocumentManagerInterface): Promise<Hover | undefined> => {
     const definitionSymbol = await getDefinitionSymbolFromPosition(identifier, position, documentManager);
@@ -52,7 +52,9 @@ const getDeclarationPrefix = (declarationType: DeclarationType): string => {
         case DeclarationType.Parameter:
         case DeclarationType.DefineParameter:
         case DeclarationType.ExpandParameter:
-            return "(parameter) ";
+            return "parameter ";
+        case DeclarationType.Variable:
+            return "(variable) ";
         default:
             return `${declarationType} `;
     }

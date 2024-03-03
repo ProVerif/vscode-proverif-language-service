@@ -5,7 +5,8 @@ import {getDefinitionSymbolFromMatch} from "./go_to_definition";
 import {nonNullable} from "./utils/array";
 import {DeclarationType} from "./tasks/create_symbol_table";
 
-export const tokenModifier = [];
+// It is unclear why an empty entry as first entry of tokenTypes is required, and why +1 for the index of the tokenModifiers needs to be added.
+export const tokenModifier = ['readonly'];
 export const tokenTypes = ['', 'function', 'variable', 'parameter', 'type'];
 
 export const getSemanticTokens = async (parseResult: ParseResult, documentManager: DocumentManagerInterface) => {
@@ -23,12 +24,27 @@ export const getSemanticTokens = async (parseResult: ParseResult, documentManage
                 const line = terminalDefinition.origin.match.symbol.line - 1;
                 const char = terminalDefinition.origin.match.symbol.charPositionInLine;
                 const length = terminalDefinition.origin.match.symbol.stopIndex - terminalDefinition.origin.match.symbol.startIndex + 1;
-                tokensBuilder.push(line, char, length, tokenType, [] as any);
+                const tokenModifier = getTokenModifier(terminalDefinition.symbol.declaration);
+                tokensBuilder.push(line, char, length, tokenType, tokenModifier);
             }
         });
 
     return tokensBuilder.build();
 };
+
+const getTokenModifier = (declarationType: DeclarationType): number => {
+    switch (declarationType) {
+        case DeclarationType.Channel:
+        case DeclarationType.Free:
+        case DeclarationType.Const:
+        case DeclarationType.DefineParameter:
+        case DeclarationType.ExpandParameter:
+            return tokenModifier.indexOf("readonly") + 1;
+    }
+
+    return 0;
+};
+
 
 const getTokenType = (declarationType: DeclarationType): number | undefined => {
     switch (declarationType) {

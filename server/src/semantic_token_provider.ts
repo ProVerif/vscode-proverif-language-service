@@ -6,7 +6,7 @@ import {nonNullable} from "./utils/array";
 import {DeclarationType} from "./tasks/create_symbol_table";
 
 export const tokenModifier = [];
-export const tokenTypes = ['function', 'variable', 'parameter'];
+export const tokenTypes = ['', 'function', 'variable', 'parameter'];
 
 export const getSemanticTokens = async (parseResult: ParseResult, documentManager: DocumentManagerInterface) => {
     // collect references

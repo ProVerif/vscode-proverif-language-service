@@ -29,6 +29,7 @@ export const createSymbolTable = (context: ParseTree): CreateSymbolTableResult =
 
 export enum DeclarationType {
     Parameter = 'parameter',
+    Variable = 'variable',
 
     Const = 'const',
     Channel = 'channel',
@@ -135,24 +136,24 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         return this.withContext(ctx, () => {
             if (ctx.LET() || ctx.IN()) {
                 collectTPattern(ctx.tpattern()).forEach(typedTerminal => {
-                    this.registerTypedTerminal(typedTerminal, DeclarationType.Parameter);
+                    this.registerTypedTerminal(typedTerminal, DeclarationType.Variable);
                 });
 
                 if (ctx.LET()) {
                     collectNevartype(ctx.nevartype()).forEach(typedTerminal => {
-                        this.registerTypedTerminal(typedTerminal, DeclarationType.Parameter);
+                        this.registerTypedTerminal(typedTerminal, DeclarationType.Variable);
                     });
                 }
             } else if (ctx.GET()) {
                 collectTPatternSeq(ctx.tpatternseq()).forEach(typedTerminal => {
-                    this.registerTypedTerminal(typedTerminal, DeclarationType.Parameter);
+                    this.registerTypedTerminal(typedTerminal, DeclarationType.Variable);
                 });
             } else if (ctx.NEW() || ctx.RANDOM()) {
                 const type = getType(ctx.typeid());
-                this.registerTerminal(ctx.IDENT()[0], DeclarationType.Parameter, type);
+                this.registerTerminal(ctx.IDENT()[0], DeclarationType.Variable, type);
             } else if (ctx.LEFTARROW()) {
                 const typedTerminal = collectBasicpattern(ctx.basicpattern());
-                this.registerTypedTerminal(typedTerminal, DeclarationType.Parameter);
+                this.registerTypedTerminal(typedTerminal, DeclarationType.Variable);
             }
 
             return this.visitChildren(ctx);

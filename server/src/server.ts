@@ -126,8 +126,6 @@ connection.languages.semanticTokens.on(async params => {
         return new ResponseError(3, 'Semantic tokens extraction failed', undefined);
     }
 
-    console.log(semanticTokens)
-
     return semanticTokens;
 });
 

@@ -79,7 +79,7 @@ Go to definition:
 Support writing ProVerif:
 - [x] Configure language
 - [x] Add syntax highlighting
-- [ ] Add semantic tokens (`connection.languages.semanticTokens`)
+- [x] Add semantic tokens (`connection.languages.semanticTokens`)
 - [ ] Support syntactical autocomplete (`connection.onCompletion`)
 - [ ] Support semantical autocomplete (see https://tomassetti.me/code-completion-with-antlr4-c3/#chapter12)
 

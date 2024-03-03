@@ -2,6 +2,7 @@ import {
     BasicpatternContext,
     EqlistContext,
     Extended_equationContext,
+    ForallmayfailvartypeContext,
     ForallvartypeContext,
     MayfailvartypeContext,
     MayfailvartypeseqContext,
@@ -185,6 +186,15 @@ export const collectForallvartype = (ctx: ForallvartypeContext): TypedTerminal[]
     const nevartype = ctx.nevartype();
     if (nevartype) {
         return collectNevartype(nevartype);
+    }
+
+    return [];
+};
+
+export const collectForallmayfailvartype = (ctx: ForallmayfailvartypeContext): TypedTerminal[] => {
+    const nemayfailvartypeseq = ctx.nemayfailvartypeseq();
+    if (nemayfailvartypeseq) {
+        return collectNemayfailvartypeseq(nemayfailvartypeseq);
     }
 
     return [];

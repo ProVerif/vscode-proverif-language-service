@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.6.2
+
+Add `in` to `pterm` in TextMate grammar and improve word detection.
+
+
 ## v1.6.1
 
 Improvements to TextMate grammar and semantic tokens.

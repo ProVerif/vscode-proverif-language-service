@@ -507,7 +507,7 @@
       "patterns": [
         { "include": "#comments" },
         {
-          "match": "(\\b(if|then|let|suchthat|event|insert|get|new)\\b)",
+          "match": "(\\b(if|then|let|in|suchthat|event|insert|get|new)\\b)",
           "name": "keyword.control.proverif"
         },
         {

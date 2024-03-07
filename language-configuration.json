@@ -22,6 +22,8 @@
         ["(", ")"],
         ["\"", "\""]
     ],
+    // identifier setting and - (to account for inj-event and similar)
+    "wordPattern": "([a-zA-Z0-9'_\\-]+)",
     "indentationRules": {
         // indent on brackets {([ equal / diff = <> and implication/equivalence ==> <-> <=>
         "increaseIndentPattern": "^.*({|\\(|\\[|=|<>|==>|<->|<=>)$",

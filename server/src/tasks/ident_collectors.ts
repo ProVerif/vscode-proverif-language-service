@@ -232,6 +232,10 @@ export const collectIdentifiers = (getIdentifer: () => TerminalNode[]): Terminal
     return tryGetTerminals(getIdentifer) ?? [];
 };
 
+const createTypedTerminals = (identifiers: TerminalNode[], getTypeId: () => TypeidContext | undefined) => {
+    return identifiers.map(identifier => ({terminal: identifier, type: getType(getTypeId)}));
+};
+
 /**
  * All context which cannot be undefined by the grammar but in fact are (because the user has a syntax error) instead throw at runtime if the corresponding entry is accessed
  * Therefore, when accessing such a context, it needs to be wrapped in try/catch.
@@ -252,6 +256,9 @@ const tryGetContext = <T extends ParserRuleContext | undefined>(getContext: () =
     return undefined;
 };
 
+/**
+ See description of tryGetContext
+ */
 const tryGetContexts = <T extends ParserRuleContext | undefined>(getContext: () => undefined | T[]): T[] => {
     try {
         return getContext() ?? [];
@@ -262,9 +269,7 @@ const tryGetContexts = <T extends ParserRuleContext | undefined>(getContext: () 
 };
 
 /**
- * See description of tryGetContext
- *
- * @param getTerminal
+ See description of tryGetContext
  */
 const tryGetTerminal = <T extends TerminalNode | undefined>(getTerminal: () => T): T | undefined => {
     try {
@@ -276,9 +281,7 @@ const tryGetTerminal = <T extends TerminalNode | undefined>(getTerminal: () => T
 };
 
 /**
- * See description of tryGetContext
- *
- * @param getTerminal
+ See description of tryGetContext
  */
 const tryGetTerminals = <T extends TerminalNode | undefined>(getTerminal: () => T[]): T[] => {
     try {
@@ -287,8 +290,4 @@ const tryGetTerminals = <T extends TerminalNode | undefined>(getTerminal: () => 
     }
 
     return [];
-};
-
-const createTypedTerminals = (identifiers: TerminalNode[], getTypeId: () => TypeidContext | undefined) => {
-    return identifiers.map(identifier => ({terminal: identifier, type: getType(getTypeId)}));
 };

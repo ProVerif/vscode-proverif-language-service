@@ -251,6 +251,7 @@ const tryGetContext = <T extends ParserRuleContext | undefined>(getContext: () =
     try {
         return getContext();
     } catch (e) {
+        // exceptions OK; just means the grammar cannot resolve parse tree
     }
 
     return undefined;
@@ -263,6 +264,7 @@ const tryGetContexts = <T extends ParserRuleContext | undefined>(getContext: () 
     try {
         return getContext() ?? [];
     } catch (e) {
+        // exceptions OK; just means the grammar cannot resolve parse tree
     }
 
     return [];
@@ -275,6 +277,7 @@ const tryGetTerminal = <T extends TerminalNode | undefined>(getTerminal: () => T
     try {
         return getTerminal();
     } catch (e) {
+        // exceptions OK; just means the grammar cannot resolve parse tree
     }
 
     return undefined;
@@ -287,6 +290,7 @@ const tryGetTerminals = <T extends TerminalNode | undefined>(getTerminal: () => 
     try {
         return getTerminal();
     } catch (e) {
+        // exceptions OK; just means the grammar cannot resolve parse tree
     }
 
     return [];

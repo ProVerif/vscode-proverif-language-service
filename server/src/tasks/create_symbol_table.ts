@@ -12,6 +12,8 @@ import {
     collectBasicpattern,
     collectEqlist,
     collectForallmayfailvartype,
+    collectIdentifier,
+    collectIdentifiers,
     collectNeidentseq,
     collectNemayfailvartypeseq,
     collectNevartype,
@@ -69,23 +71,26 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
     public visitLib = (ctx: LibContext) => {
         if (ctx.CONST() || ctx.FREE()) {
             const declarationType = ctx.CONST() ? DeclarationType.Const : DeclarationType.Free;
-            const terminalNodes = collectNeidentseq(ctx.neidentseq());
-            this.registerTerminals(terminalNodes, declarationType, getType(ctx.typeid()));
+            const terminalNodes = collectNeidentseq(() => ctx.neidentseq());
+            this.registerTerminals(terminalNodes, declarationType, getType(() => ctx.typeid()));
         } else if (ctx.CHANNEL()) {
-            const terminalNodes = collectNeidentseq(ctx.neidentseq());
+            const terminalNodes = collectNeidentseq(() => ctx.neidentseq());
             this.registerTerminals(terminalNodes, DeclarationType.Channel);
         } else if (ctx.TYPE()) {
-            this.registerTerminals([ctx.IDENT()].filter(nonNullable), DeclarationType.Type);
+            const identifier = collectIdentifier(() => ctx.IDENT());
+            this.registerTerminals([identifier].filter(nonNullable), DeclarationType.Type);
         } else if (ctx.FUN()) {
-            const parameters = collectTypeidseq(ctx.typeidseq());
-            this.registerTerminalWithParameters(ctx.IDENT(), DeclarationType.Fun, parameters, getType(ctx.typeid()));
+            const parameters = collectTypeidseq(() => ctx.typeidseq());
+            const identifier = collectIdentifier(() => ctx.IDENT());
+            this.registerTerminalWithParameters(identifier, DeclarationType.Fun, parameters, getType(() => ctx.typeid()));
         } else if (ctx.EVENT() || ctx.PREDICATE() || ctx.TABLE() || ctx.DEFINE()) {
+            const identifier = collectIdentifier(() => ctx.IDENT());
             const declarationType =
                 ctx.EVENT() ? DeclarationType.Event :
                     (ctx.PREDICATE() ? DeclarationType.Predicate :
                         (ctx.TABLE() ? DeclarationType.Table : DeclarationType.Define));
-            const parameters = collectTypeidseq(ctx.typeidseq());
-            this.registerTerminalWithParameters(ctx.IDENT(), declarationType, parameters);
+            const parameters = collectTypeidseq(() => ctx.typeidseq());
+            this.registerTerminalWithParameters(identifier, declarationType, parameters);
 
             if (ctx.DEFINE()) {
                 this.withContext(ctx, () => {
@@ -93,33 +98,34 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
                 });
             }
         } else if (ctx.EXPAND()) {
-            const parameters = collectTypeidseq(ctx.typeidseq());
+            const parameters = collectTypeidseq(() => ctx.typeidseq());
             this.registerTerminals(parameters, DeclarationType.ExpandParameter);
         } else if (ctx.LET() || ctx.LETFUN()) {
             const declarationType = ctx.LET() ? DeclarationType.Let : DeclarationType.LetFun;
-            const parameters = collecMayfailvartypeseq(ctx.mayfailvartypeseq());
-            this.registerTerminalWithNamedParameters(ctx.IDENT(), declarationType, parameters);
+            const parameters = collecMayfailvartypeseq(() => ctx.mayfailvartypeseq());
+            const identifier = collectIdentifier(() => ctx.IDENT());
+            this.registerTerminalWithNamedParameters(identifier, declarationType, parameters);
             this.withContext(ctx, () => {
                 this.registerTypedTerminals(parameters, DeclarationType.Parameter);
             });
         } else if (ctx.REDUCTION()) {
             this.withContext(ctx, () => {
-                const typedTerminals = collectTreduc(ctx.treduc());
+                const typedTerminals = collectTreduc(() => ctx.treduc());
                 this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
             });
         } else if (ctx.EQUATION()) {
             this.withContext(ctx, () => {
-                const typedTerminals = collectEqlist(ctx.eqlist());
+                const typedTerminals = collectEqlist(() => ctx.eqlist());
                 this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
             });
         } else if (ctx.NOUNIF() || ctx.SELECT() || ctx.QUERY() || ctx.NONINTERF() || ctx.NOT() || ctx.lemma()) {
             this.withContext(ctx, () => {
-                const typedTerminals = collectNevartype(ctx.nevartype());
+                const typedTerminals = collectNevartype(() => ctx.nevartype());
                 this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
             });
         } else if (ctx.ELIMTRUE()) {
             this.withContext(ctx, () => {
-                const typedTerminals = collectNemayfailvartypeseq(ctx.nemayfailvartypeseq());
+                const typedTerminals = collectNemayfailvartypeseq(() => ctx.nemayfailvartypeseq());
                 this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
             });
         }
@@ -129,7 +135,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
 
     public visitTreducmayfail = (ctx: TreducmayfailContext) => {
         this.withContext(ctx, () => {
-            const typedTerminals = collectForallmayfailvartype(ctx.forallmayfailvartype());
+            const typedTerminals = collectForallmayfailvartype(() => ctx.forallmayfailvartype());
             this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
         });
 
@@ -138,7 +144,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
 
     public visitTreducotherwise = (ctx: TreducotherwiseContext) => {
         this.withContext(ctx, () => {
-            const typedTerminals = collectForallmayfailvartype(ctx.forallmayfailvartype());
+            const typedTerminals = collectForallmayfailvartype(() => ctx.forallmayfailvartype());
             this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
         });
 
@@ -148,21 +154,22 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
     public visitTprocess = (ctx: TprocessContext) => {
         return this.withContext(ctx, () => {
             if (ctx.LET() || ctx.IN()) {
-                const typedTerminals = collectTPattern(ctx.tpattern());
+                const typedTerminals = collectTPattern(() => ctx.tpattern());
                 this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);
 
                 if (ctx.LET()) {
-                    const typedTerminals = collectNevartype(ctx.nevartype());
+                    const typedTerminals = collectNevartype(() => ctx.nevartype());
                     this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);
                 }
             } else if (ctx.GET()) {
-                const typedTerminals = collectTPatternSeq(ctx.tpatternseq());
+                const typedTerminals = collectTPatternSeq(() => ctx.tpatternseq());
                 this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);
             } else if (ctx.NEW() || ctx.RANDOM()) {
-                const type = getType(ctx.typeid());
-                this.registerTerminals(ctx.IDENT(), DeclarationType.Variable, type);
+                const identifiers = collectIdentifiers(() => ctx.IDENT());
+                const type = getType(() => ctx.typeid());
+                this.registerTerminals(identifiers, DeclarationType.Variable, type);
             } else if (ctx.LEFTARROW()) {
-                const typedTerminals = collectBasicpattern(ctx.basicpattern());
+                const typedTerminals = collectBasicpattern(() => ctx.basicpattern());
                 this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);
             }
 

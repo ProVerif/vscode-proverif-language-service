@@ -1,7 +1,6 @@
 import {CharStreams, CommonTokenStream} from "antlr4ts";
 import {AllContext, LibContext, ProverifParser} from '../parser-proverif/ProverifParser';
 import {ProverifLexer} from "../parser-proverif/ProverifLexer";
-import {ParseTree} from "antlr4ts/tree";
 
 export type ParseProverifResult = {
     parser: ProverifParser

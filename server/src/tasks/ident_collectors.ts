@@ -28,120 +28,111 @@ export type TypedTerminal = {
     type?: ParseTree
 }
 
-export const getType = (ctx?: TypeidContext): TerminalNode | undefined => {
+export const getType = (getContext: () => TypeidContext | undefined): TerminalNode | undefined => {
+    const ctx = tryGetContext(getContext);
     if (!ctx) {
-        return undefined
+        return undefined;
     }
 
-    const ident = tryGetTerminal(() => ctx.IDENT())
-    const channel = tryGetTerminal(() => ctx.CHANNEL())
+    const ident = tryGetTerminal(() => ctx.IDENT());
+    const channel = tryGetTerminal(() => ctx.CHANNEL());
     return ident ?? channel;
 };
 
-export const collectNeidentseq = (ctx?: NeidentseqContext): TerminalNode[] => {
+export const collectNeidentseq = (getContext: () => NeidentseqContext | undefined): TerminalNode[] => {
+    const ctx = tryGetContext(getContext);
     if (!ctx) {
         return [];
     }
 
-    const neidentseq = tryGetContext(() => ctx.neidentseq());
     const ident = tryGetTerminal(() => ctx.IDENT());
     return [
         ident,
-        ...collectNeidentseq(neidentseq)
+        ...collectNeidentseq(() => ctx.neidentseq())
     ].filter(nonNullable);
 };
 
-export const collectTypeidseq = (ctx?: TypeidseqContext): TerminalNode[] => {
+export const collectTypeidseq = (getContext: () => TypeidseqContext | undefined): TerminalNode[] => {
+    const ctx = tryGetContext(getContext);
     if (!ctx) {
         return [];
     }
 
-    const netypeidseq = tryGetContext(() => ctx.netypeidseq());
-    return collectNetypeidseq(netypeidseq);
+    return collectNetypeidseq(() => ctx.netypeidseq());
 };
 
-export const collectNetypeidseq = (ctx?: NetypeidseqContext): TerminalNode[] => {
+export const collectNetypeidseq = (getContext: () => NetypeidseqContext | undefined): TerminalNode[] => {
+    const ctx = tryGetContext(getContext);
     if (!ctx) {
         return [];
     }
 
-    const typeid = tryGetContext(() => ctx.typeid());
-    const netypeidseq = tryGetContext(() => ctx.netypeidseq());
     return [
-        getType(typeid),
-        ...collectNetypeidseq(netypeidseq)
+        getType(() => ctx.typeid()),
+        ...collectNetypeidseq(() => ctx.netypeidseq())
     ].filter(nonNullable);
 };
 
-export const collectNevartype = (ctx?: NevartypeContext): TypedTerminal[] => {
+export const collectNevartype = (getContext: () => NevartypeContext | undefined): TypedTerminal[] => {
+    const ctx = tryGetContext(getContext);
     if (!ctx) {
         return [];
     }
 
-    let onevartype = tryGetContext(() => ctx.onevartype());
-    let nevartype = tryGetContext(() => ctx.nevartype());
     return [
-        ...collectOnevartype(onevartype),
-        ...collectNevartype(nevartype)
+        ...collectOnevartype(() => ctx.onevartype()),
+        ...collectNevartype(() => ctx.nevartype())
     ];
 };
 
-export const collectOnevartype = (ctx?: OnevartypeContext): TypedTerminal[] => {
+export const collectOnevartype = (getContext: () => OnevartypeContext | undefined): TypedTerminal[] => {
+    const ctx = tryGetContext(getContext);
     if (!ctx) {
         return [];
     }
 
     const ident = tryGetTerminal(() => ctx.IDENT());
-    const neidentseq = tryGetContext(() => ctx.neidentseq());
     const identifiers = [
         ident,
-        ...collectNeidentseq(neidentseq)
+        ...collectNeidentseq(() => ctx.neidentseq())
     ].filter(nonNullable);
 
-    const typeid = tryGetContext(() => ctx.typeid());
-    return identifiers.map(identifier => ({terminal: identifier, type: getType(typeid)}));
+    return createTypedTerminals(identifiers, () => ctx.typeid());
 };
 
 
-export const collectTPatternSeq = (ctx?: TpatternseqContext): TypedTerminal[] => {
+export const collectTPatternSeq = (getContext: () => TpatternseqContext | undefined): TypedTerminal[] => {
+    return collectNepatternseq(() => getContext()?.nepatternseq());
+};
+
+export const collectTPattern = (getContext: () => TpatternContext | undefined): TypedTerminal[] => {
+    const ctx = tryGetContext(getContext);
     if (!ctx) {
         return [];
     }
 
-    const nepatternseq = tryGetContext(() => ctx.nepatternseq());
-    return collectNepatternseq(nepatternseq);
-};
-
-export const collectTPattern = (ctx?: TpatternContext): TypedTerminal[] => {
-    if (!ctx) {
-        return [];
-    }
-
-
-    const basicpattern = tryGetContext(() => ctx.basicpattern()); // identifier
-    const tpatternseq = tryGetContext(() => ctx.tpatternseq()); // either direct declaration or declaration with a wrapped data function
     const tpatterns = tryGetContexts(() => ctx.tpattern()); // tpattern from choice or int statements
     return [
-        ...collectBasicpattern(basicpattern),
-        ...collectTPatternSeq(tpatternseq),
-        ...tpatterns.map(collectTPattern).flat()
+        ...collectBasicpattern(() => ctx.basicpattern()),
+        ...collectTPatternSeq(() => ctx.tpatternseq()),
+        ...tpatterns.map(tpattern => collectTPattern(() => tpattern)).flat()
     ].filter(nonNullable);
 };
 
-export const collectNepatternseq = (ctx?: NepatternseqContext): TypedTerminal[] => {
+export const collectNepatternseq = (getContext: () => NepatternseqContext | undefined): TypedTerminal[] => {
+    const ctx = tryGetContext(getContext);
     if (!ctx) {
         return [];
     }
 
-    let tpattern = tryGetContext(() => ctx.tpattern());
-    const nepatternseq = tryGetContext(() => ctx.nepatternseq());
     return [
-        ...collectTPattern(tpattern),
-        ...collectNepatternseq(nepatternseq)
+        ...collectTPattern(() => ctx.tpattern()),
+        ...collectNepatternseq(() => ctx.nepatternseq())
     ];
 };
 
-export const collectBasicpattern = (ctx?: BasicpatternContext): TypedTerminal[] => {
+export const collectBasicpattern = (getContext: () => BasicpatternContext | undefined): TypedTerminal[] => {
+    const ctx = tryGetContext(getContext);
     if (!ctx) {
         return [];
     }
@@ -149,69 +140,51 @@ export const collectBasicpattern = (ctx?: BasicpatternContext): TypedTerminal[] 
     const ident = tryGetTerminal(() => ctx.IDENT());
     const identifiers = [ident].filter(nonNullable);
 
-    const typeid = tryGetContext(() => ctx.typeid());
-    return identifiers.map(identifier => ({terminal: identifier, type: getType(typeid)}))
+    return createTypedTerminals(identifiers, () => ctx.typeid());
 };
 
-export const collecMayfailvartypeseq = (ctx?: MayfailvartypeseqContext): TypedTerminal[] => {
+export const collecMayfailvartypeseq = (getContext: () => MayfailvartypeseqContext | undefined): TypedTerminal[] => {
+    return collectNemayfailvartypeseq(() => getContext()?.nemayfailvartypeseq());
+};
+
+export const collectMayfailvartype = (getContext: () => MayfailvartypeContext | undefined): TypedTerminal[] => {
+    const ctx = tryGetContext(getContext);
     if (!ctx) {
         return [];
     }
 
-    const nemayfailvartypeseq = tryGetContext(() => ctx.nemayfailvartypeseq());
-    return collectNemayfailvartypeseq(nemayfailvartypeseq);
+    const identifiers = collectNeidentseq(() => ctx.neidentseq());
+
+    return createTypedTerminals(identifiers, () => ctx.typeid());
 };
 
-export const collectMayfailvartype = (ctx?: MayfailvartypeContext): TypedTerminal[] => {
+export const collectNemayfailvartypeseq = (getContext: () => NemayfailvartypeseqContext | undefined): TypedTerminal[] => {
+    const ctx = tryGetContext(getContext);
     if (!ctx) {
         return [];
     }
 
-
-    const neidentseq = tryGetContext(() => ctx.neidentseq());
-    const identifiers = collectNeidentseq(neidentseq);
-
-    const typeid = tryGetContext(() => ctx.typeid());
-    return identifiers.map(identifier => ({terminal: identifier, type: getType(typeid)}));
-};
-
-export const collectNemayfailvartypeseq = (ctx?: NemayfailvartypeseqContext): TypedTerminal[] => {
-    if (!ctx) {
-        return [];
-    }
-
-    const mayfailvartype = tryGetContext(() => ctx.mayfailvartype());
-    const nemayfailvartypeseq = tryGetContext(() => ctx.nemayfailvartypeseq());
     return [
-        ...collectMayfailvartype(mayfailvartype),
-        ...collectNemayfailvartypeseq(nemayfailvartypeseq)
+        ...collectMayfailvartype(() => ctx.mayfailvartype()),
+        ...collectNemayfailvartypeseq(() => ctx.nemayfailvartypeseq())
     ];
 };
 
-export const collectForallvartype = (ctx?: ForallvartypeContext): TypedTerminal[] => {
-    if (!ctx) {
-        return [];
-    }
-
-    const nevartype = tryGetContext(() => ctx.nevartype());
-    return collectNevartype(nevartype);
+export const collectForallvartype = (getContext: () => ForallvartypeContext | undefined): TypedTerminal[] => {
+    return collectNevartype(() => getContext()?.nevartype());
 };
 
-export const collectForallmayfailvartype = (ctx?: ForallmayfailvartypeContext): TypedTerminal[] => {
-    if (!ctx) {
-        return [];
-    }
-
-    const nemayfailvartypeseq = tryGetContext(() => ctx.nemayfailvartypeseq());
-    return collectNemayfailvartypeseq(nemayfailvartypeseq);
+export const collectForallmayfailvartype = (getContext: () => ForallmayfailvartypeContext | undefined): TypedTerminal[] => {
+    return collectNemayfailvartypeseq(() => getContext()?.nemayfailvartypeseq());
 };
 
-export const collectExtendedEquation = (ctx?: Extended_equationContext): TypedTerminal[] => {
+export const collectExtendedEquation = (getContext: () => Extended_equationContext | undefined): TypedTerminal[] => {
+    const ctx = tryGetContext(getContext);
     if (!ctx) {
         return [];
     }
 
-    let terminal: TypedTerminal|undefined = undefined;
+    let terminal: TypedTerminal | undefined = undefined;
     const identifier = tryGetTerminal(() => ctx.IDENT());
     if (identifier) {
         // this does not infer types, although it would be nice!
@@ -219,41 +192,44 @@ export const collectExtendedEquation = (ctx?: Extended_equationContext): TypedTe
         terminal = {terminal: identifier, type: term};
     }
 
-    const extended_equation = tryGetContext(() => ctx.extended_equation());
     return [
         terminal,
-        ...collectExtendedEquation(extended_equation)
+        ...collectExtendedEquation(() => ctx.extended_equation())
     ].filter(nonNullable);
 };
 
-export const collectTreduc = (ctx?: TreducContext): TypedTerminal[] => {
+export const collectTreduc = (getContext: () => TreducContext | undefined): TypedTerminal[] => {
+    const ctx = tryGetContext(getContext);
     if (!ctx) {
         return [];
     }
 
-    const forallvartype = tryGetContext(() => ctx.forallvartype());
-    const extendedEquation = tryGetContext(() => ctx.extended_equation());
-    const nemayfailvartypeseq = tryGetContext(() => ctx.treduc());
     return [
-        ...collectForallvartype(forallvartype),
-        ...collectExtendedEquation(extendedEquation),
-        ...collectTreduc(nemayfailvartypeseq)
+        ...collectForallvartype(() => ctx.forallvartype()),
+        ...collectExtendedEquation(() => ctx.extended_equation()),
+        ...collectTreduc(() => ctx.treduc())
     ];
 };
 
-export const collectEqlist = (ctx?: EqlistContext): TypedTerminal[] => {
+export const collectEqlist = (getContext: () => EqlistContext | undefined): TypedTerminal[] => {
+    const ctx = tryGetContext(getContext);
     if (!ctx) {
         return [];
     }
 
-    const forallvartype = tryGetContext(() => ctx.forallvartype());
-    const extendedEquation = tryGetContext(() => ctx.extended_equation());
-    const eqlist = tryGetContext(() => ctx.eqlist());
     return [
-        ...collectForallvartype(forallvartype),
-        ...collectExtendedEquation(extendedEquation),
-        ...collectEqlist(eqlist)
+        ...collectForallvartype(() => ctx.forallvartype()),
+        ...collectExtendedEquation(() => ctx.extended_equation()),
+        ...collectEqlist(() => ctx.eqlist())
     ];
+};
+
+export const collectIdentifier = (getIdentifer: () => TerminalNode | undefined): TerminalNode | undefined => {
+    return tryGetTerminal(getIdentifer);
+};
+
+export const collectIdentifiers = (getIdentifer: () => TerminalNode[]): TerminalNode[] => {
+    return tryGetTerminals(getIdentifer) ?? [];
 };
 
 /**
@@ -276,9 +252,9 @@ const tryGetContext = <T extends ParserRuleContext | undefined>(getContext: () =
     return undefined;
 };
 
-const tryGetContexts = <T extends ParserRuleContext | undefined>(getContext: () => T[]): T[] => {
+const tryGetContexts = <T extends ParserRuleContext | undefined>(getContext: () => undefined | T[]): T[] => {
     try {
-        return getContext();
+        return getContext() ?? [];
     } catch (e) {
     }
 
@@ -297,4 +273,22 @@ const tryGetTerminal = <T extends TerminalNode | undefined>(getTerminal: () => T
     }
 
     return undefined;
+};
+
+/**
+ * See description of tryGetContext
+ *
+ * @param getTerminal
+ */
+const tryGetTerminals = <T extends TerminalNode | undefined>(getTerminal: () => T[]): T[] => {
+    try {
+        return getTerminal();
+    } catch (e) {
+    }
+
+    return [];
+};
+
+const createTypedTerminals = (identifiers: TerminalNode[], getTypeId: () => TypeidContext | undefined) => {
+    return identifiers.map(identifier => ({terminal: identifier, type: getType(getTypeId)}));
 };

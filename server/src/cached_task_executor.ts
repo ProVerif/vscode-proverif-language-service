@@ -98,7 +98,10 @@ export class CachedTaskExecutor {
         const cache = this.documentCache.get(identifier.uri) ?? {identifier};
 
         if (!cache.parseProverifResult) {
-            cache.parseProverifResult = parseProverif(text, selfIsLibrary);
+            const parseResult = parseProverif(text, selfIsLibrary);
+            if (parseResult) {
+                cache.parseProverifResult = parseResult;
+            }
         }
 
         this.documentCache.set(identifier.uri, cache);

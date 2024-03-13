@@ -122,7 +122,7 @@ export const collectTPattern = (ctx?: TpatternContext): TypedTerminal[] => {
     const tpatternseq = tryGetContext(() => ctx.tpatternseq()); // either direct declaration or declaration with a wrapped data function
     const tpatterns = tryGetContexts(() => ctx.tpattern()); // tpattern from choice or int statements
     return [
-        collectBasicpattern(basicpattern),
+        ...collectBasicpattern(basicpattern),
         ...collectTPatternSeq(tpatternseq),
         ...tpatterns.map(collectTPattern).flat()
     ].filter(nonNullable);
@@ -141,18 +141,16 @@ export const collectNepatternseq = (ctx?: NepatternseqContext): TypedTerminal[] 
     ];
 };
 
-export const collectBasicpattern = (ctx?: BasicpatternContext): TypedTerminal | undefined => {
+export const collectBasicpattern = (ctx?: BasicpatternContext): TypedTerminal[] => {
     if (!ctx) {
-        return undefined;
+        return [];
     }
 
     const ident = tryGetTerminal(() => ctx.IDENT());
-    if (ident) {
-        const typeid = tryGetContext(() => ctx.typeid());
-        return {terminal: ident, type: getType(typeid)};
-    }
+    const identifiers = [ident].filter(nonNullable);
 
-    return undefined;
+    const typeid = tryGetContext(() => ctx.typeid());
+    return identifiers.map(identifier => ({terminal: identifier, type: getType(typeid)}))
 };
 
 export const collecMayfailvartypeseq = (ctx?: MayfailvartypeseqContext): TypedTerminal[] => {

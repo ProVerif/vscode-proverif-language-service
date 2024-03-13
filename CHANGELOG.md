@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.6.3
+
+Fix crashes when file has grammar errors.
+
+
 ## v1.6.2
 
 Add `in` to `pterm` in TextMate grammar and improve word detection.

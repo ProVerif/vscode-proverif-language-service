@@ -80,7 +80,7 @@ Go to definition:
 - [x] Implement grammar, symbol table, over libraries 
 - [x] Add go to definition functionality; see https://tomassetti.me/integrating-code-completion-in-visual-studio-code/
 - [x] Invalidate cache of consumers when library stored
-- [ ] Support additional ways of declaring variables (e.g. in REDUCTION lib)
+- [x] Support additional ways of declaring variables (e.g. in REDUCTION lib)
 
 Support writing ProVerif:
 - [x] Configure language

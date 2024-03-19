@@ -8,7 +8,7 @@ Run & test locally:
 - Open VS Code on this folder.
 - Press Ctrl+Shift+B to start compiling the client and server in [watch mode](https://code.visualstudio.com/docs/editor/tasks#:~:text=The%20first%20entry%20executes,the%20HelloWorld.js%20file.).
 - Switch to the Run and Debug View in the Sidebar (Ctrl+Shift+D).
-- Select `Launch Client` from the drop down (if it is not already).
+- Select `Launch Client` from the drop-down (if it is not already).
 - Press ▷ to run the launch config (F5).
 - In the [Extension Development Host](https://code.visualstudio.com/api/get-started/your-first-extension#:~:text=Then%2C%20inside%20the%20editor%2C%20press%20F5.%20This%20will%20compile%20and%20run%20the%20extension%20in%20a%20new%20Extension%20Development%20Host%20window.) instance of VSCode, open a document with a ProVerif extension.
 - Enter ProVerif code, and observe how syntax errors are highlighted.
@@ -27,8 +27,7 @@ To report syntax errors, the language server simply invokes `proverif` over the 
 Syntax errors found by `proverif` are written to `stdout`, which this extension parses and processes appropriately.
 For a `.pvl` file, the extension appends `process\n0` and parses it as a `.pv` file.
 
-This has the advantage that the syntax errors are always correct and in sync with the actual proverif binary used by the user.
-As proverif is mostly a research tool, it is a use-case that different users run widely different proverif binaries.
+This has the advantage that the syntax errors are always correct and in sync with the actual proverif binary used by the user. As proverif is mostly a research tool, it is a use-case that different users run widely different proverif binaries.
 
 This has however also the following limitations:
 - Only the first syntax error is shown (as only the first is output by `proverif`).
@@ -49,7 +48,7 @@ Lastly, the language server waits for the user to click on an identifier, and th
 
 Syntax highlighting works primarily over the TextMate grammar in [./syntaxes/pv.tmLanguage.json](./syntaxes/pv.tmLanguage.json). As TextMate works quite differently to antlr, the rules are translated by hand. Details of the rules have been ommitted, to save on complexity. The primary task of the antlr grammar is to identify keywords, operators and types.
 
-While the TextMate grammar is fast, it is unable to precisely color. For example, some expressions allow both variables as well as functions to be referenced, which cannot be easily expressed in the grammar. For this, the language server implements semantic tokens: It scans the whole file, and returns a list of tokens it recognises as functions, variables and parameters. VSCode then adjusts the colors appropriately.
+While the TextMate grammar is fast, it is unable to precisely color. For example, some expressions allow both variables and functions to be referenced, which cannot be easily expressed in the grammar. For this, the language server implements semantic tokens: It scans the whole file, and returns a list of tokens it recognises as functions, variables and parameters. VSCode then adjusts the colors appropriately.
 
 ## Publish
 

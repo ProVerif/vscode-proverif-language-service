@@ -2,6 +2,7 @@ import {AbstractParseTreeVisitor, ParseTree} from "antlr4ts/tree";
 import {ProverifParserVisitor} from "../parser-proverif/ProverifParserVisitor";
 import {
     LibContext,
+    PtermContext,
     TprocessContext,
     TreducmayfailContext,
     TreducotherwiseContext
@@ -168,6 +169,31 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
                 const identifiers = collectIdentifiers(() => ctx.IDENT());
                 const type = getType(() => ctx.typeid());
                 this.registerTerminals(identifiers, DeclarationType.Variable, type);
+            } else if (ctx.LEFTARROW()) {
+                const typedTerminals = collectBasicpattern(() => ctx.basicpattern());
+                this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);
+            }
+
+            return this.visitChildren(ctx);
+        });
+    };
+
+    public visitPterm = (ctx: PtermContext) => {
+        // TODO: refactor to remove code duplication; consider other cases where NEW etc is used
+        return this.withContext(ctx, () => {
+            if (ctx.LET()) {
+                const typedTerminals = collectTPattern(() => ctx.tpattern());
+                this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);
+
+                const nevartypeTerminals = collectNevartype(() => ctx.nevartype());
+                this.registerTypedTerminals(nevartypeTerminals, DeclarationType.Variable);
+            } else if (ctx.GET()) {
+                const typedTerminals = collectTPatternSeq(() => ctx.tpatternseq());
+                this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);
+            } else if (ctx.NEW() || ctx.RANDOM()) {
+                const identifiers = collectIdentifier(() => ctx.IDENT());
+                const type = getType(() => ctx.typeid());
+                this.registerTerminals([identifiers].filter(nonNullable), DeclarationType.Variable, type);
             } else if (ctx.LEFTARROW()) {
                 const typedTerminals = collectBasicpattern(() => ctx.basicpattern());
                 this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);

@@ -28,7 +28,7 @@ export const getDefinitionSymbolFromPosition = async (identifier: TextDocumentId
 export const getDefinitionSymbolFromMatch = async (parseResult: ParseResult, matchingParseTree: TerminalNode, documentManager: DocumentManagerInterface): Promise<DefinitionSymbol | undefined> => {
     const origin = {uri: parseResult.identifier, match: matchingParseTree};
 
-    const closestSymbol = parseResult.symbolTable.findClosestSymbol(matchingParseTree);
+    const closestSymbol = parseResult.symbolTable.findClosestSymbol(matchingParseTree.text, matchingParseTree);
     if (closestSymbol) {
         return {uri: parseResult.identifier, symbol: closestSymbol, origin};
     }
@@ -44,7 +44,7 @@ export const getDefinitionSymbolFromMatch = async (parseResult: ParseResult, mat
             continue;
         }
 
-        const closestSymbol = dependencyParseResult.symbolTable.findClosestSymbol(matchingParseTree);
+        const closestSymbol = dependencyParseResult.symbolTable.findClosestSymbol(matchingParseTree.text);
         if (!closestSymbol) {
             continue;
         }

@@ -78,6 +78,8 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
     }
 
     public visitLib = (ctx: LibContext) => {
+        this.symbolTable.setPublicContext(ctx);
+
         return this.withContext(ctx, () => {
             const libs = ctx.lib();
 
@@ -378,13 +380,18 @@ export type ProverifSymbol = {
 
 export class ProverifSymbolTable {
     private symbols: ProverifSymbol[] = [];
+    private publicContext: LibContext|undefined;
 
     public addSymbol(symbol: ProverifSymbol) {
         this.symbols.push(symbol);
     }
 
-    public findClosestSymbol(node: ParseTree): ProverifSymbol | undefined {
-        return this.findClosestSymbolInternal(node.text, node);
+    public setPublicContext(publicContext: LibContext) {
+        this.publicContext = publicContext;
+    }
+
+    public findClosestSymbol(text: string, context?: ParseTree): ProverifSymbol | undefined {
+        return this.findClosestSymbolInternal(text, context ?? this.publicContext);
     }
 
     public getSymbols(): ProverifSymbol[] {

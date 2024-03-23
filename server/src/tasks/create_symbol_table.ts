@@ -6,6 +6,7 @@ import {
     GformatContext,
     GtermContext,
     LibContext,
+    NevartypeContext,
     PtermContext,
     TclausesContext,
     TfnebindingseqContext,
@@ -18,7 +19,6 @@ import {TerminalNode} from "antlr4ts/tree/TerminalNode";
 import {
     collecMayfailvartypeseq,
     collectBasicpattern,
-    collectEqlist,
     collectForallmayfailvartype,
     collectForallvartype,
     collectIdentifier,
@@ -29,11 +29,11 @@ import {
     collectSingleIdentifiers,
     collectTPattern,
     collectTPatternSeq,
-    collectTreduc,
     collectTypeidseq,
     getType,
     TypedTerminal
 } from "./ident_collectors";
+import {ParserRuleContext} from "antlr4ts/ParserRuleContext";
 
 
 export type CreateSymbolTableResult = {
@@ -78,68 +78,87 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
     }
 
     public visitLib = (ctx: LibContext) => {
-        if (ctx.CONST() || ctx.FREE()) {
-            const declarationType = ctx.CONST() ? DeclarationType.Const : DeclarationType.Free;
-            const terminalNodes = collectNeidentseq(() => ctx.neidentseq());
-            this.registerTerminals(terminalNodes, declarationType, getType(() => ctx.typeid()));
-        } else if (ctx.CHANNEL()) {
-            const terminalNodes = collectNeidentseq(() => ctx.neidentseq());
-            this.registerTerminals(terminalNodes, DeclarationType.Channel);
-        } else if (ctx.TYPE()) {
-            const identifiers = collectSingleIdentifiers(() => ctx.IDENT());
-            this.registerTerminals(identifiers, DeclarationType.Type);
-        } else if (ctx.FUN()) {
-            const parameters = collectTypeidseq(() => ctx.typeidseq());
-            const identifier = collectIdentifier(() => ctx.IDENT());
-            this.registerTerminalWithParameters(identifier, DeclarationType.Fun, parameters, getType(() => ctx.typeid()));
-        } else if (ctx.EVENT() || ctx.PREDICATE() || ctx.TABLE() || ctx.DEFINE()) {
-            const identifier = collectIdentifier(() => ctx.IDENT());
-            const declarationType =
-                ctx.EVENT() ? DeclarationType.Event :
-                    (ctx.PREDICATE() ? DeclarationType.Predicate :
-                        (ctx.TABLE() ? DeclarationType.Table : DeclarationType.Define));
-            const parameters = collectTypeidseq(() => ctx.typeidseq());
-            this.registerTerminalWithParameters(identifier, declarationType, parameters);
+        return this.withContext(ctx, () => {
+            const libs = ctx.lib();
 
-            if (ctx.DEFINE()) {
+            if (ctx.CONST() || ctx.FREE()) {
+                const declarationType = ctx.CONST() ? DeclarationType.Const : DeclarationType.Free;
+                const terminalNodes = collectNeidentseq(() => ctx.neidentseq());
+                this.registerTerminals(terminalNodes, declarationType, getType(() => ctx.typeid()));
+            } else if (ctx.CHANNEL()) {
+                const terminalNodes = collectNeidentseq(() => ctx.neidentseq());
+                this.registerTerminals(terminalNodes, DeclarationType.Channel);
+            } else if (ctx.TYPE()) {
+                const identifiers = collectSingleIdentifiers(() => ctx.IDENT());
+                this.registerTerminals(identifiers, DeclarationType.Type);
+            } else if (ctx.FUN()) {
+                const parameters = collectTypeidseq(() => ctx.typeidseq());
+                const identifier = collectIdentifier(() => ctx.IDENT());
+                this.registerTerminalWithParameters(identifier, DeclarationType.Fun, parameters, getType(() => ctx.typeid()));
+            } else if (ctx.EVENT() || ctx.PREDICATE() || ctx.TABLE()) {
+                const identifier = collectIdentifier(() => ctx.IDENT());
+                const declarationType =
+                    ctx.EVENT() ? DeclarationType.Event :
+                        (ctx.PREDICATE() ? DeclarationType.Predicate : DeclarationType.Table);
+                const parameters = collectTypeidseq(() => ctx.typeidseq());
+                this.registerTerminalWithParameters(identifier, declarationType, parameters);
+            } else if (ctx.LET() || ctx.LETFUN()) {
+                const declarationType = ctx.LET() ? DeclarationType.Let : DeclarationType.LetFun;
+                const parameters = collecMayfailvartypeseq(() => ctx.mayfailvartypeseq());
+                const identifier = collectIdentifier(() => ctx.IDENT());
+                this.registerTerminalWithNamedParameters(identifier, declarationType, parameters);
                 this.withContext(ctx, () => {
-                    this.registerTerminals(parameters, DeclarationType.DefineParameter);
+                    this.registerTypedTerminals(parameters, DeclarationType.Parameter);
+                    const inner = ctx.LET() ? () => ctx.tprocess() : () => ctx.pterm();
+                    return this.visitInner(inner);
                 });
-            }
-        } else if (ctx.EXPAND()) {
-            const parameters = collectTypeidseq(() => ctx.typeidseq());
-            this.registerTerminals(parameters, DeclarationType.ExpandParameter);
-        } else if (ctx.LET() || ctx.LETFUN()) {
-            const declarationType = ctx.LET() ? DeclarationType.Let : DeclarationType.LetFun;
-            const parameters = collecMayfailvartypeseq(() => ctx.mayfailvartypeseq());
-            const identifier = collectIdentifier(() => ctx.IDENT());
-            this.registerTerminalWithNamedParameters(identifier, declarationType, parameters);
-            this.withContext(ctx, () => {
-                this.registerTypedTerminals(parameters, DeclarationType.Parameter);
-            });
-        } else if (ctx.REDUCTION()) {
-            this.withContext(ctx, () => {
-                const typedTerminals = collectTreduc(() => ctx.treduc());
-                this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
-            });
-        } else if (ctx.EQUATION()) {
-            this.withContext(ctx, () => {
-                const typedTerminals = collectEqlist(() => ctx.eqlist());
-                this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
-            });
-        } else if (ctx.NOUNIF() || ctx.SELECT() || ctx.QUERY() || ctx.NONINTERF() || ctx.NOT() || ctx.lemma()) {
-            this.withContext(ctx, () => {
-                const typedTerminals = collectNevartype(() => ctx.nevartype());
-                this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
-            });
-        } else if (ctx.ELIMTRUE()) {
-            this.withContext(ctx, () => {
+            } else if (ctx.REDUCTION()) {
+                this.visitInner(() => ctx.treduc());
+            } else if (ctx.EQUATION()) {
+                this.visitInner(() => ctx.eqlist());
+            } else if (ctx.NOUNIF() || ctx.SELECT()) {
+                this.registerNevartypeParameters(() => ctx.nevartype());
+                this.visitInner(() => ctx.tfnebindingseq());
+            } else if (ctx.QUERY()) {
+                this.registerNevartypeParameters(() => ctx.nevartype());
+                this.visitInner(() => ctx.tqueryseq());
+            } else if (ctx.NONINTERF() || ctx.NOT() || ctx.lemma()) {
+                this.registerNevartypeParameters(() => ctx.nevartype());
+                this.visitInner(() => ctx.niseq());
+            } else if (ctx.NOT()) {
+                this.registerNevartypeParameters(() => ctx.nevartype());
+                this.visitInner(() => ctx.gterm());
+            } else if (ctx.lemma()) {
+                this.registerNevartypeParameters(() => ctx.nevartype());
+                this.visitInner(() => ctx.tlemmaseq());
+            } else if (ctx.ELIMTRUE()) {
                 const typedTerminals = collectNemayfailvartypeseq(() => ctx.nemayfailvartypeseq());
                 this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
-            });
-        }
+                this.visitInner(() => ctx.term());
+            } else if (ctx.DEFINE()) {
+                const identifier = collectIdentifier(() => ctx.IDENT());
+                const declarationType = DeclarationType.Define;
+                const parameters = collectTypeidseq(() => ctx.typeidseq());
+                this.registerTerminalWithParameters(identifier, declarationType, parameters);
 
-        return this.visitChildren(ctx);
+                this.withContext(ctx, () => {
+                    this.registerTerminals(parameters, DeclarationType.DefineParameter);
+                    return libs.length > 0 ? this.visitChildren(libs[0]) : this.defaultResult();
+                });
+
+                return libs.length > 1 ? this.visitChildren(libs[1]) : this.defaultResult();
+            } else if (ctx.EXPAND()) {
+                const parameters = collectTypeidseq(() => ctx.typeidseq());
+                this.registerTerminals(parameters, DeclarationType.ExpandParameter);
+            }
+
+            return libs.length > 0 ? this.visitChildren(libs[0]) : this.defaultResult();
+        });
+    };
+
+    private visitInner = (getInner: () => ParserRuleContext | undefined) => {
+        const inner = getInner();
+        return inner ? this.visitChildren(inner) : this.defaultResult();
     };
 
     public visitTclauses = (ctx: TclausesContext) => {
@@ -150,8 +169,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             return this.visitChildren(ctx.tclause());
         });
 
-        const tclauses = ctx.tclauses();
-        return tclauses ? this.visitChildren(tclauses) : this.defaultResult();
+        return this.visitInner(() => ctx.tclauses());
     };
 
     public visitTreducmayfail = (ctx: TreducmayfailContext) => {
@@ -170,23 +188,20 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             return this.visitChildren(ctx.extended_equation());
         });
 
-        const treducotherwise = ctx.treducotherwise();
-        return treducotherwise ? this.visitChildren(treducotherwise) : this.defaultResult();
+        return this.visitInner(() => ctx.treducotherwise())
     };
 
     public visitTreduc = (ctx: TreducContext) => {
         this.collectExtendedEquation(ctx);
 
-        const treduc = ctx.treduc();
-        return treduc ? this.visitChildren(treduc) : this.defaultResult();
-    }
+        return this.visitInner(() => ctx.treduc())
+    };
 
     public visitEqlist = (ctx: EqlistContext) => {
         this.collectExtendedEquation(ctx);
 
-        const eqlist = ctx.eqlist();
-        return eqlist ? this.visitChildren(eqlist) : this.defaultResult();
-    }
+        return this.visitInner(() => ctx.eqlist())
+    };
 
     private collectExtendedEquation = (ctx: TreducContext | EqlistContext) => {
         return this.withContext(ctx, () => {
@@ -205,7 +220,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         return this.collectInlineDefinitions(ctx);
     };
 
-    private collectInlineDefinitions = (ctx: Extended_equationContext|TfnebindingseqContext) => {
+    private collectInlineDefinitions = (ctx: Extended_equationContext | TfnebindingseqContext) => {
         return this.withContext(ctx, () => {
             if (ctx.LET() || ctx.LEFTARROW()) {
                 const identifiers = collectSingleIdentifiers(() => ctx.IDENT());
@@ -214,7 +229,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
 
             return this.visitChildren(ctx);
         });
-    }
+    };
 
     public visitTprocess = (ctx: TprocessContext) => {
         return this.withContext(ctx, () => {
@@ -278,6 +293,11 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             return this.visitChildren(ctx);
         });
     };
+
+    private registerNevartypeParameters(getContext: () => NevartypeContext | undefined) {
+        const typedTerminals = collectNevartype(getContext);
+        this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
+    }
 
     private registerTerminals(identifiers: TerminalNode[], declaration: DeclarationType, type?: ParseTree) {
         identifiers.forEach(identifier => {

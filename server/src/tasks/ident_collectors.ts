@@ -228,6 +228,11 @@ export const collectIdentifier = (getIdentifer: () => TerminalNode | undefined):
     return tryGetTerminal(getIdentifer);
 };
 
+export const collectSingleIdentifiers = (getIdentifer: () => TerminalNode | undefined): TerminalNode[] => {
+    const identifier = tryGetTerminal(getIdentifer);
+    return [identifier].filter(nonNullable)
+};
+
 export const collectIdentifiers = (getIdentifer: () => TerminalNode[]): TerminalNode[] => {
     return tryGetTerminals(getIdentifer) ?? [];
 };

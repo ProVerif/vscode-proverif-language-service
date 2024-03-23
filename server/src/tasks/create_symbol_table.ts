@@ -1,8 +1,12 @@
 import {AbstractParseTreeVisitor, ParseTree} from "antlr4ts/tree";
 import {ProverifParserVisitor} from "../parser-proverif/ProverifParserVisitor";
 import {
+    Extended_equationContext,
+    GformatContext,
+    GtermContext,
     LibContext,
     PtermContext,
+    TfnebindingseqContext,
     TprocessContext,
     TreducmayfailContext,
     TreducotherwiseContext
@@ -18,6 +22,7 @@ import {
     collectNeidentseq,
     collectNemayfailvartypeseq,
     collectNevartype,
+    collectSingleIdentifiers,
     collectTPattern,
     collectTPatternSeq,
     collectTreduc,
@@ -25,7 +30,6 @@ import {
     getType,
     TypedTerminal
 } from "./ident_collectors";
-import {nonNullable} from "../utils/array";
 
 
 export type CreateSymbolTableResult = {
@@ -78,8 +82,8 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             const terminalNodes = collectNeidentseq(() => ctx.neidentseq());
             this.registerTerminals(terminalNodes, DeclarationType.Channel);
         } else if (ctx.TYPE()) {
-            const identifier = collectIdentifier(() => ctx.IDENT());
-            this.registerTerminals([identifier].filter(nonNullable), DeclarationType.Type);
+            const identifiers = collectSingleIdentifiers(() => ctx.IDENT());
+            this.registerTerminals(identifiers, DeclarationType.Type);
         } else if (ctx.FUN()) {
             const parameters = collectTypeidseq(() => ctx.typeidseq());
             const identifier = collectIdentifier(() => ctx.IDENT());
@@ -152,55 +156,89 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         return this.visitChildren(ctx);
     };
 
+    public visitTfnebindingseq = (ctx: TfnebindingseqContext) => {
+        return this.withContext(ctx, () => {
+            if (ctx.LET() || ctx.LEFTARROW()) {
+                const identifiers = collectSingleIdentifiers(() => ctx.IDENT());
+                this.registerTerminals(identifiers, DeclarationType.Variable);
+            }
+
+            return this.visitChildren(ctx);
+        });
+    }
+
+    public visitExtended_equation = (ctx: Extended_equationContext) => {
+        return this.withContext(ctx, () => {
+            if (ctx.LET() || ctx.LEFTARROW()) {
+                const identifiers = collectSingleIdentifiers(() => ctx.IDENT());
+                this.registerTerminals(identifiers, DeclarationType.Variable);
+            }
+
+            return this.visitChildren(ctx);
+        });
+    }
+
     public visitTprocess = (ctx: TprocessContext) => {
         return this.withContext(ctx, () => {
-            if (ctx.LET() || ctx.IN()) {
+            if (ctx.IN()) {
                 const typedTerminals = collectTPattern(() => ctx.tpattern());
                 this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);
+            }
 
-                if (ctx.LET()) {
-                    const typedTerminals = collectNevartype(() => ctx.nevartype());
-                    this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);
-                }
-            } else if (ctx.GET()) {
-                const typedTerminals = collectTPatternSeq(() => ctx.tpatternseq());
-                this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);
-            } else if (ctx.NEW() || ctx.RANDOM()) {
-                const identifiers = collectIdentifiers(() => ctx.IDENT());
-                const type = getType(() => ctx.typeid());
-                this.registerTerminals(identifiers, DeclarationType.Variable, type);
-            } else if (ctx.LEFTARROW()) {
-                const typedTerminals = collectBasicpattern(() => ctx.basicpattern());
-                this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);
+            this.collectProcessStyleTerms(ctx, true);
+            return this.visitChildren(ctx);
+        });
+    };
+
+    public visitPterm = (ctx: PtermContext) => {
+        return this.withContext(ctx, () => {
+            this.collectProcessStyleTerms(ctx, false);
+            return this.visitChildren(ctx);
+        });
+    };
+
+    public visitGterm = (ctx: GtermContext) => {
+        return this.withContext(ctx, () => {
+            if (ctx.NEW() || ctx.LET() || ctx.LEFTARROW()) {
+                const identifiers = collectSingleIdentifiers(() => ctx.IDENT());
+                this.registerTerminals(identifiers, DeclarationType.Variable);
             }
 
             return this.visitChildren(ctx);
         });
     };
 
-    public visitPterm = (ctx: PtermContext) => {
-        // TODO: refactor to remove code duplication; consider other cases where NEW etc is used
+    public visitGformat = (ctx: GformatContext) => {
         return this.withContext(ctx, () => {
-            if (ctx.LET()) {
-                const typedTerminals = collectTPattern(() => ctx.tpattern());
-                this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);
-
-                const nevartypeTerminals = collectNevartype(() => ctx.nevartype());
-                this.registerTypedTerminals(nevartypeTerminals, DeclarationType.Variable);
-            } else if (ctx.GET()) {
-                const typedTerminals = collectTPatternSeq(() => ctx.tpatternseq());
-                this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);
-            } else if (ctx.NEW() || ctx.RANDOM()) {
-                const identifiers = collectIdentifier(() => ctx.IDENT());
-                const type = getType(() => ctx.typeid());
-                this.registerTerminals([identifiers].filter(nonNullable), DeclarationType.Variable, type);
-            } else if (ctx.LEFTARROW()) {
-                const typedTerminals = collectBasicpattern(() => ctx.basicpattern());
-                this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);
+            if (ctx.NEW() || ctx.STAR() || ctx.LET() || ctx.LEFTARROW()) {
+                const identifiers = collectSingleIdentifiers(() => ctx.IDENT());
+                this.registerTerminals(identifiers, DeclarationType.Variable);
             }
 
             return this.visitChildren(ctx);
         });
+    };
+
+    private collectProcessStyleTerms = <Variant extends boolean>(ctx: (Variant extends true ? TprocessContext : PtermContext), isTProcess: Variant) => {
+        if (ctx.LET()) {
+            const typedTerminals = collectTPattern(() => ctx.tpattern());
+            this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);
+
+            const nevartypeTerminals = collectNevartype(() => ctx.nevartype());
+            this.registerTypedTerminals(nevartypeTerminals, DeclarationType.Variable);
+        } else if (ctx.GET()) {
+            const typedTerminals = collectTPatternSeq(() => ctx.tpatternseq());
+            this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);
+        } else if (ctx.NEW() || ctx.RANDOM()) {
+            const identifiers = isTProcess ?
+                collectIdentifiers(() => (ctx as TprocessContext).IDENT()) :
+                collectSingleIdentifiers(() => (ctx as PtermContext).IDENT());
+            const type = getType(() => ctx.typeid());
+            this.registerTerminals(identifiers, DeclarationType.Variable, type);
+        } else if (ctx.LEFTARROW()) {
+            const typedTerminals = collectBasicpattern(() => ctx.basicpattern());
+            this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);
+        }
     };
 
     private registerTerminals(identifiers: TerminalNode[], declaration: DeclarationType, type?: ParseTree) {

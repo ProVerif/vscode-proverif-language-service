@@ -29,7 +29,7 @@ channel public2.
 
 table Storage(key_t).
 
-letfun no_conversion(key: key_t) = let k' = convert(key) in new k2: bitstring; k2. 
+letfun no_conversion(key: key_t) = let k' = convert(key) in new k2: bitstring; get Storage(=key) in k2. 
 let publish(key: key_t or fail) = out(public, key). 
 
 set attacker = passive.

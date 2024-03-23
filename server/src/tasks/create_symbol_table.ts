@@ -145,22 +145,17 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
 
                 this.withContext(ctx, () => {
                     this.registerTerminals(parameters, DeclarationType.DefineParameter);
-                    return libs.length > 0 ? this.visitChildren(libs[0]) : this.defaultResult();
+                    return libs.length > 0 ? this.visit(libs[0]) : this.defaultResult();
                 });
 
-                return libs.length > 1 ? this.visitChildren(libs[1]) : this.defaultResult();
+                return libs.length > 1 ? this.visit(libs[1]) : this.defaultResult();
             } else if (ctx.EXPAND()) {
                 const parameters = collectTypeidseq(() => ctx.typeidseq());
                 this.registerTerminals(parameters, DeclarationType.ExpandParameter);
             }
 
-            return libs.length > 0 ? this.visitChildren(libs[0]) : this.defaultResult();
+            return libs.length > 0 ? this.visit(libs[0]) : this.defaultResult();
         });
-    };
-
-    private visitInner = (getInner: () => ParserRuleContext | undefined) => {
-        const inner = getInner();
-        return inner ? this.visitChildren(inner) : this.defaultResult();
     };
 
     public visitTclauses = (ctx: TclausesContext) => {
@@ -168,7 +163,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             const typedTerminals = collectForallmayfailvartype(() => ctx.forallmayfailvartype());
             this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
 
-            return this.visitChildren(ctx.tclause());
+            return this.visit(ctx.tclause());
         });
 
         return this.visitInner(() => ctx.tclauses());
@@ -187,7 +182,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             const typedTerminals = collectForallmayfailvartype(() => ctx.forallmayfailvartype());
             this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
 
-            return this.visitChildren(ctx.extended_equation());
+            return this.visit(ctx.extended_equation());
         });
 
         return this.visitInner(() => ctx.treducotherwise())
@@ -210,7 +205,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             const typedTerminals = collectForallvartype(() => ctx.forallvartype());
             this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
 
-            return this.visitChildren(ctx.extended_equation());
+            return this.visit(ctx.extended_equation());
         });
     };
 
@@ -229,7 +224,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
                 this.registerTerminals(identifiers, DeclarationType.Variable);
             }
 
-            return this.visitChildren(ctx);
+            return this.visit(ctx);
         });
     };
 
@@ -241,14 +236,14 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             }
 
             this.collectProcessStyleTerms(ctx, true);
-            return this.visitChildren(ctx);
+            return this.visitInners(() => ctx.tprocess());
         });
     };
 
     public visitPterm = (ctx: PtermContext) => {
         return this.withContext(ctx, () => {
             this.collectProcessStyleTerms(ctx, false);
-            return this.visitChildren(ctx);
+            return this.visitInners(() => ctx.pterm());
         });
     };
 
@@ -281,7 +276,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
                 this.registerTerminals(identifiers, DeclarationType.Variable);
             }
 
-            return this.visitChildren(ctx);
+            return this.visitInners(() => ctx.gterm());
         });
     };
 
@@ -292,7 +287,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
                 this.registerTerminals(identifiers, DeclarationType.Variable);
             }
 
-            return this.visitChildren(ctx);
+            return this.visitInners(() => ctx.gformat());
         });
     };
 
@@ -363,6 +358,16 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             this.context = previous;
         }
     }
+
+    private visitInner = (getInner: () => ParserRuleContext | undefined) => {
+        const inner = getInner();
+        return inner ? this.visit(inner) : this.defaultResult();
+    };
+
+    private visitInners = (getInner: () => ParserRuleContext[]) => {
+        getInner().forEach(inner => this.visit(inner));
+        return this.defaultResult();
+    };
 }
 
 export type ProverifSymbolParameter = {

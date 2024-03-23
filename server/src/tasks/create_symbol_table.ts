@@ -1,6 +1,7 @@
 import {AbstractParseTreeVisitor, ParseTree} from "antlr4ts/tree";
 import {ProverifParserVisitor} from "../parser-proverif/ProverifParserVisitor";
 import {
+    AllContext,
     EqlistContext,
     Extended_equationContext,
     GformatContext,
@@ -185,19 +186,19 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             return this.visit(ctx.extended_equation());
         });
 
-        return this.visitInner(() => ctx.treducotherwise())
+        return this.visitInner(() => ctx.treducotherwise());
     };
 
     public visitTreduc = (ctx: TreducContext) => {
         this.collectExtendedEquation(ctx);
 
-        return this.visitInner(() => ctx.treduc())
+        return this.visitInner(() => ctx.treduc());
     };
 
     public visitEqlist = (ctx: EqlistContext) => {
         this.collectExtendedEquation(ctx);
 
-        return this.visitInner(() => ctx.eqlist())
+        return this.visitInner(() => ctx.eqlist());
     };
 
     private collectExtendedEquation = (ctx: TreducContext | EqlistContext) => {
@@ -385,7 +386,7 @@ export type ProverifSymbol = {
 
 export class ProverifSymbolTable {
     private symbols: ProverifSymbol[] = [];
-    private publicContext: LibContext|undefined;
+    private publicContext: LibContext | undefined;
 
     public addSymbol(symbol: ProverifSymbol) {
         this.symbols.push(symbol);
@@ -404,13 +405,21 @@ export class ProverifSymbolTable {
     }
 
     private findClosestSymbolInternal(name: string, context?: ParseTree): ProverifSymbol | undefined {
+        if (!context) {
+            return undefined;
+        }
+
         const symbolsOfContext = this.symbols.filter(symbol => symbol.context === context);
         const matchingSymbol = symbolsOfContext.find(symbol => symbol.node.text === name);
         if (matchingSymbol) {
             return matchingSymbol;
         }
 
-        return context ? this.findClosestSymbolInternal(name, context.parent) : undefined;
+        if (context instanceof TprocessContext && context.parent instanceof AllContext) {
+            return this.findClosestSymbolInternal(name, this.publicContext);
+        }
+
+        return this.findClosestSymbolInternal(name, context.parent);
     }
 }
 

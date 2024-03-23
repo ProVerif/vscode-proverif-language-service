@@ -1,13 +1,16 @@
 import {AbstractParseTreeVisitor, ParseTree} from "antlr4ts/tree";
 import {ProverifParserVisitor} from "../parser-proverif/ProverifParserVisitor";
 import {
+    EqlistContext,
     Extended_equationContext,
     GformatContext,
     GtermContext,
     LibContext,
     PtermContext,
+    TclausesContext,
     TfnebindingseqContext,
     TprocessContext,
+    TreducContext,
     TreducmayfailContext,
     TreducotherwiseContext
 } from "../parser-proverif/ProverifParser";
@@ -17,6 +20,7 @@ import {
     collectBasicpattern,
     collectEqlist,
     collectForallmayfailvartype,
+    collectForallvartype,
     collectIdentifier,
     collectIdentifiers,
     collectNeidentseq,
@@ -138,36 +142,70 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         return this.visitChildren(ctx);
     };
 
-    public visitTreducmayfail = (ctx: TreducmayfailContext) => {
+    public visitTclauses = (ctx: TclausesContext) => {
         this.withContext(ctx, () => {
             const typedTerminals = collectForallmayfailvartype(() => ctx.forallmayfailvartype());
             this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
+
+            return this.visitChildren(ctx.tclause());
         });
 
-        return this.visitChildren(ctx);
+        const tclauses = ctx.tclauses();
+        return tclauses ? this.visitChildren(tclauses) : this.defaultResult();
+    };
+
+    public visitTreducmayfail = (ctx: TreducmayfailContext) => {
+        return this.collectMayFailExtendedEquation(ctx);
     };
 
     public visitTreducotherwise = (ctx: TreducotherwiseContext) => {
+        return this.collectMayFailExtendedEquation(ctx);
+    };
+
+    private collectMayFailExtendedEquation = (ctx: TreducotherwiseContext | TreducmayfailContext) => {
         this.withContext(ctx, () => {
             const typedTerminals = collectForallmayfailvartype(() => ctx.forallmayfailvartype());
             this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
+
+            return this.visitChildren(ctx.extended_equation());
         });
 
-        return this.visitChildren(ctx);
+        const treducotherwise = ctx.treducotherwise();
+        return treducotherwise ? this.visitChildren(treducotherwise) : this.defaultResult();
+    };
+
+    public visitTreduc = (ctx: TreducContext) => {
+        this.collectExtendedEquation(ctx);
+
+        const treduc = ctx.treduc();
+        return treduc ? this.visitChildren(treduc) : this.defaultResult();
+    }
+
+    public visitEqlist = (ctx: EqlistContext) => {
+        this.collectExtendedEquation(ctx);
+
+        const eqlist = ctx.eqlist();
+        return eqlist ? this.visitChildren(eqlist) : this.defaultResult();
+    }
+
+    private collectExtendedEquation = (ctx: TreducContext | EqlistContext) => {
+        return this.withContext(ctx, () => {
+            const typedTerminals = collectForallvartype(() => ctx.forallvartype());
+            this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
+
+            return this.visitChildren(ctx.extended_equation());
+        });
     };
 
     public visitTfnebindingseq = (ctx: TfnebindingseqContext) => {
-        return this.withContext(ctx, () => {
-            if (ctx.LET() || ctx.LEFTARROW()) {
-                const identifiers = collectSingleIdentifiers(() => ctx.IDENT());
-                this.registerTerminals(identifiers, DeclarationType.Variable);
-            }
-
-            return this.visitChildren(ctx);
-        });
-    }
+        return this.collectInlineDefinitions(ctx);
+    };
 
     public visitExtended_equation = (ctx: Extended_equationContext) => {
+        return this.collectInlineDefinitions(ctx);
+    };
+
+    private collectInlineDefinitions = (ctx: Extended_equationContext|TfnebindingseqContext) => {
         return this.withContext(ctx, () => {
             if (ctx.LET() || ctx.LEFTARROW()) {
                 const identifiers = collectSingleIdentifiers(() => ctx.IDENT());
@@ -197,28 +235,6 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         });
     };
 
-    public visitGterm = (ctx: GtermContext) => {
-        return this.withContext(ctx, () => {
-            if (ctx.NEW() || ctx.LET() || ctx.LEFTARROW()) {
-                const identifiers = collectSingleIdentifiers(() => ctx.IDENT());
-                this.registerTerminals(identifiers, DeclarationType.Variable);
-            }
-
-            return this.visitChildren(ctx);
-        });
-    };
-
-    public visitGformat = (ctx: GformatContext) => {
-        return this.withContext(ctx, () => {
-            if (ctx.NEW() || ctx.STAR() || ctx.LET() || ctx.LEFTARROW()) {
-                const identifiers = collectSingleIdentifiers(() => ctx.IDENT());
-                this.registerTerminals(identifiers, DeclarationType.Variable);
-            }
-
-            return this.visitChildren(ctx);
-        });
-    };
-
     private collectProcessStyleTerms = <Variant extends boolean>(ctx: (Variant extends true ? TprocessContext : PtermContext), isTProcess: Variant) => {
         if (ctx.LET()) {
             const typedTerminals = collectTPattern(() => ctx.tpattern());
@@ -239,6 +255,28 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             const typedTerminals = collectBasicpattern(() => ctx.basicpattern());
             this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);
         }
+    };
+
+    public visitGterm = (ctx: GtermContext) => {
+        return this.withContext(ctx, () => {
+            if (ctx.NEW() || ctx.LET() || ctx.LEFTARROW()) {
+                const identifiers = collectSingleIdentifiers(() => ctx.IDENT());
+                this.registerTerminals(identifiers, DeclarationType.Variable);
+            }
+
+            return this.visitChildren(ctx);
+        });
+    };
+
+    public visitGformat = (ctx: GformatContext) => {
+        return this.withContext(ctx, () => {
+            if (ctx.NEW() || ctx.STAR() || ctx.LET() || ctx.LEFTARROW()) {
+                const identifiers = collectSingleIdentifiers(() => ctx.IDENT());
+                this.registerTerminals(identifiers, DeclarationType.Variable);
+            }
+
+            return this.visitChildren(ctx);
+        });
     };
 
     private registerTerminals(identifiers: TerminalNode[], declaration: DeclarationType, type?: ParseTree) {

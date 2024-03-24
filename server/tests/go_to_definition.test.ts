@@ -127,6 +127,14 @@ process System`;
         await assertSingleFileNavigation(code, click, target, 5);
     });
 
+    it("consider reduc", async () => {
+        const code = `fun redu(bitstring): bitstring\nreduc forall entry: bitstring;\nredu(entry) = entry.\nprocess 0`;
+        const click = {line: 2, character: 6};
+        const target = {line: 1, character: 13};
+
+        await assertSingleFileNavigation(code, click, target, 5);
+    });
+
     it("checks in dependencies if not found in main", async () => {
         const dependencyUri = 'dependency.pvl';
         const dependencyCode = `channel c.`;

@@ -98,6 +98,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
                 const parameters = collectTypeidseq(() => ctx.typeidseq());
                 const identifier = collectIdentifier(() => ctx.IDENT());
                 this.registerTerminalWithParameters(identifier, DeclarationType.Fun, parameters, getType(() => ctx.typeid()));
+                this.withContext(ctx, () => this.visitInner(() => ctx.treducmayfail()));
             } else if (ctx.EVENT() || ctx.PREDICATE() || ctx.TABLE()) {
                 const identifier = collectIdentifier(() => ctx.IDENT());
                 const declarationType =
@@ -225,7 +226,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
                 this.registerTerminals(identifiers, DeclarationType.Variable);
             }
 
-            return this.visit(ctx);
+            return this.visitChildren(ctx);
         });
     };
 

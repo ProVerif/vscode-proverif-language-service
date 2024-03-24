@@ -126,7 +126,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             } else if (ctx.QUERY()) {
                 this.registerNevartypeParameters(() => ctx.nevartype());
                 this.visitInner(() => ctx.tqueryseq());
-            } else if (ctx.NONINTERF() || ctx.NOT() || ctx.lemma()) {
+            } else if (ctx.NONINTERF()) {
                 this.registerNevartypeParameters(() => ctx.nevartype());
                 this.visitInner(() => ctx.niseq());
             } else if (ctx.NOT()) {
@@ -435,9 +435,9 @@ export class ProverifSymbolTable {
 
         // if in OTHERWISE, then jump directly to the real parent, not the previous clauses
         if (context instanceof TreducotherwiseContext) {
-            let realParent = context.parent
+            let realParent = context.parent;
             while (realParent instanceof TreducotherwiseContext || realParent instanceof TreducmayfailContext) {
-                realParent = realParent.parent
+                realParent = realParent.parent;
             }
 
             return this.findClosestSymbolInternal(name, realParent, considerMacros);

@@ -28,10 +28,10 @@ export const getDefinitionSymbolFromPosition = async (identifier: TextDocumentId
 export const getDefinitionSymbolFromMatch = async (parseResult: ParseResult, matchingParseTree: TerminalNode, documentManager: DocumentManagerInterface): Promise<DefinitionSymbol | undefined> => {
     const definition = getDefinitionSymbolFromMatchMacroAware(parseResult, matchingParseTree, documentManager, false);
     if (definition) {
-        return definition
+        return definition;
     }
 
-    return getDefinitionSymbolFromMatchMacroAware(parseResult, matchingParseTree, documentManager, true)
+    return getDefinitionSymbolFromMatchMacroAware(parseResult, matchingParseTree, documentManager, true);
 };
 
 export const getDefinitionSymbolFromMatchMacroAware = async (parseResult: ParseResult, matchingParseTree: TerminalNode, documentManager: DocumentManagerInterface, considerMacros: boolean): Promise<DefinitionSymbol | undefined> => {

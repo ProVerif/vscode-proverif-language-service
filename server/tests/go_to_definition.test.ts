@@ -6,7 +6,12 @@ import {DefinitionLink} from "vscode-languageserver-protocol";
 import {MockDocumentManager} from "./mocks/mock_document_manager";
 
 describe('go to definition', function () {
-    const assertDefinitionPointsToTarget = (definitionLink: DefinitionLink | undefined, targetUri: string, target: Position, targetCharacterLength: number, source: Position) => {
+    const assertDefinitionPointsToTarget = (definitionLink: DefinitionLink | undefined, targetUri: string, target: Position|undefined, targetCharacterLength: number, source: Position) => {
+        if (!target) {
+            assert.isUndefined(definitionLink)
+            return;
+        }
+
         assert.isDefined(definitionLink);
         if (!definitionLink) {
             return;
@@ -28,7 +33,7 @@ describe('go to definition', function () {
         assert.isTrue(definitionLink.originSelectionRange.start.character <= source.character && source.character <= definitionLink.originSelectionRange.end.character);
     };
 
-    const assertSingleFileNavigation = async (code: string, click: Position, target: Position, targetCharacterLength: number) => {
+    const assertSingleFileNavigation = async (code: string, click: Position, target: Position|undefined, targetCharacterLength: number) => {
         const uri = 'main.pv';
 
         const documentManager = new MockDocumentManager();
@@ -133,6 +138,13 @@ process System`;
         const target = {line: 1, character: 13};
 
         await assertSingleFileNavigation(code, click, target, 5);
+    });
+
+    it("ignore otherwise clauses in reduc", async () => {
+        const code = `fun redu(bitstring): bitstring\nreduc forall entry:bitstring;redu(entry) = entry\notherwise forall entry2: bitstring;\nredu(entry) = entry.\nprocess 0`;
+        const click = {line: 3, character: 6};
+
+        await assertSingleFileNavigation(code, click, undefined, 5);
     });
 
     it("checks in dependencies if not found in main", async () => {

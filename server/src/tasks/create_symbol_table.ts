@@ -416,8 +416,19 @@ export class ProverifSymbolTable {
             return matchingSymbol;
         }
 
+        // if in tprocess, check whether defined in library
         if (context instanceof TprocessContext && context.parent instanceof AllContext) {
             return this.findClosestSymbolInternal(name, this.publicContext);
+        }
+
+        // if in OTHERWISE, then jump directly to the real parent, not the previous clauses
+        if (context instanceof TreducotherwiseContext) {
+            let realParent = context.parent
+            while (realParent instanceof TreducotherwiseContext || realParent instanceof TreducmayfailContext) {
+                realParent = realParent.parent
+            }
+
+            return this.findClosestSymbolInternal(name, realParent);
         }
 
         return this.findClosestSymbolInternal(name, context.parent);

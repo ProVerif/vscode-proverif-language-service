@@ -1,5 +1,9 @@
 # Changelog
 
+## NEXT
+
+Rework symbol table for more accurate definitions.
+
 ## v1.6.3
 
 Fix crashes when file has grammar errors.

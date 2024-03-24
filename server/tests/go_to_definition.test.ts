@@ -147,6 +147,14 @@ process System`;
         await assertSingleFileNavigation(code, click, undefined, 5);
     });
 
+    it("consider clauses", async () => {
+        const code = `pred p1.\nclauses forall entry: bitstring;\np1(entry).\nprocess 0`;
+        const click = {line: 2, character: 4};
+        const target = {line: 1, character: 15};
+
+        await assertSingleFileNavigation(code, click, target, 5);
+    });
+
     it("checks in dependencies if not found in main", async () => {
         const dependencyUri = 'dependency.pvl';
         const dependencyCode = `channel c.`;

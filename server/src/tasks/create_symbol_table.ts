@@ -253,7 +253,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
     public visitPterm = (ctx: PtermContext) => {
         return this.withContext(ctx, () => {
             this.collectProcessStyleTerms(ctx, false);
-            
+
             this.visitInners(() => ctx.pterm());
             this.visitInner(() => ctx.optelseterm());
 

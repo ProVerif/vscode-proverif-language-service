@@ -139,6 +139,8 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
                 const typedTerminals = collectNemayfailvartypeseq(() => ctx.nemayfailvartypeseq());
                 this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
                 this.visitInner(() => ctx.term());
+            }   else if (ctx.CLAUSES()) {
+                this.visitInner(() => ctx.tclauses());
             } else if (ctx.DEFINE()) {
                 const identifier = collectIdentifier(() => ctx.IDENT());
                 const declarationType = DeclarationType.Define;

@@ -240,14 +240,24 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             }
 
             this.collectProcessStyleTerms(ctx, true);
-            return this.visitInners(() => ctx.tprocess());
+
+            this.visitInners(() => ctx.tprocess());
+            this.visitInner(() => ctx.opttprocess());
+            this.visitInner(() => ctx.optinprocess());
+            this.visitInner(() => ctx.optelseprocess());
+
+            return this.defaultResult();
         });
     };
 
     public visitPterm = (ctx: PtermContext) => {
         return this.withContext(ctx, () => {
             this.collectProcessStyleTerms(ctx, false);
-            return this.visitInners(() => ctx.pterm());
+            
+            this.visitInners(() => ctx.pterm());
+            this.visitInner(() => ctx.optelseterm());
+
+            return this.defaultResult();
         });
     };
 
@@ -399,28 +409,28 @@ export class ProverifSymbolTable {
         this.publicContext = publicContext;
     }
 
-    public findClosestSymbol(text: string, context?: ParseTree): ProverifSymbol | undefined {
-        return this.findClosestSymbolInternal(text, context ?? this.publicContext);
+    public findClosestSymbol(text: string, context: ParseTree|undefined, considerMacros: boolean): ProverifSymbol | undefined {
+        return this.findClosestSymbolInternal(text, context ?? this.publicContext, considerMacros);
     }
 
     public getSymbols(): ProverifSymbol[] {
         return this.symbols;
     }
 
-    private findClosestSymbolInternal(name: string, context?: ParseTree): ProverifSymbol | undefined {
+    private findClosestSymbolInternal(name: string, context: ParseTree|undefined, considerMacros: boolean): ProverifSymbol | undefined {
         if (!context) {
             return undefined;
         }
 
         const symbolsOfContext = this.symbols.filter(symbol => symbol.context === context);
         const matchingSymbol = symbolsOfContext.find(symbol => symbol.node.text === name);
-        if (matchingSymbol) {
+        if (matchingSymbol && (considerMacros || matchingSymbol.declaration !== DeclarationType.ExpandParameter)) {
             return matchingSymbol;
         }
 
         // if in tprocess, check whether defined in library
         if (context instanceof TprocessContext && context.parent instanceof AllContext) {
-            return this.findClosestSymbolInternal(name, this.publicContext);
+            return this.findClosestSymbolInternal(name, this.publicContext, considerMacros);
         }
 
         // if in OTHERWISE, then jump directly to the real parent, not the previous clauses
@@ -430,10 +440,10 @@ export class ProverifSymbolTable {
                 realParent = realParent.parent
             }
 
-            return this.findClosestSymbolInternal(name, realParent);
+            return this.findClosestSymbolInternal(name, realParent, considerMacros);
         }
 
-        return this.findClosestSymbolInternal(name, context.parent);
+        return this.findClosestSymbolInternal(name, context.parent, considerMacros);
     }
 }
 

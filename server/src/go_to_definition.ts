@@ -6,7 +6,6 @@ import {DefinitionLink} from "vscode-languageserver-protocol";
 import {ParseTree} from "antlr4ts/tree";
 import {DeclarationType, ProverifSymbol} from "./tasks/create_symbol_table";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";
-import {LibraryDependencyToken} from "./tasks/parse_library_dependencies";
 
 type Origin = { uri: TextDocumentIdentifier, match: TerminalNode };
 export type DefinitionSymbol = { uri: TextDocumentIdentifier, symbol: ProverifSymbol, origin: Origin }
@@ -27,47 +26,43 @@ export const getDefinitionSymbolFromPosition = async (identifier: TextDocumentId
 
 
 export const getDefinitionSymbolFromMatch = async (parseResult: ParseResult, matchingParseTree: TerminalNode, documentManager: DocumentManagerInterface): Promise<DefinitionSymbol | undefined> => {
-    return  getDefinitionSymbolFromMatchMacroAware(parseResult, matchingParseTree, documentManager);
-};
-
-const getDefinitionSymbolFromMatchMacroAware = async (parseResult: ParseResult, matchingParseTree: TerminalNode, documentManager: DocumentManagerInterface): Promise<DefinitionSymbol | undefined> => {
     const origin = {uri: parseResult.identifier, match: matchingParseTree};
 
-    const closestSymbol = parseResult.symbolTable.findClosestSymbol(matchingParseTree.text, matchingParseTree);
-    if (closestSymbol) {
-        if (closestSymbol.declaration === DeclarationType.ExpandParameter) {
-            // TODO: break the cycle
-            const originSymbol = await getDefinitionSymbolFromMatch(parseResult, closestSymbol.node, documentManager);
-            if (originSymbol) {
-                return originSymbol;
-            }
-        }
+    // collect relevant files in order
+    const getParseResults: (() => Promise<ParseResult | undefined>)[] = parseResult.dependencyTokens
+        .filter(dependencyToken => dependencyToken.exists)
+        .map(dependencyToken => () => documentManager.getParseResult(dependencyToken));
+    getParseResults.unshift(async () => parseResult);
 
-        return {uri: parseResult.identifier, symbol: closestSymbol, origin};
-    }
-
-    let currentClosestSymbol: ProverifSymbol|undefined;
-    let currentClosestSymbolDependency: LibraryDependencyToken|undefined;
-    for (let i = 0; i < parseResult.dependencyTokens.length; i++) {
-        const dependency = parseResult.dependencyTokens[i];
-        if (!dependency.exists) {
+    // look for best matching symbol
+    let currentContext: ParseTree | undefined = matchingParseTree;
+    let currentClosestSymbol: ProverifSymbol | undefined;
+    let currentClosestSymbolDependency: TextDocumentIdentifier | undefined;
+    while (getParseResults.length > 0) {
+        const getParseResult = getParseResults.shift()!;
+        const parseResult = await getParseResult();
+        const symbolTable = parseResult?.symbolTable;
+        if (!parseResult || !symbolTable) {
             continue;
         }
 
-        const dependencyParseResult = await documentManager.getParseResult(dependency);
-        if (!dependencyParseResult) {
-            continue;
-        }
-
-        const closestSymbol = dependencyParseResult.symbolTable.findClosestSymbol(matchingParseTree.text, undefined);
+        const closestSymbol = symbolTable.findClosestSymbol(matchingParseTree.text, currentContext);
         if (!closestSymbol) {
+            currentContext = undefined;
             continue;
         }
 
         currentClosestSymbol = closestSymbol;
-        currentClosestSymbolDependency = dependency;
+        currentClosestSymbolDependency = parseResult.identifier;
+
+        // if defined by macro, try to find real definition
         if (closestSymbol.declaration === DeclarationType.ExpandParameter) {
-            // TODO: check in library first for previous declaration, before going to another library
+            // 1st parent: the expand LibContext; 2nd parent: whatever is before
+            currentContext = closestSymbol.context?.parent?.parent;
+            if (currentContext) {
+                // recheck in same file
+                getParseResults.unshift(async () => parseResult);
+            }
             continue;
         }
 
@@ -75,7 +70,7 @@ const getDefinitionSymbolFromMatchMacroAware = async (parseResult: ParseResult, 
     }
 
     if (currentClosestSymbol && currentClosestSymbolDependency) {
-        return {uri: currentClosestSymbolDependency, symbol: currentClosestSymbol, origin}
+        return {uri: currentClosestSymbolDependency, symbol: currentClosestSymbol, origin};
     }
 
     return undefined;

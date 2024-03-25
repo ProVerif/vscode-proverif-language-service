@@ -80,7 +80,7 @@ Go to definition:
 - [x] Add go to definition functionality; see https://tomassetti.me/integrating-code-completion-in-visual-studio-code/
 - [x] Invalidate cache of consumers when library stored
 - [x] Support additional ways of declaring variables (e.g. in REDUCTION lib)
-- [ ] Properly implement macro resolution
+- [ ] Properly implement macro resolution (see TODOs in corresponding unit test)
 - [ ] Improve performance by considering previous resolutions
 
 Support writing ProVerif:

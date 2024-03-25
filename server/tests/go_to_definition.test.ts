@@ -99,13 +99,44 @@ def My(ProcImplementation,SystemInterface) {
 expand My(Proc, System).
 process System`;
 
-        const click = {line: 2, character: 28};
+        // ProcImplementation defined outside, hence this is the real definition
+        const click = {line: 1, character: 7};
         const target = {line: 1, character: 7};
-        await assertSingleFileNavigation(code, click, target, 18);
+        await assertSingleFileNavigation(code, click, target, 'ProcImplementation'.length);
 
-        const click2 = {line: 5, character: 9};
-        const target2 = {line: 4, character: 16};
-        await assertSingleFileNavigation(code, click2, target2, 6);
+        /* TODO implement
+        // SystemInterface defined inside macro
+        const click1 = {line: 1, character: 25};
+        const target1 = {line: 2, character: 12};
+        await assertSingleFileNavigation(code, click1, target1, 'SystemInterface'.length);
+        */
+
+        // SystemInterface defined inside macro
+        const click2 = {line: 2, character: 8};
+        const target2 = {line: 2, character: 8};
+        await assertSingleFileNavigation(code, click2, target2, 'SystemInterface'.length);
+
+        // ProcImplementation defined outside, hence definition inside macro signature
+        const click3 = {line: 2, character: 30};
+        const target3 = {line: 1, character: 7};
+        await assertSingleFileNavigation(code, click3, target3, 'ProcImplementation'.length);
+
+        // Proc defined at start
+        const click4 = {line: 4, character: 10};
+        const target4 = {line: 0, character: 4};
+        await assertSingleFileNavigation(code, click4, target4, 'Proc'.length);
+
+        /* TODO implement
+        // System defined by macro, hence navigate to macro signature
+        const click5 = {line: 4, character: 18};
+        const target5 = {line: 1, character: 23};
+        await assertSingleFileNavigation(code, click5, target5, 'Proc'.length);
+         */
+
+        // System defined by macro
+        const click6 = {line: 5, character: 9};
+        const target6 = {line: 4, character: 16};
+        await assertSingleFileNavigation(code, click6, target6, 'System'.length);
     });
 
     it("consider query variables", async () => {

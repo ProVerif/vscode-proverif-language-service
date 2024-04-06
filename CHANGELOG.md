@@ -1,6 +1,6 @@
 # Changelog
 
-## NEXT
+## v1.6.4
 
 Rework symbol table for more accurate definitions.
 

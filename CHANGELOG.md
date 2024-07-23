@@ -1,8 +1,14 @@
 # Changelog
 
+## v1.6.5
+
+Update dependencies.
+
+
 ## v1.6.4
 
 Rework symbol table for more accurate definitions.
+
 
 ## v1.6.3
 

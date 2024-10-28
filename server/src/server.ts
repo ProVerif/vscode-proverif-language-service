@@ -17,6 +17,8 @@ import {getSemanticTokens, tokenModifier, tokenTypes} from './semantic_token_pro
 import {getDocumentLinks} from "./document_links";
 import {getSignatureHelp} from "./signature_help";
 import {getHover} from "./hover";
+import {CompletionTriggerKind} from "vscode-languageserver";
+import {getCompletion} from "./completion";
 
 const connection = createConnection(ProposedFeatures.all);
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
@@ -46,6 +48,7 @@ connection.onInitialize((params: InitializeParams) => {
             renameProvider: true,
             signatureHelpProvider: { triggerCharacters: ['('], retriggerCharacters: [',', ', '] },
             hoverProvider: true,
+            completionProvider: { },
             semanticTokensProvider: {
                 documentSelector: null, // use client-side definition
                 legend: {tokenModifiers: tokenModifier, tokenTypes: tokenTypes},
@@ -112,6 +115,15 @@ connection.onSignatureHelp(async params => {
 
     return signatureHelp;
 });
+
+connection.onCompletion(async params => {
+    const completions = await getCompletion(params.textDocument, params.position, documentManager);
+    if (!completions) {
+        return undefined;
+    }
+
+    return completions;
+})
 
 connection.languages.semanticTokens.on(async params => {
     const parseResult = await documentManager.getParseResult(params.textDocument);

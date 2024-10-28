@@ -8,11 +8,14 @@ import {TextDocumentIdentifier} from "vscode-languageserver";
 import {Connection} from "vscode-languageserver/node";
 import {joinOptionalLists} from "./utils/array";
 import {CachedTaskExecutor} from "./cached_task_executor";
+import {AllContext, LibContext, ProverifParser} from "./parser-proverif/ProverifParser";
 
 export type ParseResult = ParseProverifResult & CreateSymbolTableResult & {
     identifier: TextDocumentIdentifier
     dependencyTokens: LibraryDependencyToken[]
 };
+
+export type RawParseResult = Partial<ParseProverifResult>
 
 export interface DocumentManagerInterface {
     markSettingsChanged(): Promise<void>
@@ -20,6 +23,7 @@ export interface DocumentManagerInterface {
     markDocumentContentChanged(document: TextDocument): Promise<void>
     markFilesystemDocumentContentChanged(document: TextDocument): Promise<void>
     getParseResult(identifier: TextDocumentIdentifier): Promise<ParseResult | undefined>
+    getRawParseResult(identifier: TextDocumentIdentifier): Promise<RawParseResult>
     getConsumers(identifier: TextDocumentIdentifier): Promise<TextDocumentIdentifier[]>
 }
 
@@ -82,6 +86,10 @@ export class DocumentManager implements DocumentManagerInterface {
         const {libraryDependencyTokens} = await this.taskExecutor.parseLibraryDependencies(identifier);
 
         return {identifier, parser, parserTree, symbolTable, dependencyTokens: libraryDependencyTokens};
+    };
+
+    public getRawParseResult = async (identifier: TextDocumentIdentifier): Promise<RawParseResult> => {
+        return this.taskExecutor.parse(identifier);
     };
 
     public getConsumers = (identifier: TextDocumentIdentifier): Promise<TextDocumentIdentifier[]> => {

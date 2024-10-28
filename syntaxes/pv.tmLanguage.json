@@ -454,7 +454,7 @@
       "patterns": [
         { "include": "#comments" },
         {
-          "match": "(\\b(true|false)\\b)",
+          "match": "(\\b(true|false|active|passive|none|approx|strict|interactive|check|nocheck|instantiate|full|discard|trueWithoutArgsInNames|TermMaxsize|Term|NounifsetMaxsize|Nounifset|best|simple|no|beginOnly|auto|all)\\b)",
           "name": "constant.language.proverif"
         },
         {

@@ -7,29 +7,110 @@
   ],
   "patterns": [
     {
-      "//comment": "Declaration of built-in functions",
-      "match": "\\b(is_nat|is_not_nat|neq|geq)\\b",
-      "name": "keyword.control.proverif"
-    },
-    {
       "//comment": "Declaration of facts",
-      "match": "\\b(attacker2|mess2|table2)\\b",
-      "name": "keyword.control.proverif"
+      "begin" : "\\b(attacker2|mess2|table2)\\(",
+      "end": "\\)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.proverif" }
+      },
+      "patterns": [
+        { "include": "#fact"}
+      ]
     },
     {
-      "//comment": "Declaration of event",
-      "match": "\\b(b-event2)\\b",
-      "name": "keyword.control.proverif"
+      "//comment": "Declaration of events",
+      "begin" : "\\b(b-event2|event2)\\(",
+      "end": "\\)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.proverif" }
+      },
+      "patterns": [
+        { "include": "#fact"}
+      ]
     },
     {
-      "//comment": "Declaration of functions",
-      "match": "([a-zA-Z'0-9_]+)\\(",
-      "name": "entity.name.function.proverif"
+      "//comment": "Declaration of built-in functions",
+      "begin" : "\\b(is_nat|is_not_nat|neq|geq|equal)\\(",
+      "end": "\\)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.proverif" }
+      },
+      "patterns": [
+        { "include": "#fact"}
+      ]
+    },
+    {
+      "//comment": "Declaration of forall",
+      "begin" : "\\((forall)",
+      "end": "\\)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.proverif" }
+      },
+      "patterns": [
+        { "include": "#fact"}
+      ]
+    },
+    {
+      "//comment": "Declaration of inequalities",
+      "begin" : "(@[a-zA-Z'0-9_]+) ≠",
+      "end": "&&",
+      "beginCaptures": {
+        "1": { "name": "variable.parameter.proverif" }
+      },
+      "patterns": [
+        { "include": "#fact"}
+      ]
     },
     { "include": "#constants" },
     { "include": "#terms" }
   ],
   "repository": {
+    "fact": {
+      "patterns":[
+        {
+          "//comment" : "Functions",
+          "begin" : "\\b([a-zA-Z'0-9_]+)\\(",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "entity.name.function.proverif" }
+          },
+          "patterns": [
+            { "include": "#fact"}
+          ]
+        },
+        {
+          "//comment" : "Pair",
+          "begin" : "\\(",
+          "end": "\\)",
+          "patterns": [
+            { "include": "#fact"}
+          ]
+        },
+        {
+          "//comment" : "Context",
+          "begin" : "\\[",
+          "end": "\\]",
+          "patterns": [
+            { "include": "#fact"}
+          ]
+        },
+        {
+          "//comment" : "Parameters",
+          "match": "@[a-zA-Z'0-9_]+",
+          "name": "variable.parameter.proverif"
+        },
+        {
+          "//comment" : "Numbers",
+          "match": "[0-9]+",
+          "name": "constant.numeric.proverif"
+        },
+        {
+          "//comment" : "Constants",
+          "match": "[a-zA-Z'0-9_]+",
+          "name": "variable.other.constant.proverif"
+        }
+      ]
+    },
     "constants": {
       "patterns": [
         {

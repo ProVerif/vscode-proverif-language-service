@@ -41,7 +41,8 @@
 				],
 				"extensions": [
 					".pv.log"
-				]
+				],
+				"configuration": "./language-configuration.log.json"
 			}
 		],
 		"grammars": [

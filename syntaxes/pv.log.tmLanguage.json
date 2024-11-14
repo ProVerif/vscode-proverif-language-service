@@ -1,0 +1,54 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "pv.log",
+  "scopeName": "source.pv.log",
+  "fileTypes": [
+    "pv.log"
+  ],
+  "patterns": [
+    {
+      "//comment": "Declaration of built-in functions",
+      "match": "\\b(is_nat|is_not_nat|neq|geq)\\b",
+      "name": "keyword.control.proverif"
+    },
+    {
+      "//comment": "Declaration of facts",
+      "match": "\\b(attacker2|mess2|table2)\\b",
+      "name": "keyword.control.proverif"
+    },
+    {
+      "//comment": "Declaration of event",
+      "match": "\\b(b-event2)\\b",
+      "name": "keyword.control.proverif"
+    },
+    {
+      "//comment": "Declaration of functions",
+      "match": "([a-zA-Z'0-9_]+)\\(",
+      "name": "entity.name.function.proverif"
+    },
+    { "include": "#constants" },
+    { "include": "#terms" }
+  ],
+  "repository": {
+    "constants": {
+      "patterns": [
+        {
+          "match": "(\\b(true|false)\\b)",
+          "name": "constant.language.proverif"
+        },
+        {
+          "match": "(\\b([0-9]+)\\b)",
+          "name": "constant.numeric.proverif"
+        }
+      ]
+    },
+    "terms": {
+      "patterns": [
+        {
+          "match": "(\\b(fail|choice|diff|not)\\b)",
+          "name": "keyword.operator.proverif"
+        }
+      ]
+    }
+  }
+}

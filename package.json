@@ -15,7 +15,6 @@
 		"vscode": "^1.75.0"
 	},
 	"activationEvents": [
-		"onLanguage:pv",
 		"onCommand:workbench.action.tasks.runTask"
 	],
 	"main": "./client/out/extension",
@@ -33,14 +32,29 @@
 					".pcv"
 				],
 				"configuration": "./language-configuration.json"
+			},
+			{
+				"id": "pv.log",
+				"aliases": [
+					"ProVerif Log",
+					"pv.log"
+				],
+				"extensions": [
+					".pv.log"
+				]
 			}
 		],
 		"grammars": [
-            {
-                "language": "pv",
-                "scopeName": "source.pv",
-                "path": "./syntaxes/pv.tmLanguage.json"
-            }
+			{
+				"language": "pv",
+				"scopeName": "source.pv",
+				"path": "./syntaxes/pv.tmLanguage.json"
+			},
+			{
+				"language": "pv.log",
+				"scopeName": "source.pv.log",
+				"path": "./syntaxes/pv.log.tmLanguage.json"
+			}
         ],
 		"configuration": {
 			"title": "ProVerif",

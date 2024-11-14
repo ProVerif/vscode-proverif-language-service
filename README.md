@@ -36,3 +36,7 @@ If your `.pv` or `.pvl` file depends on libraries, include a corresponding comme
 fun senc(bitstring, key): bitstring.
 reduc forall m: bitstring, k: key; sdec(senc(m,k),k) = m.
 ```
+
+## Logs (.pv.log)
+
+Store output of ProVerif in `.pv.log` files, for some basic syntax highlighting.

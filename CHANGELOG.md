@@ -1,5 +1,10 @@
 # Changelog
 
+## current
+
+Add autocomplete for set statements.  
+Add new `pv.log` language, which colors ProVerif output.
+
 ## v1.6.5
 
 Update dependencies.

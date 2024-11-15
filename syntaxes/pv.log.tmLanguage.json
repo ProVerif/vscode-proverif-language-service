@@ -40,6 +40,22 @@
       ]
     },
     {
+      "//comment" : "Equalities",
+      "match": "(@?[\\(\\)\\(\\],a-zA-Z'0-9_]+) (=|≠) (@?[\\(\\)\\(\\],a-zA-Z'0-9_]+)\\b",
+      "captures": {
+        "1": { 
+          "patterns": [
+            { "include": "#fact"}
+          ]
+        },
+        "3": { 
+          "patterns": [
+            { "include": "#fact"}
+          ]
+        }
+      }
+    },
+    {
       "//comment": "Declaration of forall",
       "begin" : "\\((forall)",
       "end": "\\)",

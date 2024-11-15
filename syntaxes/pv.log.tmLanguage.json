@@ -7,8 +7,15 @@
   ],
   "patterns": [
     {
+      "//comment": "Prevent coloring ProVerif statements",
+      "match" : "({[0-9]+})(.+)",
+      "captures": {
+        "1": { "name": "comment.block.proverif" }
+      }
+    },
+    {
       "//comment": "Declaration of facts",
-      "begin" : "\\b(attacker2|mess2|table2)\\(",
+      "begin" : "\\b(attacker|mess|table|attacker2|mess2|table2)\\(",
       "end": "\\)",
       "beginCaptures": {
         "1": { "name": "keyword.control.proverif" }
@@ -19,7 +26,7 @@
     },
     {
       "//comment": "Declaration of events",
-      "begin" : "\\b(b-event2|event2)\\(",
+      "begin" : "\\b(event|event2|b-event2|event2)\\(",
       "end": "\\)",
       "beginCaptures": {
         "1": { "name": "keyword.control.proverif" }
@@ -77,8 +84,7 @@
         { "include": "#fact"}
       ]
     },
-    { "include": "#constants" },
-    { "include": "#terms" }
+    { "include": "#highlights" }
   ],
   "repository": {
     "fact": {
@@ -127,23 +133,19 @@
         }
       ]
     },
-    "constants": {
+    "highlights": {
       "patterns": [
         {
           "match": "(\\b(true|false)\\b)",
           "name": "constant.language.proverif"
         },
         {
+          "match" : "{[0-9]+}",
+          "name": "comment.block.proverif"
+        },
+        {
           "match": "(\\b([0-9]+)\\b)",
           "name": "constant.numeric.proverif"
-        }
-      ]
-    },
-    "terms": {
-      "patterns": [
-        {
-          "match": "(\\b(fail|choice|diff|not)\\b)",
-          "name": "keyword.operator.proverif"
         }
       ]
     }

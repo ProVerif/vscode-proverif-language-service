@@ -73,6 +73,7 @@ Execute ProVerif:
 - [x] Add support for libraries (.pvl).
 - [x] Add [custom task](https://code.visualstudio.com/api/extension-guides/task-provider) to automatically include libraries when invoking proverif.
 - [x] Introduce proper caching / cache invalidation
+- [x] Use `-parse-only` flag if available
 
 Go to definition:
 - [x] PoC of how to implement grammar

@@ -8,7 +8,7 @@ import {TextDocumentIdentifier} from "vscode-languageserver";
 
 export type InvokeProverifResult = {
     proverifBinary: string
-    invocation: string
+    invocation?: string
     diagnostics?: Diagnostic[]
     messages?: Message[]
 }
@@ -154,12 +154,41 @@ const parseDiagnosticLine = (content: string, selfIsLibrary: boolean, libraryDep
     return {diagnostics: [parsingError]};
 };
 
+const KNOWN_PROVERIF_BINARIES: { [key: string]: ProverifBinaryMeta } = {};
+type ProverifBinaryMeta = {
+    exists: boolean,
+    support_parse_only: boolean
+}
+const getProverifBinaryMeta = async (proverifBinary: string): Promise<ProverifBinaryMeta> => {
+    return new Promise((resolve) => {
+        if (proverifBinary in KNOWN_PROVERIF_BINARIES) {
+            resolve(KNOWN_PROVERIF_BINARIES[proverifBinary]);
+            return;
+        }
+
+        exec(`${proverifBinary} -parse-only`, (error) => {
+            KNOWN_PROVERIF_BINARIES[proverifBinary] = {
+                exists: !error || error.code !== 127,
+                support_parse_only: !error
+            }
+
+            resolve(KNOWN_PROVERIF_BINARIES[proverifBinary]);
+        });
+    });
+};
+
 const LIB_ARGUMENT_PREFIX = '-lib';
 export const invokeProverif = async (documentIdentifier: TextDocumentIdentifier, content: string, selfIsLibrary: boolean, libraryDependencyTokens: LibraryDependencyToken[], proverifBinary: string): Promise<InvokeProverifResult> => {
     let appendFileEnding: string | undefined = undefined;
     if (selfIsLibrary) {
         content += '\nprocess\n\t0';
         appendFileEnding = '.pv';
+    }
+
+    const proverifBinaryMeta = await getProverifBinaryMeta(proverifBinary);
+    if (!proverifBinaryMeta.exists) {
+        const errorMessage = createSingleErrorMessage(`Failed to invoke ProVerif: ${proverifBinary}`)
+        return Promise.resolve({proverifBinary, ...errorMessage})
     }
 
     // sync changes here into the proverif build task in the client
@@ -169,11 +198,13 @@ export const invokeProverif = async (documentIdentifier: TextDocumentIdentifier,
         messages?: Message[],
         diagnostics?: Diagnostic[]
     }>(path, content, appendFileEnding, tempFilePath => new Promise((resolve) => {
+        const proverifArgs = proverifBinaryMeta.support_parse_only ? '-parse-only' : '';
         const libs = new Set(libraryDependencyTokens.filter(token => token.exists).map(token => fileURLToPath(token.uri)));
         const libArguments = Array.from(libs).map(lib => `${LIB_ARGUMENT_PREFIX} "${lib}"`).join(" ");
-        const invocation = `${proverifBinary} ${libArguments} "${tempFilePath}"`;
+        const invocation = `${proverifBinary} ${proverifArgs} ${libArguments} "${tempFilePath}"`;
 
-        exec(invocation, {timeout: 1000}, (error, stdout) => {
+        const timeout = proverifBinaryMeta.support_parse_only ? undefined : 2000;
+        exec(invocation, {timeout}, (error, stdout) => {
             const result = parseDiagnostics(content, selfIsLibrary, libraryDependencyTokens, error, stdout);
             resolve({ invocation, ...result });
         });

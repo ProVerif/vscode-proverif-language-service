@@ -1,6 +1,5 @@
 import * as path from 'path';
-import { ExtensionContext } from 'vscode';
-
+import {ExtensionContext, window} from 'vscode';
 import {
 	LanguageClient,
 	LanguageClientOptions,
@@ -30,6 +29,10 @@ export const startLanguageServer = async (context: ExtensionContext) => {
 		serverOptions,
 		clientOptions
 	);
+
+	client.onNotification('custom/notifyUser', (params) => {
+		window.showWarningMessage(params.message);
+	});
 
 	await client.start();
 };

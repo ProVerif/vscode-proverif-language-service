@@ -90,6 +90,7 @@ Support writing ProVerif:
 - [x] Add semantic tokens (`connection.languages.semanticTokens`)
 - [ ] Support syntactical autocomplete (`connection.onCompletion`)
 - [ ] Support semantical autocomplete (see https://tomassetti.me/code-completion-with-antlr4-c3/#chapter12)
+- [ ] Detect blocking private channels (`in(c_private, mess)` where `mess` is of a format that is never sent)
 
 Refactorings:
 - [ ] Introduce refactoring for free c: channel to replace with channel c

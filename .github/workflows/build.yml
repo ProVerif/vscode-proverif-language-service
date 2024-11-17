@@ -42,6 +42,9 @@ jobs:
         working-directory: server
         run: npm run test
 
+      - name: Test E2E
+        run: xvfb-run -a npm run test
+
       - name: Publish
         if: success() && startsWith(github.ref, 'refs/tags/')
         run: npm run deploy
@@ -49,6 +52,3 @@ jobs:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
           OVSX_PAT: ${{ secrets.OVSX_PAT }}
 
-      # inactive as does not work on CI
-      # - name: Run Unit Tests
-      #   run: xvfb-run -a npm run test

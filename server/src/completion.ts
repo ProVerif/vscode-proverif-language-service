@@ -20,15 +20,15 @@ export const getCompletion = async (identifier: TextDocumentIdentifier, position
         return undefined;
     }
 
-    const tokensCount = contextTokens.length
+    const tokensCount = contextTokens.length;
     if (contextTokens.length > 0 && contextTokens[tokensCount-1].type === ProverifParser.SET) {
-        return Object.getOwnPropertyNames(setRules).map(label => ({ label, kind: CompletionItemKind.Keyword}))
+        return Object.getOwnPropertyNames(setRules).map(label => ({ label, kind: CompletionItemKind.Keyword}));
     }
 
     if (contextTokens.length > 2 && contextTokens[tokensCount-3].type === ProverifParser.SET && contextTokens[tokensCount-1].type === ProverifParser.EQUAL) {
-        const ruleName = contextTokens[tokensCount-2].text
+        const ruleName = contextTokens[tokensCount-2].text;
         if (ruleName && ruleName in setRules) {
-            return setRules[ruleName].map(label => ({ label, kind: CompletionItemKind.Value }))
+            return setRules[ruleName].map(label => ({ label, kind: CompletionItemKind.Value }));
         }
     }
 
@@ -112,12 +112,12 @@ const setRules: { [key in string]: string[] } = {
     verboseRedundant: ["false", "true"],
     verboseCompleted: ["false", "true"],
     verboseGoalReachable: ["true", "false"],
-}
+};
 
 const createCompletionItem = (text: string): CompletionItem => {
     return {
         label: text,
         kind:CompletionItemKind.Keyword
-    }
-}
+    };
+};
 

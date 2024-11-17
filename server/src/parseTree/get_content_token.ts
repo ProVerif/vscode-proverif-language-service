@@ -17,11 +17,11 @@ export const getPreviousContextTokens = (tokens: TokenStream, position: Position
 
     const contextTokens: Token[] = [];
     for (let i = currentContextTokenIndex; i >= 0 && contextTokens.length < max; i--) {
-        const candidate = tokens.get(i)
+        const candidate = tokens.get(i);
 
         // ignore whitespace and last token
         if (candidate.type !== ProverifParser.WS && candidate.type !== -1) {
-            contextTokens.unshift(candidate)
+            contextTokens.unshift(candidate);
         }
     }
 

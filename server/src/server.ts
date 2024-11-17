@@ -123,7 +123,7 @@ connection.onCompletion(async params => {
     }
 
     return completions;
-})
+});
 
 connection.languages.semanticTokens.on(async params => {
     const parseResult = await documentManager.getParseResult(params.textDocument);

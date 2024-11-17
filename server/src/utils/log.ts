@@ -1,4 +1,5 @@
 import {Connection} from "vscode-languageserver/node";
+import {sendNotification} from "./notifications";
 
 export type Message = {
     severity: 'info' | 'error'
@@ -12,6 +13,7 @@ export const logMessages = (connection: Connection, messages: Message[]) => {
                 break;
             case "error":
                 connection.console.error(message.content);
+                sendNotification(connection, message.content);
         }
     });
 };

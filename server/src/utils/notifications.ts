@@ -1,6 +1,8 @@
-import {Connection, Diagnostic} from "vscode-languageserver/node";
-import {TextDocumentIdentifier} from "vscode-languageserver";
+import {Connection} from "vscode-languageserver/node";
+import {NotificationType} from "vscode-languageserver";
+
+const NotifyUserNotification = new NotificationType<string>('custom/notifyUser');
 
 export const sendNotification = async (connection: Connection, message: string) => {
-    await connection.sendNotification('custom/notifyUser', message);
+    await connection.sendNotification(NotifyUserNotification, message);
 };

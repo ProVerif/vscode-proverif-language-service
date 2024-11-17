@@ -6,8 +6,10 @@ import {
 	ServerOptions,
 	TransportKind
 } from 'vscode-languageclient/node';
+import {NotificationType} from "vscode-languageclient";
 
 let client: LanguageClient;
+const NotifyUserNotification = new NotificationType<string>('custom/notifyUser');
 
 export const startLanguageServer = async (context: ExtensionContext) => {
 	const serverModule = context.asAbsolutePath(
@@ -30,8 +32,8 @@ export const startLanguageServer = async (context: ExtensionContext) => {
 		clientOptions
 	);
 
-	client.onNotification('custom/notifyUser', (params) => {
-		window.showWarningMessage(params.message);
+	client.onNotification(NotifyUserNotification, (params) => {
+		window.showWarningMessage(params);
 	});
 
 	await client.start();

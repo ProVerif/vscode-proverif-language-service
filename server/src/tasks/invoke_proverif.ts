@@ -170,7 +170,7 @@ const getProverifBinaryMeta = async (proverifBinary: string): Promise<ProverifBi
             KNOWN_PROVERIF_BINARIES[proverifBinary] = {
                 exists: !error || error.code !== 127,
                 support_parse_only: !error
-            }
+            };
 
             resolve(KNOWN_PROVERIF_BINARIES[proverifBinary]);
         });
@@ -187,8 +187,8 @@ export const invokeProverif = async (documentIdentifier: TextDocumentIdentifier,
 
     const proverifBinaryMeta = await getProverifBinaryMeta(proverifBinary);
     if (!proverifBinaryMeta.exists) {
-        const errorMessage = createSingleErrorMessage(`Failed to invoke ProVerif: ${proverifBinary}`)
-        return Promise.resolve({proverifBinary, ...errorMessage})
+        const errorMessage = createSingleErrorMessage(`Failed to invoke ProVerif: ${proverifBinary}`);
+        return Promise.resolve({proverifBinary, ...errorMessage});
     }
 
     // sync changes here into the proverif build task in the client

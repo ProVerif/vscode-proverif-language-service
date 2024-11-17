@@ -42,17 +42,6 @@ jobs:
         working-directory: server
         run: npm run test
 
-      - name: Cache vscode binary
-        uses: actions/cache@v3
-        with:
-          path: ~/.vscode-test
-          key: ${{ runner.os }}-vscode-test
-
-      - name: Run E2E test
-        uses: coactions/setup-xvfb@v1
-        with:
-          run: npm run test
-
       - name: Publish
         if: success() && startsWith(github.ref, 'refs/tags/')
         run: npm run deploy

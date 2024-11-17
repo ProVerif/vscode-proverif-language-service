@@ -2,7 +2,7 @@
 	"name": "vscode-proverif-server",
 	"description": "Language support for the ProVerif language - server",
 	"author": "ProVerif",
-	"version": "1.7.0",
+	"version": "1.7.1",
 	"license": "MIT",
 	"engines": {
 		"node": "*"

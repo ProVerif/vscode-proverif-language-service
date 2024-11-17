@@ -1,9 +1,16 @@
 # Changelog
 
+## v1.7.1
+
+Use `-parse-only` if available to improve performance.  
+Send notification to user if proverif bin is not found.
+
+
 ## v1.7.0
 
 Add autocomplete for set statements.  
 Add new `pv.log` language, which colors ProVerif output.
+
 
 ## v1.6.5
 

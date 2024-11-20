@@ -12,7 +12,7 @@ export const tokenTypes = ['', 'function', 'variable', 'parameter', 'type'];
 
 export const getSemanticTokens = async (identifier: TextDocumentIdentifier, documentManager: DocumentManagerInterface) => {
     const parseResult = await documentManager.getParseResult(identifier);
-    if (!parseResult) {
+    if (!parseResult.parserTree) {
         return undefined;
     }
 

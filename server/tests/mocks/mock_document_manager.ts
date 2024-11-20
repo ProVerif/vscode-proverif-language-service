@@ -56,10 +56,6 @@ export class MockDocumentManager implements DocumentManagerInterface {
         this.parseResults.set(uri, parseResult);
     }
 
-    public async getRawParseResult(identifier: TextDocumentIdentifier): Promise<RawParseResult> {
-        return this.rawParseResults.get(identifier.uri);
-    }
-
     public async getParseResult(identifier: TextDocumentIdentifier): Promise<ParseResult | undefined> {
         return this.parseResults.get(identifier.uri);
     }

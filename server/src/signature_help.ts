@@ -11,7 +11,7 @@ import {getSignaturePosition} from "./parseTree/get_signature_position";
 
 export const getSignatureHelp = async (identifier: TextDocumentIdentifier, position: Position, documentManager: DocumentManagerInterface): Promise<SignatureHelp | undefined> => {
     const parseResult = await documentManager.getParseResult(identifier);
-    if (!parseResult) {
+    if (!parseResult.parser) {
         return undefined;
     }
 

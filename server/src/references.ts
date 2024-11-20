@@ -46,7 +46,7 @@ class ReferenceCollector {
         this.collected.add(identifier.uri);
 
         const definitionParseResult = await this.documentManager.getParseResult(identifier);
-        if (!definitionParseResult) {
+        if (!definitionParseResult.parserTree) {
             return;
         }
 

@@ -1,21 +1,24 @@
 import {assert, expect} from "chai";
 
-import {getDefinitionLink} from "../src/go_to_definition";
+import {getDefinitionLocations} from "../src/go_to_definition";
 import {Position} from "vscode-languageserver";
 import {DefinitionLink} from "vscode-languageserver-protocol";
 import {MockDocumentManager} from "./mocks/mock_document_manager";
 
 describe('go to definition', function () {
-    const assertDefinitionPointsToTarget = (definitionLink: DefinitionLink | undefined, targetUri: string, target: Position|undefined, targetCharacterLength: number, source: Position) => {
+    const assertDefinitionPointsToTarget = (definitionLinks: DefinitionLink[] | undefined, targetUri: string, target: Position|undefined, targetCharacterLength: number, source: Position) => {
         if (!target) {
-            assert.isUndefined(definitionLink)
+            assert.isUndefined(definitionLinks)
             return;
         }
 
-        assert.isDefined(definitionLink);
-        if (!definitionLink) {
+        assert.isDefined(definitionLinks);
+        if (!definitionLinks) {
             return;
         }
+        
+        assert.lengthOf(definitionLinks, 1);
+        const definitionLink = definitionLinks[0]
         
         expect(definitionLink.targetUri).to.equal(targetUri);
 
@@ -38,7 +41,7 @@ describe('go to definition', function () {
 
         const documentManager = new MockDocumentManager();
         documentManager.parse(uri, code);
-        const definitionLink = await getDefinitionLink({uri}, click, documentManager);
+        const definitionLink = await getDefinitionLocations({uri}, click, documentManager);
 
         assertDefinitionPointsToTarget(definitionLink, uri, target, targetCharacterLength, click);
     };
@@ -198,7 +201,7 @@ process System`;
         const documentManager = new MockDocumentManager();
         documentManager.parse(uri, code, dependencyUri);
         documentManager.parse(dependencyUri, dependencyCode);
-        const definitionLink = await getDefinitionLink({uri}, click, documentManager);
+        const definitionLink = await getDefinitionLocations({uri}, click, documentManager);
 
         assertDefinitionPointsToTarget(definitionLink, dependencyUri, target, 1, click);
     });

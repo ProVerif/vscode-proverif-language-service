@@ -10,7 +10,7 @@ import {
 } from 'vscode-languageserver/node';
 import {TextDocument} from 'vscode-languageserver-textdocument';
 import {DocumentManager, DocumentManagerInterface,} from "./document_manager";
-import {getDefinitionLink} from "./go_to_definition";
+import {getDefinitionLocations} from "./go_to_definition";
 import {rename} from "./rename";
 import {getReferences} from "./references";
 import {getSemanticTokens, tokenModifier, tokenTypes} from './semantic_token_provider';
@@ -80,78 +80,22 @@ documents.onDidClose(event => documentManager.closeDocument(event.document));
 documents.onDidChangeContent(async event => documentManager.markDocumentContentChanged(event.document));
 documents.onDidSave(async event => documentManager.markFilesystemDocumentContentChanged(event.document));
 
-connection.onDefinition(async (params) => {
-    const definitionLink = await getDefinitionLink(params.textDocument, params.position, documentManager);
-    if (!definitionLink) {
-        return undefined;
-    }
-
-    return [definitionLink];
-});
-
-connection.onHover(async (params) => {
-    const hover = await getHover(params.textDocument, params.position, documentManager);
-    if (!hover) {
-        return undefined;
-    }
-
-    return hover;
-});
-
-connection.onDocumentLinks(async params => {
-    const parseResult = await documentManager.getParseResult(params.textDocument);
-    if (!parseResult) {
-        return undefined;
-    }
-
-    return await getDocumentLinks(parseResult);
-});
-
-connection.onSignatureHelp(async params => {
-    const signatureHelp = await getSignatureHelp(params.textDocument, params.position, documentManager);
-    if (!signatureHelp) {
-        return undefined;
-    }
-
-    return signatureHelp;
-});
-
-connection.onCompletion(async params => {
-    const completions = await getCompletion(params.textDocument, params.position, documentManager);
-    if (!completions) {
-        return undefined;
-    }
-
-    return completions;
-});
+connection.onDefinition(async (params) => getDefinitionLocations(params.textDocument, params.position, documentManager));
+connection.onHover(async (params) => getHover(params.textDocument, params.position, documentManager));
+connection.onDocumentLinks(async params => getDocumentLinks(params.textDocument, documentManager));
+connection.onSignatureHelp(async params => getSignatureHelp(params.textDocument, params.position, documentManager));
+connection.onCompletion(async params => getCompletion(params.textDocument, params.position, documentManager));
+connection.onRenameRequest(async params => rename(params.textDocument, params.position, params.newName, documentManager));
+connection.onReferences(async params => getReferences(params.textDocument, params.position, documentManager));
 
 connection.languages.semanticTokens.on(async params => {
-    const parseResult = await documentManager.getParseResult(params.textDocument);
-    if (!parseResult) {
-        connection.console.error("Parsing failed.");
-        return new ResponseError(2, 'Parsing failed', undefined);
-    }
-
-    const semanticTokens = await getSemanticTokens(parseResult, documentManager);
+    const semanticTokens = await getSemanticTokens(params.textDocument, documentManager);
     if (!semanticTokens) {
         connection.console.error("Retrieving semantic tokens failed.");
         return new ResponseError(3, 'Semantic tokens extraction failed', undefined);
     }
 
     return semanticTokens;
-});
-
-connection.onRenameRequest(async params => {
-    return rename(params.textDocument, params.position, params.newName, documentManager);
-});
-
-connection.onReferences(async params => {
-    const references = await getReferences(params.textDocument, params.position, documentManager);
-    if (!references) {
-        return undefined;
-    }
-
-    return references;
 });
 
 documents.listen(connection);

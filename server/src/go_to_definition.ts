@@ -76,13 +76,18 @@ export const getDefinitionSymbolFromMatch = async (parseResult: ParseResult, mat
     return undefined;
 };
 
-export const getDefinitionLink = async (identifier: TextDocumentIdentifier, position: Position, documentManager: DocumentManagerInterface): Promise<DefinitionLink | undefined> => {
+export const getDefinitionLocations = async (identifier: TextDocumentIdentifier, position: Position, documentManager: DocumentManagerInterface): Promise<LocationLink[] | undefined> => {
     const definitionSymbol = await getDefinitionSymbolFromPosition(identifier, position, documentManager);
     if (!definitionSymbol) {
         return undefined;
     }
 
-    return constructLocationLink(definitionSymbol.uri, definitionSymbol.symbol.node, definitionSymbol.origin.match);
+    const locationLink = constructLocationLink(definitionSymbol.uri, definitionSymbol.symbol.node, definitionSymbol.origin.match);
+    if (!locationLink) {
+        return undefined;
+    }
+
+    return [locationLink];
 };
 
 export const definitionSymbolsEqual = (a: DefinitionSymbol, b: DefinitionSymbol) => {

@@ -1,15 +1,21 @@
-import {SemanticTokensBuilder} from 'vscode-languageserver';
+import {SemanticTokensBuilder, TextDocumentIdentifier} from 'vscode-languageserver';
 import {DocumentManagerInterface, ParseResult} from './document_manager';
 import {collectIdentTerminals} from "./parseTree/collect_terminals";
 import {getDefinitionSymbolFromMatch} from "./go_to_definition";
 import {nonNullable} from "./utils/array";
 import {DeclarationType} from "./tasks/create_symbol_table";
+import {ResponseError} from "vscode-languageserver/node";
 
 // It is unclear why an empty entry as first entry of tokenTypes is required, and why +1 for the index of the tokenModifiers needs to be added.
 export const tokenModifier = ['readonly'];
 export const tokenTypes = ['', 'function', 'variable', 'parameter', 'type'];
 
-export const getSemanticTokens = async (parseResult: ParseResult, documentManager: DocumentManagerInterface) => {
+export const getSemanticTokens = async (identifier: TextDocumentIdentifier, documentManager: DocumentManagerInterface) => {
+    const parseResult = await documentManager.getParseResult(identifier);
+    if (!parseResult) {
+        return undefined;
+    }
+
     // collect references
     const candidateTerminals = collectIdentTerminals(parseResult.parserTree);
     const terminalDefinitions = candidateTerminals

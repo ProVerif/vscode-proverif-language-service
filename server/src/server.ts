@@ -17,7 +17,6 @@ import {getSemanticTokens, tokenModifier, tokenTypes} from './semantic_token_pro
 import {getDocumentLinks} from "./document_links";
 import {getSignatureHelp} from "./signature_help";
 import {getHover} from "./hover";
-import {CompletionTriggerKind} from "vscode-languageserver";
 import {getCompletion} from "./completion";
 
 const connection = createConnection(ProposedFeatures.all);

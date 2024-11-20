@@ -1,7 +1,6 @@
-import {integer, Position, uinteger} from "vscode-languageserver";
+import {integer, Position} from "vscode-languageserver";
 import {TokenStream} from "antlr4ts/TokenStream";
 import {Token} from "antlr4ts";
-import {ProverifLexer} from "../parser-proverif/ProverifLexer";
 import {ProverifParser} from "../parser-proverif/ProverifParser";
 
 export const getPreviousContextTokens = (tokens: TokenStream, position: Position, max: integer = 5): Token[] | undefined => {

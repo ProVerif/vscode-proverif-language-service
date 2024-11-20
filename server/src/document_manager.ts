@@ -8,7 +8,6 @@ import {TextDocumentIdentifier} from "vscode-languageserver";
 import {Connection} from "vscode-languageserver/node";
 import {joinOptionalLists} from "./utils/array";
 import {CachedTaskExecutor} from "./cached_task_executor";
-import {AllContext, LibContext, ProverifParser} from "./parser-proverif/ProverifParser";
 
 export type ParseResult = Partial<ParseProverifResult> & Partial<CreateSymbolTableResult> & {
     identifier: TextDocumentIdentifier

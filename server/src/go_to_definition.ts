@@ -2,7 +2,6 @@ import {DocumentManagerInterface, ParseResult} from "./document_manager";
 import {LocationLink, Position, TextDocumentIdentifier} from "vscode-languageserver";
 import {getMatchingParseTree} from "./parseTree/get_matching_parse_tree";
 import {getRange} from "./parseTree/get_range";
-import {DefinitionLink} from "vscode-languageserver-protocol";
 import {ParseTree} from "antlr4ts/tree";
 import {DeclarationType, ProverifSymbol} from "./tasks/create_symbol_table";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";
@@ -12,7 +11,7 @@ export type DefinitionSymbol = { uri: TextDocumentIdentifier, symbol: ProverifSy
 
 export const getDefinitionSymbolFromPosition = async (identifier: TextDocumentIdentifier, position: Position, documentManager: DocumentManagerInterface): Promise<DefinitionSymbol | undefined> => {
     const parseResult = await documentManager.getParseResult(identifier);
-    if (!parseResult) {
+    if (!parseResult.parserTree) {
         return undefined;
     }
 
@@ -29,7 +28,7 @@ export const getDefinitionSymbolFromMatch = async (parseResult: ParseResult, mat
     const origin = {uri: parseResult.identifier, match: matchingParseTree};
 
     // collect relevant files in order
-    const getParseResults: (() => Promise<ParseResult | undefined>)[] = parseResult.dependencyTokens
+    const getParseResults: (() => Promise<ParseResult>)[] = parseResult.dependencyTokens
         .filter(dependencyToken => dependencyToken.exists)
         .map(dependencyToken => () => documentManager.getParseResult(dependencyToken));
     getParseResults.unshift(async () => parseResult);
@@ -41,12 +40,11 @@ export const getDefinitionSymbolFromMatch = async (parseResult: ParseResult, mat
     while (getParseResults.length > 0) {
         const getParseResult = getParseResults.shift()!;
         const parseResult = await getParseResult();
-        const symbolTable = parseResult?.symbolTable;
-        if (!parseResult || !symbolTable) {
+        if (!parseResult.symbolTable) {
             continue;
         }
 
-        const closestSymbol = symbolTable.findClosestSymbol(matchingParseTree.text, currentContext);
+        const closestSymbol = parseResult.symbolTable.findClosestSymbol(matchingParseTree.text, currentContext);
         if (!closestSymbol) {
             currentContext = undefined;
             continue;

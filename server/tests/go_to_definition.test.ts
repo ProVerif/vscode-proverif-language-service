@@ -16,7 +16,7 @@ describe('go to definition', function () {
         if (!definitionLinks) {
             return;
         }
-        
+
         assert.lengthOf(definitionLinks, 1);
         const definitionLink = definitionLinks[0]
         

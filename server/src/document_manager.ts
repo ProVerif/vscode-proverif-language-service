@@ -10,7 +10,7 @@ import {joinOptionalLists} from "./utils/array";
 import {CachedTaskExecutor} from "./cached_task_executor";
 import {AllContext, LibContext, ProverifParser} from "./parser-proverif/ProverifParser";
 
-export type ParseResult = ParseProverifResult & CreateSymbolTableResult & {
+export type ParseResult = Partial<ParseProverifResult> & Partial<CreateSymbolTableResult> & {
     identifier: TextDocumentIdentifier
     dependencyTokens: LibraryDependencyToken[]
 };
@@ -22,8 +22,7 @@ export interface DocumentManagerInterface {
     closeDocument(identifier: TextDocumentIdentifier): void
     markDocumentContentChanged(document: TextDocument): Promise<void>
     markFilesystemDocumentContentChanged(document: TextDocument): Promise<void>
-    getParseResult(identifier: TextDocumentIdentifier): Promise<ParseResult | undefined>
-    getRawParseResult(identifier: TextDocumentIdentifier): Promise<RawParseResult>
+    getParseResult(identifier: TextDocumentIdentifier): Promise<ParseResult>
     getConsumers(identifier: TextDocumentIdentifier): Promise<TextDocumentIdentifier[]>
 }
 
@@ -75,21 +74,12 @@ export class DocumentManager implements DocumentManagerInterface {
         await sendDiagnostics(this.connection, identifier, diagnostics);
     };
 
-    public getParseResult = async (identifier: TextDocumentIdentifier): Promise<ParseResult | undefined> => {
+    public getParseResult = async (identifier: TextDocumentIdentifier): Promise<ParseResult> => {
         const {parser, parserTree} = await this.taskExecutor.parse(identifier);
         const {symbolTable} = await this.taskExecutor.createSymbolTable(identifier);
-
-        if (!parser || !parserTree || !symbolTable) {
-            return undefined;
-        }
-
         const {libraryDependencyTokens} = await this.taskExecutor.parseLibraryDependencies(identifier);
 
         return {identifier, parser, parserTree, symbolTable, dependencyTokens: libraryDependencyTokens};
-    };
-
-    public getRawParseResult = async (identifier: TextDocumentIdentifier): Promise<RawParseResult> => {
-        return this.taskExecutor.parse(identifier);
     };
 
     public getConsumers = (identifier: TextDocumentIdentifier): Promise<TextDocumentIdentifier[]> => {

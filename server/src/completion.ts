@@ -4,7 +4,6 @@ import {
     TextDocumentIdentifier
 } from "vscode-languageserver";
 import {DocumentManagerInterface} from "./document_manager";
-import {getMatchingParseTree} from "./parseTree/get_matching_parse_tree";
 import {getPreviousContextTokens} from "./parseTree/get_content_token";
 import {ProverifParser} from "./parser-proverif/ProverifParser";
 import {CompletionItemKind} from "vscode-languageserver-types";

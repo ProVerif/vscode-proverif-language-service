@@ -58,7 +58,7 @@ const getRangeFromPositionString = (positionString: string): Range | undefined =
     return undefined;
 };
 
-const parseDiagnostics = (content: string, selfIsLibrary: boolean, libraryDependencyTokens: LibraryDependencyToken[], error: ExecException | null, stdout: string): {
+const parseDiagnostics = (selfIsLibrary: boolean, libraryDependencyTokens: LibraryDependencyToken[], error: ExecException | null, stdout: string): {
     messages?: Message[]
     diagnostics?: Diagnostic[]
 } => {
@@ -85,7 +85,7 @@ const parseDiagnostics = (content: string, selfIsLibrary: boolean, libraryDepend
         const endOfErrorLineIndex = stdout.indexOf('\n', nextNewlineIndex+1);
         const errorLine = stdout.substring(nextNewlineIndex + 1, endOfErrorLineIndex > 0 ? endOfErrorLineIndex : undefined);
         
-        const result = parseDiagnosticLine(content, selfIsLibrary, libraryDependencyTokens, positionLine, errorLine);
+        const result = parseDiagnosticLine(selfIsLibrary, libraryDependencyTokens, positionLine, errorLine);
         results.push(result);
     }
 
@@ -109,7 +109,7 @@ const mergeOptionalLists = <T>(lists: (T[]|undefined)[]): T[]|undefined => {
 };
 
 
-const parseDiagnosticLine = (content: string, selfIsLibrary: boolean, libraryDependencyTokens: LibraryDependencyToken[], positionLine: string, errorLine: string): {
+const parseDiagnosticLine = (selfIsLibrary: boolean, libraryDependencyTokens: LibraryDependencyToken[], positionLine: string, errorLine: string): {
     messages?: Message[]
     diagnostics?: Diagnostic[]
 } => {
@@ -205,7 +205,7 @@ export const invokeProverif = async (documentIdentifier: TextDocumentIdentifier,
 
         const timeout = proverifBinaryMeta.support_parse_only ? undefined : 2000;
         exec(invocation, {timeout}, (error, stdout) => {
-            const result = parseDiagnostics(content, selfIsLibrary, libraryDependencyTokens, error, stdout);
+            const result = parseDiagnostics(selfIsLibrary, libraryDependencyTokens, error, stdout);
             resolve({ invocation, ...result });
         });
     }));

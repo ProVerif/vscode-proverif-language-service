@@ -123,18 +123,6 @@ export class CachedTaskExecutor {
         return {...cache.createSymbolTableResult};
     };
 
-    private readSettings = async (identifier: TextDocumentIdentifier) => {
-        const cache = this.documentCache.get(identifier.uri) ?? {identifier};
-
-        if (!cache.settings) {
-            cache.settings = await getDocumentSettings(this.connection, this.hasConfigurationCapability, identifier);
-        }
-
-        this.documentCache.set(identifier.uri, cache);
-
-        return {...cache.settings};
-    };
-
     public parseLibraryDependencies = async (identifier: TextDocumentIdentifier) => {
         const selfIsLibrary = identifier.uri.endsWith('.pvl');
         const {text} = await this.getDocumentText(identifier);
@@ -158,7 +146,33 @@ export class CachedTaskExecutor {
         return {selfIsLibrary, ...cache.parseLibraryDependenciesResult};
     };
 
-    public getDocumentText = async (identifier: TextDocumentIdentifier) => {
+    public getConsumers = async (identifier: TextDocumentIdentifier) => {
+        const path = fileURLToPath(identifier.uri);
+        const folder = dirname(path);
+        if (!this.folderCache.has(folder)) {
+            const {parentFolderDiscoveryLimit} = await this.readSettings(identifier);
+
+            await this.discoverFolder(folder, parentFolderDiscoveryLimit);
+            this.folderCache.add(folder);
+        }
+
+        const cache = this.documentCache.get(identifier.uri) ?? {identifier};
+        return cache.consumers ?? [];
+    };
+
+    private readSettings = async (identifier: TextDocumentIdentifier) => {
+        const cache = this.documentCache.get(identifier.uri) ?? {identifier};
+
+        if (!cache.settings) {
+            cache.settings = await getDocumentSettings(this.connection, this.hasConfigurationCapability, identifier);
+        }
+
+        this.documentCache.set(identifier.uri, cache);
+
+        return {...cache.settings};
+    };
+
+    private getDocumentText = async (identifier: TextDocumentIdentifier) => {
         const cache = this.documentCache.get(identifier.uri) ?? {identifier};
 
         let text = cache.document?.getText();
@@ -174,20 +188,6 @@ export class CachedTaskExecutor {
         this.documentCache.set(identifier.uri, cache);
 
         return {text};
-    };
-
-    public getConsumers = async (identifier: TextDocumentIdentifier) => {
-        const path = fileURLToPath(identifier.uri);
-        const folder = dirname(path);
-        if (!this.folderCache.has(folder)) {
-            const {parentFolderDiscoveryLimit} = await this.readSettings(identifier);
-
-            await this.discoverFolder(folder, parentFolderDiscoveryLimit);
-            this.folderCache.add(folder);
-        }
-
-        const cache = this.documentCache.get(identifier.uri) ?? {identifier};
-        return cache.consumers ?? [];
     };
 
     private discoveredFolders: Set<string> = new Set();

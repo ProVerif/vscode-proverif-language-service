@@ -35,14 +35,17 @@ import {
     TypedTerminal
 } from "./ident_collectors";
 import {ParserRuleContext} from "antlr4ts/ParserRuleContext";
+import {CommonTokenStream} from "antlr4ts";
+import {ProverifLexer} from "../parser-proverif/ProverifLexer";
+import {Token} from "antlr4ts/Token";
 
 
 export type CreateSymbolTableResult = {
     symbolTable: ProverifSymbolTable
 }
 
-export const createSymbolTable = (context: ParseTree): CreateSymbolTableResult => {
-    const symbolTableVisitor = new SymbolTableVisitor();
+export const createSymbolTable = (tokenStream: CommonTokenStream, context: ParseTree): CreateSymbolTableResult => {
+    const symbolTableVisitor = new SymbolTableVisitor(tokenStream);
     return {symbolTable: symbolTableVisitor.visit(context)};
 };
 
@@ -68,9 +71,10 @@ export enum DeclarationType {
 }
 
 class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> implements ProverifParserVisitor<ProverifSymbolTable> {
-    constructor(
-        private readonly symbolTable = new ProverifSymbolTable(),
-        private context: undefined | ParseTree = undefined) {
+    private readonly symbolTable = new ProverifSymbolTable();
+    private context: undefined | ParseTree = undefined;
+
+    constructor(private tokenStream: CommonTokenStream) {
         super();
     }
 
@@ -97,7 +101,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             } else if (ctx.FUN()) {
                 const parameters = collectTypeidseq(() => ctx.typeidseq());
                 const identifier = collectIdentifier(() => ctx.IDENT());
-                this.registerTerminalWithParameters(identifier, DeclarationType.Fun, parameters, getType(() => ctx.typeid()));
+                this.registerTerminalWithParameters(ctx.FUN(), identifier, DeclarationType.Fun, parameters, getType(() => ctx.typeid()));
                 this.withContext(ctx, () => this.visitInner(() => ctx.treducmayfail()));
             } else if (ctx.EVENT() || ctx.PREDICATE() || ctx.TABLE()) {
                 const identifier = collectIdentifier(() => ctx.IDENT());
@@ -105,12 +109,12 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
                     ctx.EVENT() ? DeclarationType.Event :
                         (ctx.PREDICATE() ? DeclarationType.Predicate : DeclarationType.Table);
                 const parameters = collectTypeidseq(() => ctx.typeidseq());
-                this.registerTerminalWithParameters(identifier, declarationType, parameters);
+                this.registerTerminalWithParameters(ctx.EVENT() || ctx.PREDICATE() || ctx.TABLE(), identifier, declarationType, parameters);
             } else if (ctx.LET() || ctx.LETFUN()) {
                 const declarationType = ctx.LET() ? DeclarationType.Let : DeclarationType.LetFun;
                 const parameters = collecMayfailvartypeseq(() => ctx.mayfailvartypeseq());
                 const identifier = collectIdentifier(() => ctx.IDENT());
-                this.registerTerminalWithNamedParameters(identifier, declarationType, parameters);
+                this.registerTerminalWithNamedParameters(ctx.LET() || ctx.LETFUN(), identifier, declarationType, parameters);
                 this.withContext(ctx, () => {
                     this.registerTypedTerminals(parameters, DeclarationType.Parameter);
                     const inner = ctx.LET() ? () => ctx.tprocess() : () => ctx.pterm();
@@ -145,7 +149,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
                 const identifier = collectIdentifier(() => ctx.IDENT());
                 const declarationType = DeclarationType.Define;
                 const parameters = collectTypeidseq(() => ctx.typeidseq());
-                this.registerTerminalWithParameters(identifier, declarationType, parameters);
+                this.registerTerminalWithParameters(ctx.DEFINE(), identifier, declarationType, parameters);
 
                 this.withContext(ctx, () => {
                     this.registerTerminals(parameters, DeclarationType.DefineParameter);
@@ -332,25 +336,28 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         });
     }
 
-    private registerTerminalWithParameters(identifier: TerminalNode | undefined, declaration: DeclarationType, parameters: (ParseTree | undefined)[], type?: ParseTree) {
+    private registerTerminalWithParameters(root: TerminalNode | undefined, identifier: TerminalNode | undefined, declaration: DeclarationType, parameters: (ParseTree | undefined)[], type?: ParseTree) {
         if (!identifier) {
             return;
         }
 
+        const docComment = this.getDocComment(root);
         this.symbolTable.addSymbol({
             node: identifier,
             declaration,
             type,
             parameters: parameters.map(parameter => parameter ? ({node: parameter}) : undefined),
+            docComment,
             context: this.context
         });
     }
 
-    private registerTerminalWithNamedParameters(identifier: TerminalNode | undefined, declaration: DeclarationType, parameters: (TypedTerminal | undefined)[], type?: ParseTree) {
+    private registerTerminalWithNamedParameters(root: TerminalNode | undefined, identifier: TerminalNode | undefined, declaration: DeclarationType, parameters: (TypedTerminal | undefined)[], type?: ParseTree) {
         if (!identifier) {
             return;
         }
 
+        const docComment = this.getDocComment(root);
         this.symbolTable.addSymbol({
             node: identifier,
             declaration,
@@ -359,8 +366,32 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
                 node: parameter.terminal,
                 type: parameter.type
             }) : undefined),
+            docComment,
             context: this.context
         });
+    }
+
+    private getDocComment(root: TerminalNode | undefined) {
+        if (!root) {
+            return undefined;
+        }
+
+        const docCandidates = this.tokenStream.getHiddenTokensToLeft(root.symbol.tokenIndex);
+        let docCandidate = docCandidates.pop();
+        while (docCandidate) {
+            if (docCandidate.type === ProverifLexer.DelimitedDocComment) {
+                break;
+            }
+
+            if (docCandidate.type !== ProverifLexer.WS) {
+                docCandidate = undefined;
+                break;
+            }
+
+            docCandidate = docCandidates.pop();
+        }
+
+        return docCandidate?.text;
     }
 
     private withContext<T>(context: undefined | ParseTree, action: () => T): T {
@@ -394,6 +425,7 @@ export type ProverifSymbol = {
     declaration: DeclarationType
     type?: ParseTree
     parameters?: (ProverifSymbolParameter | undefined)[]
+    docComment?: string
     context?: ParseTree
 }
 

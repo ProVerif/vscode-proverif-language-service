@@ -8,6 +8,7 @@
     "pcv"
   ],
   "patterns": [
+    { "include": "#docComments"},
     { "include": "#comments" },
     {
       "//comment": "Declaration of type",
@@ -396,8 +397,17 @@
         { "include": "#nevartypeorfail" }
       ]
     },
+    "docComments": {
+      "name": "comment.block.documentation",
+      "begin": "\\(\\*\\*",
+      "end": "\\*\\*\\)",
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#commentContents"}
+      ]
+    },
     "comments": {
-      "name": "comment.multiline",
+      "name": "comment.block",
       "begin": "\\(\\*",
       "end": "\\*\\)",
       "patterns": [

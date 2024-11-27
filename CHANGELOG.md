@@ -1,5 +1,9 @@
 # Changelog
 
+## current
+
+Add doccomments: Add `(** documentation with two stars **)` before entities so the documentation is shown on how. Supports `fun`, `let`, `letfun`, `predicate`, `event`, `table` and `define`.  
+
 ## v1.7.1
 
 Use `-parse-only` if available to improve performance.  

@@ -33,12 +33,12 @@ export class MockDocumentManager implements DocumentManagerInterface {
         const rawParseResult = parseProverif(code, uri.endsWith('.pvl'));
         this.rawParseResults.set(uri, rawParseResult);
 
-        const {parser, parserTree} = rawParseResult
+        const {tokenStream, parser, parserTree} = rawParseResult
         if (!this.allowParseFails) {
             assert.isUndefined(parserTree.exception);
         }
 
-        const symbolTable = createSymbolTable(parserTree).symbolTable;
+        const symbolTable = createSymbolTable(tokenStream, parserTree).symbolTable;
 
         const dependencyTokens: LibraryDependencyToken[] = [];
         if (dependencyUri) {

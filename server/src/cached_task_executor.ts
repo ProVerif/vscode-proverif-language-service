@@ -110,12 +110,12 @@ export class CachedTaskExecutor {
     };
 
     public createSymbolTable = async (identifier: TextDocumentIdentifier) => {
-        const {parserTree} = await this.parse(identifier);
+        const {tokenStream, parserTree} = await this.parse(identifier);
 
         const cache = this.documentCache.get(identifier.uri) ?? {identifier};
 
-        if (parserTree && !cache.createSymbolTableResult) {
-            cache.createSymbolTableResult = createSymbolTable(parserTree);
+        if (tokenStream && parserTree && !cache.createSymbolTableResult) {
+            cache.createSymbolTableResult = createSymbolTable(tokenStream, parserTree);
         }
 
         this.documentCache.set(identifier.uri, cache);

@@ -22,19 +22,20 @@ export const getHover = async (identifier: TextDocumentIdentifier, position: Pos
 const constructHover = (definitionSymbol: ProverifSymbol, source: ParseTree): Hover | undefined => {
     const range = getRange(source);
     const fullName = getFullName(definitionSymbol);
-    const contents = createProverifMarkupContent(fullName);
+    const contents = createProverifMarkupContent(fullName, definitionSymbol.docComment);
 
     return {range, contents};
 };
 
-const createProverifMarkupContent = (proverifCode: string): MarkupContent => {
+const createProverifMarkupContent = (proverifCode: string, docComment?: string): MarkupContent => {
     return {
         kind: MarkupKind.Markdown,
         value: [
             '```pv',
+            docComment,
             proverifCode,
-            '```'
-        ].join('\n')
+            '```',
+        ].filter(s => s).join('\n')
     };
 };
 

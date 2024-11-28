@@ -2,8 +2,8 @@ import {assert, expect, should} from "chai";
 
 import {Location, Position, Range} from "vscode-languageserver";
 import {MockDocumentManager} from "./mocks/mock_document_manager";
-import {getReferences} from "../src/references";
-import {getSignatureHelp} from "../src/signature_help";
+import {getReferences} from "../src/capabilities/references";
+import {getSignatureHelp} from "../src/capabilities/signature_help";
 import {number} from "vscode-languageserver/lib/common/utils/is";
 
 describe('signature help', function () {

@@ -1,15 +1,15 @@
 import {TextDocument} from "vscode-languageserver-textdocument";
-import {parseLibraryDependencies, ParseLibraryDependenciesResult} from "./proverif/parse_library_dependencies";
-import {getDocumentSettings, ProVerifSettings} from "./utils/settings";
-import {invokeProverif, InvokeProverifResult} from "./proverif/invoke_proverif";
-import {parseProverif, ParseProverifResult} from "./proverif/parse_proverif";
-import {createSymbolTable, CreateSymbolTableResult} from "./proverif/symbol_table/create_symbol_table";
+import {parseLibraryDependencies, ParseLibraryDependenciesResult} from "../proverif/parse_library_dependencies";
+import {getDocumentSettings, ProVerifSettings} from "../utils/settings";
+import {invokeProverif, InvokeProverifResult} from "../proverif/invoke_proverif";
+import {parseProverif, ParseProverifResult} from "../proverif/parse_proverif";
+import {createSymbolTable, CreateSymbolTableResult} from "../proverif/symbol_table/create_symbol_table";
 import {TextDocumentIdentifier} from "vscode-languageserver";
 import {Connection} from "vscode-languageserver/node";
 import {fileURLToPath, pathToFileURL} from 'url';
 import {dirname, sep} from 'path';
 import {readdir} from 'fs/promises';
-import {isProverifFile, readFile} from "./utils/files";
+import {isProverifFile, readFile} from "../utils/files";
 
 type DocumentCache = {
     settings?: ProVerifSettings,

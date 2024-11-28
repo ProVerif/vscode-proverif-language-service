@@ -2,7 +2,7 @@ import {assert, expect} from "chai";
 
 import {Location, Position, Range} from "vscode-languageserver";
 import {MockDocumentManager} from "./mocks/mock_document_manager";
-import {getReferences} from "../src/references";
+import {getReferences} from "../src/capabilities/references";
 
 describe('references', function () {
     const assertSingleFileLocationsFoundAllReferences = (locations: Location[]|undefined, expectedReferences: Position[], targetCharacterLength: number, source: Position) => {

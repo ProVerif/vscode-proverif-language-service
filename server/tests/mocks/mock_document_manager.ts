@@ -1,6 +1,6 @@
 import {Position, Range, TextDocumentIdentifier} from "vscode-languageserver";
 import {TextDocument} from "vscode-languageserver-textdocument";
-import {DocumentManagerInterface, ParseResult, RawParseResult} from "../../src/document_manager";
+import {DocumentManagerInterface, ParseResult, RawParseResult} from "../../src/document_manager/document_manager";
 import {parseProverif} from "../../src/proverif/parse_proverif";
 import {assert} from "chai";
 import {createSymbolTable} from "../../src/proverif/symbol_table/create_symbol_table";

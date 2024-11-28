@@ -10,15 +10,15 @@ export const tokenModifier = ['readonly'];
 export const tokenTypes = ['', 'function', 'variable', 'parameter', 'type'];
 
 export const getSemanticTokens = async (identifier: TextDocumentIdentifier, documentManager: DocumentManagerInterface) => {
-    const parseResult = await documentManager.getParseResult(identifier);
-    if (!parseResult.parserTree) {
+    const proverifDocument = await documentManager.getProverifDocument(identifier);
+    if (!proverifDocument || !proverifDocument.parserTree) {
         return undefined;
     }
 
     // collect references
-    const candidateTerminals = collectIdentTerminals(parseResult.parserTree);
+    const candidateTerminals = collectIdentTerminals(proverifDocument.parserTree);
     const terminalDefinitions = candidateTerminals
-        .map(async terminal => getDefinitionSymbolFromMatch(parseResult, terminal, documentManager));
+        .map(async terminal => getDefinitionSymbolFromMatch(proverifDocument, terminal, documentManager));
 
     const tokensBuilder = new SemanticTokensBuilder();
     (await Promise.all(terminalDefinitions))

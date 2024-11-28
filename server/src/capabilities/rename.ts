@@ -1,5 +1,5 @@
 import {Position, TextDocumentIdentifier} from "vscode-languageserver";
-import {DocumentManagerInterface} from "../document_manager/document_manager";
+import {DocumentManagerInterface} from "../document_manager";
 import {WorkspaceEdit} from "vscode-languageserver-protocol";
 import {getReferences} from "./references";
 import {DocumentUri, TextEdit} from "vscode-languageserver-types";

@@ -1,5 +1,5 @@
 import {CompletionItem, Position, TextDocumentIdentifier} from "vscode-languageserver";
-import {DocumentManagerInterface} from "../document_manager/document_manager";
+import {DocumentManagerInterface} from "../document_manager";
 import {getPreviousContextTokens} from "../proverif/get_content_token";
 import {ProverifParser} from "../proverif/parser/ProverifParser";
 import {CompletionItemKind} from "vscode-languageserver-types";

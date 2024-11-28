@@ -42,7 +42,7 @@ describe('references', function () {
         const uri = 'main.pv';
 
         const documentManager = new MockDocumentManager();
-        documentManager.parse(uri, code);
+        documentManager.addProverifDocument(uri, code);
         const locations = await getReferences({uri}, click, documentManager);
 
         assertSingleFileLocationsFoundAllReferences(locations, references, targetCharacterLength, click);
@@ -78,8 +78,8 @@ describe('references', function () {
         const reference2 = {line: 1, character: 7};
 
         const documentManager = new MockDocumentManager();
-        documentManager.parse(uri, code, dependencyUri);
-        documentManager.parse(dependencyUri, dependencyCode);
+        documentManager.addProverifDocument(uri, code, dependencyUri);
+        documentManager.addProverifDocument(dependencyUri, dependencyCode);
         const definitionLink = await getReferences({uri: dependencyUri}, click, documentManager);
 
         assertLocationsFoundAllReferences(definitionLink, dependencyUri, [click], 1);

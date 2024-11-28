@@ -1,10 +1,11 @@
 import {TextDocument} from "vscode-languageserver-textdocument";
 import {TextDocumentIdentifier} from "vscode-languageserver";
 import {Connection} from "vscode-languageserver/node";
-import {DocumentManager as ProverifDocumentManager, ProverifDocument} from "../proverif/document_manager";
+import {DocumentManager as ProverifDocumentManager, ProverifDocument} from "./proverif/document_manager";
 import {fileURLToPath} from "url";
-import {readFile} from "../utils/files";
-import {getDocumentSettings, Settings} from "../utils/settings";
+import {readFile} from "./utils/files";
+import {getDocumentSettings, Settings} from "./utils/settings";
+import {DocumentManager as ProverifLogDocumentManager, ProverifLogDocument} from "./proverif_log/document_manager";
 
 type DocumentCache = {
     identifier: TextDocumentIdentifier,
@@ -12,6 +13,11 @@ type DocumentCache = {
     settings?: Settings,
     document?: TextDocument,
     filesystemText?: string,
+}
+
+export enum DocumentType {
+    ProVerif = 1,
+    ProVerifLog = 2,
 }
 
 export interface DocumentManagerInterface {
@@ -23,6 +29,10 @@ export interface DocumentManagerInterface {
 
     markFilesystemDocumentContentChanged(document: TextDocument): Promise<void>;
 
+    getDocumentType(identifier: TextDocumentIdentifier): DocumentType | undefined;
+
+    getProverifLogDocument(identifier: TextDocumentIdentifier): Promise<ProverifLogDocument | undefined>;
+
     getProverifDocument(identifier: TextDocumentIdentifier): Promise<ProverifDocument | undefined>;
 
     getConsumers(identifier: TextDocumentIdentifier): Promise<TextDocumentIdentifier[]>;
@@ -31,9 +41,11 @@ export interface DocumentManagerInterface {
 export class DocumentManager implements DocumentManagerInterface {
     private documentCache: Map<string, DocumentCache> = new Map();
     private proverifDocumentManager: ProverifDocumentManager;
+    private proverifLogDocumentManager: ProverifLogDocumentManager;
 
     constructor(private connection: Connection, private hasConfigurationCapability: boolean) {
         this.proverifDocumentManager = new ProverifDocumentManager(connection, this.getDocumentText, this.getDocumentSettings);
+        this.proverifLogDocumentManager = new ProverifLogDocumentManager();
     }
 
     public markSettingsChanged = async () => {
@@ -49,14 +61,6 @@ export class DocumentManager implements DocumentManagerInterface {
                 }
             });
         await Promise.all(processingDocuments);
-    };
-
-    public closeDocument = (document: TextDocumentIdentifier) => {
-        this.documentCache.delete(document.uri);
-
-        if (this.proverifDocumentManager.supports(document)) {
-            this.proverifDocumentManager.forget(document);
-        }
     };
 
     public markDocumentContentChanged = async (document: TextDocument) => {
@@ -84,6 +88,26 @@ export class DocumentManager implements DocumentManagerInterface {
         }
     };
 
+    public closeDocument = (document: TextDocumentIdentifier) => {
+        this.documentCache.delete(document.uri);
+
+        if (this.proverifDocumentManager.supports(document)) {
+            this.proverifDocumentManager.forget(document);
+        }
+    };
+
+    public getDocumentType = (document: TextDocumentIdentifier): DocumentType | undefined => {
+        if (this.proverifDocumentManager.supports(document)) {
+            return DocumentType.ProVerif;
+        }
+
+        if (this.proverifLogDocumentManager.supports(document)) {
+            return DocumentType.ProVerifLog;
+        }
+
+        return undefined;
+    }
+
     public getProverifDocument = async (identifier: TextDocumentIdentifier): Promise<ProverifDocument | undefined> => {
         if (this.proverifDocumentManager.supports(identifier)) {
             return this.proverifDocumentManager.getProverifDocument(identifier);
@@ -99,6 +123,16 @@ export class DocumentManager implements DocumentManagerInterface {
 
         return [];
     };
+
+    public getProverifLogDocument = async (identifier: TextDocumentIdentifier): Promise<ProverifLogDocument | undefined> => {
+        const cache = this.documentCache.get(identifier.uri);
+
+        if (cache?.document && this.proverifLogDocumentManager.supports(identifier)) {
+            return this.proverifLogDocumentManager.getProverifLogDocument(cache.document);
+        }
+
+        return undefined
+    }
 
     private getDocumentText = async (identifier: TextDocumentIdentifier) => {
         const cache = this.documentCache.get(identifier.uri) ?? {identifier};

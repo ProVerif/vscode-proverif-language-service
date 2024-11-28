@@ -1,11 +1,12 @@
 import {Position, Range, TextDocumentIdentifier} from "vscode-languageserver";
 import {TextDocument} from "vscode-languageserver-textdocument";
-import {DocumentManagerInterface} from "../../src/document_manager/document_manager";
+import {DocumentManagerInterface} from "../../src/document_manager";
 import {parseProverif, ParseProverifResult} from "../../src/proverif/parse_proverif";
 import {assert} from "chai";
 import {createSymbolTable} from "../../src/proverif/symbol_table/create_symbol_table";
 import {LibraryDependencyToken} from "../../src/proverif/parse_library_dependencies";
 import {ProverifDocument} from "../../src/proverif/document_manager";
+import { ProverifLogDocument } from "../../src/proverif_log/document_manager";
 
 export class MockDocumentManager implements DocumentManagerInterface {
     public constructor(private allowParseFails: boolean = false) {
@@ -27,14 +28,10 @@ export class MockDocumentManager implements DocumentManagerInterface {
         return;
     }
 
-    private rawParseResults: Map<string, ParseProverifResult> = new Map();
-    private parseResults: Map<string, ProverifDocument> = new Map();
+    private proverifDocument: Map<string, ProverifDocument> = new Map();
     private consumers: Map<string, TextDocumentIdentifier[]> = new Map();
-    public parse(uri: string, code: string, dependencyUri?: string, dependencyRange?: Range) {
-        const rawParseResult = parseProverif(code, uri.endsWith('.pvl'));
-        this.rawParseResults.set(uri, rawParseResult);
-
-        const {tokenStream, parser, parserTree} = rawParseResult
+    public addProverifDocument(uri: string, code: string, dependencyUri?: string, dependencyRange?: Range) {
+        const {tokenStream, parser, parserTree} = parseProverif(code, uri.endsWith('.pvl'));
         if (!this.allowParseFails) {
             assert.isUndefined(parserTree.exception);
         }
@@ -54,14 +51,26 @@ export class MockDocumentManager implements DocumentManagerInterface {
 
         const parseResult = {identifier: {uri}, parser, parserTree, symbolTable, dependencyTokens: dependencyTokens};
 
-        this.parseResults.set(uri, parseResult);
+        this.proverifDocument.set(uri, parseResult);
     }
 
     public async getProverifDocument(identifier: TextDocumentIdentifier): Promise<ProverifDocument | undefined> {
-        return this.parseResults.get(identifier.uri);
+        return this.proverifDocument.get(identifier.uri);
     }
 
     public async getConsumers(identifier: TextDocumentIdentifier): Promise<TextDocumentIdentifier[]> {
         return this.consumers.get(identifier.uri) ?? []
+    }
+
+    private proverifLogDocument: Map<string, ProverifLogDocument> = new Map();
+    public addProverifLogDocument(uri: string, content: string) {
+        this.proverifLogDocument.set(uri, {
+            identifier: { uri },
+            document: TextDocument.create(uri, "pv.log", 2, content)
+        })
+    }
+
+    public async getProverifLogDocument(identifier: TextDocumentIdentifier): Promise<ProverifLogDocument | undefined> {
+        return this.proverifLogDocument.get(identifier.uri);
     }
 }

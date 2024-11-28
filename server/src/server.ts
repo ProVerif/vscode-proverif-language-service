@@ -9,7 +9,7 @@ import {
     TextDocumentSyncKind
 } from 'vscode-languageserver/node';
 import {TextDocument} from 'vscode-languageserver-textdocument';
-import {DocumentManager, DocumentManagerInterface,} from "./document_manager/document_manager";
+import {DocumentManager, DocumentManagerInterface,} from "./document_manager";
 import {getDefinitionLocations} from "./capabilities/go_to_definition";
 import {rename} from "./capabilities/rename";
 import {getReferences} from "./capabilities/references";
@@ -74,10 +74,11 @@ connection.onInitialized(() => {
     }
 });
 
-connection.onDidChangeConfiguration(async _ => documentManager.markSettingsChanged());
-documents.onDidClose(event => documentManager.closeDocument(event.document));
+documents.onDidOpen(async event => documentManager.markDocumentContentChanged(event.document));
 documents.onDidChangeContent(async event => documentManager.markDocumentContentChanged(event.document));
 documents.onDidSave(async event => documentManager.markFilesystemDocumentContentChanged(event.document));
+documents.onDidClose(event => documentManager.closeDocument(event.document));
+connection.onDidChangeConfiguration(async _ => documentManager.markSettingsChanged());
 
 connection.onDefinition(async (params) => getDefinitionLocations(params.textDocument, params.position, documentManager));
 connection.onHover(async (params) => getHover(params.textDocument, params.position, documentManager));

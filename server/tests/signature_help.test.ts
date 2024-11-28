@@ -9,7 +9,7 @@ describe('signature help', function () {
         const uri = 'main.pv';
 
         const documentManager = new MockDocumentManager();
-        documentManager.parse(uri, code);
+        documentManager.addProverifDocument(uri, code);
         return await getSignatureHelp({uri}, signatureInvoked, documentManager);
     }
 

@@ -3,6 +3,7 @@
 ## current
 
 Add doccomments: Add `(** documentation with two stars **)` before entities so the documentation is shown on how. Supports `fun`, `let`, `letfun`, `predicate`, `event`, `table` and `define`.  
+Navigate in `.pv.log` files to the definition of process references (e.g. `{21}`).  
 
 ## v1.7.1
 

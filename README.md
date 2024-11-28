@@ -39,4 +39,4 @@ reduc forall m: bitstring, k: key; sdec(senc(m,k),k) = m.
 
 ## Logs (.pv.log)
 
-Store output of ProVerif in `.pv.log` files, for some basic syntax highlighting.
+Store output of ProVerif in `.pv.log` files, for some basic syntax highlighting, and process reference navigation (press `CTRL` and click on e.g. `{21}` to navigate to its definition).

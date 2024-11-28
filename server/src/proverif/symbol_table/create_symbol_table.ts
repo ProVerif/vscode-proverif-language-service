@@ -37,7 +37,6 @@ import {
 import {ParserRuleContext} from "antlr4ts/ParserRuleContext";
 import {CommonTokenStream} from "antlr4ts";
 import {ProverifLexer} from "../parser/ProverifLexer";
-import {Token} from "antlr4ts/Token";
 
 
 export type CreateSymbolTableResult = {

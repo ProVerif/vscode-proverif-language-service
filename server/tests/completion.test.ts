@@ -1,4 +1,4 @@
-import {assert, expect, should} from "chai";
+import {expect} from "chai";
 
 import {Position} from "vscode-languageserver";
 import {MockDocumentManager} from "./mocks/mock_document_manager";

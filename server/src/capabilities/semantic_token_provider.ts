@@ -1,4 +1,4 @@
-import {SemanticTokensBuilder, TextDocumentIdentifier} from 'vscode-languageserver';
+import {SemanticTokens, SemanticTokensBuilder, TextDocumentIdentifier} from 'vscode-languageserver';
 import {DocumentManagerInterface} from '../document_manager';
 import {collectIdentTerminals} from "../proverif/collect_ident_terminals";
 import {nonNullable} from "../utils/array";
@@ -9,10 +9,11 @@ import {getDefinitionSymbolFromMatch} from "../proverif/definition_symbol";
 export const tokenModifier = ['readonly'];
 export const tokenTypes = ['', 'function', 'variable', 'parameter', 'type'];
 
-export const getSemanticTokens = async (identifier: TextDocumentIdentifier, documentManager: DocumentManagerInterface) => {
+export const getSemanticTokens = async (identifier: TextDocumentIdentifier, documentManager: DocumentManagerInterface): Promise<SemanticTokens> => {
     const proverifDocument = await documentManager.getProverifDocument(identifier);
     if (!proverifDocument || !proverifDocument.parserTree) {
-        return undefined;
+        const tokensBuilder = new SemanticTokensBuilder();
+        return tokensBuilder.build();
     }
 
     // collect references

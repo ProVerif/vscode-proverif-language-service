@@ -9,12 +9,12 @@ import {ProverifParser} from "../proverif/parser/ProverifParser";
 import {CompletionItemKind} from "vscode-languageserver-types";
 
 export const getCompletion = async (identifier: TextDocumentIdentifier, position: Position, documentManager: DocumentManagerInterface): Promise<CompletionItem[] | undefined> => {
-    const parseResult = await documentManager.getParseResult(identifier);
-    if (!parseResult.parser || !parseResult.parserTree) {
+    const proverifDocument = await documentManager.getProverifDocument(identifier);
+    if (!proverifDocument || !proverifDocument.parser || !proverifDocument.parserTree) {
         return undefined;
     }
 
-    const contextTokens = getPreviousContextTokens(parseResult.parser.inputStream, position);
+    const contextTokens = getPreviousContextTokens(proverifDocument.parser.inputStream, position);
     if (!contextTokens) {
         return undefined;
     }

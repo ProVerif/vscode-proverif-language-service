@@ -10,12 +10,12 @@ import {DefinitionSymbol, getDefinitionSymbolFromPosition} from "./go_to_definit
 import {getSignaturePosition} from "../proverif/get_signature_position";
 
 export const getSignatureHelp = async (identifier: TextDocumentIdentifier, position: Position, documentManager: DocumentManagerInterface): Promise<SignatureHelp | undefined> => {
-    const parseResult = await documentManager.getParseResult(identifier);
-    if (!parseResult.parser) {
+    const proverifDocument = await documentManager.getProverifDocument(identifier);
+    if (!proverifDocument || !proverifDocument.parser) {
         return undefined;
     }
 
-    const signaturePosition = getSignaturePosition(parseResult.parser.inputStream, position);
+    const signaturePosition = getSignaturePosition(proverifDocument.parser.inputStream, position);
     if (!signaturePosition) {
         return undefined;
     }

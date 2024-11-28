@@ -1,7 +1,7 @@
 import {Position, Range, TextDocumentIdentifier} from "vscode-languageserver";
 import {TextDocument} from "vscode-languageserver-textdocument";
-import {DocumentManagerInterface, ParseResult, RawParseResult} from "../../src/document_manager/document_manager";
-import {parseProverif} from "../../src/proverif/parse_proverif";
+import {DocumentManagerInterface, ProverifDocument} from "../../src/document_manager/document_manager";
+import {parseProverif, ParseProverifResult} from "../../src/proverif/parse_proverif";
 import {assert} from "chai";
 import {createSymbolTable} from "../../src/proverif/symbol_table/create_symbol_table";
 import {LibraryDependencyToken} from "../../src/proverif/parse_library_dependencies";
@@ -26,8 +26,8 @@ export class MockDocumentManager implements DocumentManagerInterface {
         return;
     }
 
-    private rawParseResults: Map<string, RawParseResult> = new Map();
-    private parseResults: Map<string, ParseResult> = new Map();
+    private rawParseResults: Map<string, ParseProverifResult> = new Map();
+    private parseResults: Map<string, ProverifDocument> = new Map();
     private consumers: Map<string, TextDocumentIdentifier[]> = new Map();
     public parse(uri: string, code: string, dependencyUri?: string, dependencyRange?: Range) {
         const rawParseResult = parseProverif(code, uri.endsWith('.pvl'));
@@ -56,7 +56,7 @@ export class MockDocumentManager implements DocumentManagerInterface {
         this.parseResults.set(uri, parseResult);
     }
 
-    public async getParseResult(identifier: TextDocumentIdentifier): Promise<ParseResult | undefined> {
+    public async getProverifDocument(identifier: TextDocumentIdentifier): Promise<ProverifDocument | undefined> {
         return this.parseResults.get(identifier.uri);
     }
 

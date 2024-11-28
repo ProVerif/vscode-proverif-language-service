@@ -18,10 +18,6 @@ export const asTempFile = async <T>(path: string, content: string, appendFileEnd
     }
 };
 
-export const isProverifFile = (path: string) => {
-    return path.endsWith(".pv") || path.endsWith(".pvl") || path.endsWith(".pvc");
-};
-
 export const readFile = async <T>(path: string) => {
     const buffer = await fsPromises.readFile(path);
     return buffer.toString();

@@ -1,4 +1,4 @@
-import {DocumentManagerInterface, ParseResult} from "../document_manager/document_manager";
+import {DocumentManagerInterface, ProverifDocument} from "../document_manager/document_manager";
 import {LocationLink, Position, TextDocumentIdentifier} from "vscode-languageserver";
 import {getMatchingParseTree, getRange} from "../utils/parse_tree";
 import {ParseTree} from "antlr4ts/tree";
@@ -9,48 +9,48 @@ type Origin = { uri: TextDocumentIdentifier, match: TerminalNode };
 export type DefinitionSymbol = { uri: TextDocumentIdentifier, symbol: ProverifSymbol, origin: Origin }
 
 export const getDefinitionSymbolFromPosition = async (identifier: TextDocumentIdentifier, position: Position, documentManager: DocumentManagerInterface): Promise<DefinitionSymbol | undefined> => {
-    const parseResult = await documentManager.getParseResult(identifier);
-    if (!parseResult.parserTree) {
+    const proverifDocument = await documentManager.getProverifDocument(identifier);
+    if (!proverifDocument || !proverifDocument.parserTree) {
         return undefined;
     }
 
-    const matchingParseTree = getMatchingParseTree(parseResult.parserTree, position);
+    const matchingParseTree = getMatchingParseTree(proverifDocument.parserTree, position);
     if (!matchingParseTree) {
         return undefined;
     }
 
-    return await getDefinitionSymbolFromMatch(parseResult, matchingParseTree, documentManager);
+    return await getDefinitionSymbolFromMatch(proverifDocument, matchingParseTree, documentManager);
 };
 
 
-export const getDefinitionSymbolFromMatch = async (parseResult: ParseResult, matchingParseTree: TerminalNode, documentManager: DocumentManagerInterface): Promise<DefinitionSymbol | undefined> => {
-    const origin = {uri: parseResult.identifier, match: matchingParseTree};
+export const getDefinitionSymbolFromMatch = async (proverifDocument: ProverifDocument, matchingParseTree: TerminalNode, documentManager: DocumentManagerInterface): Promise<DefinitionSymbol | undefined> => {
+    const origin = {uri: proverifDocument.identifier, match: matchingParseTree};
 
     // collect relevant files in order
-    const getParseResults: (() => Promise<ParseResult>)[] = parseResult.dependencyTokens
+    const getProverifDocuments: (() => Promise<ProverifDocument|undefined>)[] = proverifDocument.dependencyTokens
         .filter(dependencyToken => dependencyToken.exists)
-        .map(dependencyToken => () => documentManager.getParseResult(dependencyToken));
-    getParseResults.unshift(async () => parseResult);
+        .map(dependencyToken => () => documentManager.getProverifDocument(dependencyToken));
+    getProverifDocuments.unshift(async () => proverifDocument);
 
     // look for best matching symbol
     let currentContext: ParseTree | undefined = matchingParseTree;
     let currentClosestSymbol: ProverifSymbol | undefined;
     let currentClosestSymbolDependency: TextDocumentIdentifier | undefined;
-    while (getParseResults.length > 0) {
-        const getParseResult = getParseResults.shift()!;
-        const parseResult = await getParseResult();
-        if (!parseResult.symbolTable) {
+    while (getProverifDocuments.length > 0) {
+        const getProverifDocument = getProverifDocuments.shift()!;
+        const proverifDocument = await getProverifDocument();
+        if (!proverifDocument || !proverifDocument.symbolTable) {
             continue;
         }
 
-        const closestSymbol = parseResult.symbolTable.findClosestSymbol(matchingParseTree.text, currentContext);
+        const closestSymbol = proverifDocument.symbolTable.findClosestSymbol(matchingParseTree.text, currentContext);
         if (!closestSymbol) {
             currentContext = undefined;
             continue;
         }
 
         currentClosestSymbol = closestSymbol;
-        currentClosestSymbolDependency = parseResult.identifier;
+        currentClosestSymbolDependency = proverifDocument.identifier;
 
         // if defined by macro, try to find real definition
         if (closestSymbol.declaration === DeclarationType.ExpandParameter) {
@@ -58,7 +58,7 @@ export const getDefinitionSymbolFromMatch = async (parseResult: ParseResult, mat
             currentContext = closestSymbol.context?.parent?.parent;
             if (currentContext) {
                 // recheck in same file
-                getParseResults.unshift(async () => parseResult);
+                getProverifDocuments.unshift(async () => proverifDocument);
             }
             continue;
         }

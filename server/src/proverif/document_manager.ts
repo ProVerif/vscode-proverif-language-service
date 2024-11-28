@@ -1,15 +1,15 @@
 import {TextDocument} from "vscode-languageserver-textdocument";
-import {parseLibraryDependencies, ParseLibraryDependenciesResult} from "../proverif/parse_library_dependencies";
+import {parseLibraryDependencies, ParseLibraryDependenciesResult} from "./parse_library_dependencies";
 import {getDocumentSettings, ProVerifSettings} from "../utils/settings";
-import {invokeProverif, InvokeProverifResult} from "../proverif/invoke_proverif";
-import {parseProverif, ParseProverifResult} from "../proverif/parse_proverif";
-import {createSymbolTable, CreateSymbolTableResult} from "../proverif/symbol_table/create_symbol_table";
+import {invokeProverif, InvokeProverifResult} from "./invoke_proverif";
+import {parseProverif, ParseProverifResult} from "./parse_proverif";
+import {createSymbolTable, CreateSymbolTableResult} from "./symbol_table/create_symbol_table";
 import {TextDocumentIdentifier} from "vscode-languageserver";
 import {Connection} from "vscode-languageserver/node";
 import {fileURLToPath, pathToFileURL} from 'url';
 import {dirname, sep} from 'path';
 import {readdir} from 'fs/promises';
-import {isProverifFile, readFile} from "../utils/files";
+import {readFile} from "../utils/files";
 
 type DocumentCache = {
     settings?: ProVerifSettings,
@@ -26,13 +26,17 @@ type DocumentCache = {
     createSymbolTableResult?: CreateSymbolTableResult
 }
 
-export class CachedTaskExecutor {
+export class DocumentManager {
     private documentCache: Map<string, DocumentCache> = new Map();
     private folderCache: Set<string> = new Set();
 
     constructor(
         private connection: Connection,
         private hasConfigurationCapability: boolean) {
+    }
+
+    public supports = (document: TextDocumentIdentifier) => {
+        return isProverifFile(document.uri);
     }
 
     public allDocuments = (): TextDocumentIdentifier[] => {
@@ -225,3 +229,7 @@ export class CachedTaskExecutor {
         }
     };
 }
+
+const isProverifFile = (path: string) => {
+    return path.endsWith(".pv") || path.endsWith(".pvl") || path.endsWith(".pvc");
+};

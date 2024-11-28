@@ -44,15 +44,15 @@ class ReferenceCollector {
         }
         this.collected.add(identifier.uri);
 
-        const definitionParseResult = await this.documentManager.getParseResult(identifier);
-        if (!definitionParseResult.parserTree) {
+        const definitionProvierfDocument = await this.documentManager.getProverifDocument(identifier);
+        if (!definitionProvierfDocument || !definitionProvierfDocument.parserTree) {
             return;
         }
 
         // collect references
-        const candidateTerminals = collectMatchingTerminals(definitionParseResult.parserTree, this.definitionSymbol.origin.match.text);
+        const candidateTerminals = collectMatchingTerminals(definitionProvierfDocument.parserTree, this.definitionSymbol.origin.match.text);
         const collectMatchingReferences = candidateTerminals
-            .map(async terminal => getDefinitionSymbolFromMatch(definitionParseResult, terminal, this.documentManager));
+            .map(async terminal => getDefinitionSymbolFromMatch(definitionProvierfDocument, terminal, this.documentManager));
         const matchingReferences: Reference[] = (await Promise.all(collectMatchingReferences))
             .filter(nonNullable)
             .filter(symbol => definitionSymbolsEqual(symbol, this.definitionSymbol))

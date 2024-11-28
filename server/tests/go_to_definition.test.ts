@@ -217,7 +217,7 @@ process System`;
 The (...) be received at input {3}.
 table2((...),(...)).
 (...)`;
-        const click = {line: 5, character: 32};
+        const click = {line: 5, character: 29};
         const target = {line: 1, character: 0};
 
         const documentManager = new MockDocumentManager();

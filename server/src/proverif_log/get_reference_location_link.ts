@@ -21,8 +21,8 @@ export const getReferenceLocationLink = async (identifier: TextDocumentIdentifie
     }
 
     // find origin selection range
-    const matchStart: Position = { line: safePositionStart.line, character: safePositionStart.character + processReferenceMatch.index }
-    const matchEnd: Position = { line: matchStart.line, character: matchStart.character + processReferenceMatch[1].length }
+    const matchStart: Position = { line: safePositionStart.line, character: safePositionStart.character + processReferenceMatch.index };
+    const matchEnd: Position = { line: matchStart.line, character: matchStart.character + processReferenceMatch[1].length };
     const originSelectionRange = Range.create(matchStart, matchEnd);
     if (matchStart > position || position > matchEnd) {
         return undefined;
@@ -38,8 +38,8 @@ export const getReferenceLocationLink = async (identifier: TextDocumentIdentifie
 
         const targetMatch = text.indexOf(processReferenceMatch[1]);
         if (targetMatch >= 0) {
-            const startOffset = document.document.offsetAt(currentStart)
-            targetStart = document.document.positionAt(startOffset + targetMatch)
+            const startOffset = document.document.offsetAt(currentStart);
+            targetStart = document.document.positionAt(startOffset + targetMatch);
 
             break;
         }
@@ -53,4 +53,4 @@ export const getReferenceLocationLink = async (identifier: TextDocumentIdentifie
 
     const targetRange = Range.create(targetStart, {line: targetStart.line, character: targetStart.character + processReferenceMatch[1].length});
     return LocationLink.create(identifier.uri, targetRange, targetRange, originSelectionRange);
-}
+};

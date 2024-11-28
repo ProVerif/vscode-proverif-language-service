@@ -106,7 +106,7 @@ export class DocumentManager implements DocumentManagerInterface {
         }
 
         return undefined;
-    }
+    };
 
     public getProverifDocument = async (identifier: TextDocumentIdentifier): Promise<ProverifDocument | undefined> => {
         if (this.proverifDocumentManager.supports(identifier)) {
@@ -131,8 +131,8 @@ export class DocumentManager implements DocumentManagerInterface {
             return this.proverifLogDocumentManager.getProverifLogDocument(cache.document);
         }
 
-        return undefined
-    }
+        return undefined;
+    };
 
     private getDocumentText = async (identifier: TextDocumentIdentifier) => {
         const cache = this.documentCache.get(identifier.uri) ?? {identifier};

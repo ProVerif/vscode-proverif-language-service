@@ -51,6 +51,6 @@ export const getReferenceLocationLink = async (identifier: TextDocumentIdentifie
         return undefined;
     }
 
-    const targetRange = Range.create(targetStart, {line: targetStart.line, character: processReferenceMatch[1].length});
+    const targetRange = Range.create(targetStart, {line: targetStart.line, character: targetStart.character + processReferenceMatch[1].length});
     return LocationLink.create(identifier.uri, targetRange, targetRange, originSelectionRange);
 }

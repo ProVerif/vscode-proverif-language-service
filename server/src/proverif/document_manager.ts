@@ -90,7 +90,21 @@ export class DocumentManager {
         return {identifier, parser, parserTree, symbolTable, dependencyTokens: libraryDependencyTokens};
     };
 
-    public invoke = async (identifier: TextDocumentIdentifier) => {
+    public getConsumers = async (identifier: TextDocumentIdentifier) => {
+        const path = fileURLToPath(identifier.uri);
+        const folder = dirname(path);
+        if (!this.folderCache.has(folder)) {
+            const {parentFolderDiscoveryLimit} = await this.getSettings(identifier);
+
+            await this.discoverFolder(folder, parentFolderDiscoveryLimit);
+            this.folderCache.add(folder);
+        }
+
+        const cache = this.documentCache.get(identifier.uri) ?? {identifier};
+        return cache.consumers ?? [];
+    };
+
+    private invoke = async (identifier: TextDocumentIdentifier) => {
         const {selfIsLibrary, libraryDependencyTokens} = await this.parseLibraryDependencies(identifier);
         const {proverifBinary} = await this.getSettings(identifier);
         const text = await this.getText(identifier);
@@ -106,7 +120,7 @@ export class DocumentManager {
         return {...cache.invokeProverifResult};
     };
 
-    public parse = async (identifier: TextDocumentIdentifier) => {
+    private parse = async (identifier: TextDocumentIdentifier) => {
         const {selfIsLibrary} = await this.parseLibraryDependencies(identifier);
         const text = await this.getText(identifier);
 
@@ -124,7 +138,7 @@ export class DocumentManager {
         return {...cache.parseProverifResult};
     };
 
-    public createSymbolTable = async (identifier: TextDocumentIdentifier) => {
+    private createSymbolTable = async (identifier: TextDocumentIdentifier) => {
         const {tokenStream, parserTree} = await this.parse(identifier);
 
         const cache = this.documentCache.get(identifier.uri) ?? {identifier};
@@ -138,7 +152,7 @@ export class DocumentManager {
         return {...cache.createSymbolTableResult};
     };
 
-    public parseLibraryDependencies = async (identifier: TextDocumentIdentifier) => {
+    private parseLibraryDependencies = async (identifier: TextDocumentIdentifier) => {
         const selfIsLibrary = identifier.uri.endsWith('.pvl');
         const text = await this.getText(identifier);
 
@@ -159,20 +173,6 @@ export class DocumentManager {
         this.documentCache.set(identifier.uri, cache);
 
         return {selfIsLibrary, ...cache.parseLibraryDependenciesResult};
-    };
-
-    public getConsumers = async (identifier: TextDocumentIdentifier) => {
-        const path = fileURLToPath(identifier.uri);
-        const folder = dirname(path);
-        if (!this.folderCache.has(folder)) {
-            const {parentFolderDiscoveryLimit} = await this.getSettings(identifier);
-
-            await this.discoverFolder(folder, parentFolderDiscoveryLimit);
-            this.folderCache.add(folder);
-        }
-
-        const cache = this.documentCache.get(identifier.uri) ?? {identifier};
-        return cache.consumers ?? [];
     };
 
     private checkProverifParsingErrors = async (identifier: TextDocumentIdentifier) => {

@@ -6,11 +6,10 @@ import {
     getDefinitionSymbolFromMatch,
     getDefinitionSymbolFromPosition
 } from "./go_to_definition";
-import {collectMatchingTerminals} from "./parseTree/collect_terminals";
 import {ParseTree} from "antlr4ts/tree";
-import {getRange} from "./parseTree/get_range";
 import {nonNullable} from "./utils/array";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";
+import {collectMatchingTerminals, getRange} from "./utils/parse_tree";
 
 type Reference = {
     uri: TextDocumentIdentifier,

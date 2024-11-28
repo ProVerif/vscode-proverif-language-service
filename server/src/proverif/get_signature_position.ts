@@ -1,7 +1,7 @@
 import {Position, uinteger} from "vscode-languageserver";
 import {TokenStream} from "antlr4ts/TokenStream";
 import {Token} from "antlr4ts";
-import {ProverifLexer} from "../parser-proverif/ProverifLexer";
+import {ProverifLexer} from "./parser/ProverifLexer";
 
 export type SignaturePosition = {
     signatureToken: Token

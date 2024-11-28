@@ -4,8 +4,8 @@ import {
     TextDocumentIdentifier
 } from "vscode-languageserver";
 import {DocumentManagerInterface} from "./document_manager";
-import {getPreviousContextTokens} from "./parseTree/get_content_token";
-import {ProverifParser} from "./parser-proverif/ProverifParser";
+import {getPreviousContextTokens} from "./proverif/get_content_token";
+import {ProverifParser} from "./proverif/parser/ProverifParser";
 import {CompletionItemKind} from "vscode-languageserver-types";
 
 export const getCompletion = async (identifier: TextDocumentIdentifier, position: Position, documentManager: DocumentManagerInterface): Promise<CompletionItem[] | undefined> => {

@@ -1,5 +1,5 @@
 import {AbstractParseTreeVisitor, ParseTree} from "antlr4ts/tree";
-import {ProverifParserVisitor} from "../parser-proverif/ProverifParserVisitor";
+import {ProverifParserVisitor} from "../parser/ProverifParserVisitor";
 import {
     AllContext,
     EqlistContext,
@@ -15,7 +15,7 @@ import {
     TreducContext,
     TreducmayfailContext,
     TreducotherwiseContext
-} from "../parser-proverif/ProverifParser";
+} from "../parser/ProverifParser";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";
 import {
     collecMayfailvartypeseq,
@@ -36,7 +36,7 @@ import {
 } from "./ident_collectors";
 import {ParserRuleContext} from "antlr4ts/ParserRuleContext";
 import {CommonTokenStream} from "antlr4ts";
-import {ProverifLexer} from "../parser-proverif/ProverifLexer";
+import {ProverifLexer} from "../parser/ProverifLexer";
 import {Token} from "antlr4ts/Token";
 
 

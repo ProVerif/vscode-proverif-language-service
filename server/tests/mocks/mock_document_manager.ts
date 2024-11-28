@@ -1,10 +1,10 @@
 import {Position, Range, TextDocumentIdentifier} from "vscode-languageserver";
 import {TextDocument} from "vscode-languageserver-textdocument";
 import {DocumentManagerInterface, ParseResult, RawParseResult} from "../../src/document_manager";
-import {parseProverif} from "../../src/tasks/parse_proverif";
+import {parseProverif} from "../../src/proverif/parse_proverif";
 import {assert} from "chai";
-import {createSymbolTable} from "../../src/tasks/create_symbol_table";
-import {LibraryDependencyToken} from "../../src/tasks/parse_library_dependencies";
+import {createSymbolTable} from "../../src/proverif/symbol_table/create_symbol_table";
+import {LibraryDependencyToken} from "../../src/proverif/parse_library_dependencies";
 
 export class MockDocumentManager implements DocumentManagerInterface {
     public constructor(private allowParseFails: boolean = false) {

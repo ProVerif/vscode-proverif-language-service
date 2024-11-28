@@ -1,9 +1,8 @@
 import {DocumentManagerInterface, ParseResult} from "./document_manager";
 import {LocationLink, Position, TextDocumentIdentifier} from "vscode-languageserver";
-import {getMatchingParseTree} from "./parseTree/get_matching_parse_tree";
-import {getRange} from "./parseTree/get_range";
+import {getMatchingParseTree, getRange} from "./utils/parse_tree";
 import {ParseTree} from "antlr4ts/tree";
-import {DeclarationType, ProverifSymbol} from "./tasks/create_symbol_table";
+import {DeclarationType, ProverifSymbol} from "./proverif/symbol_table/create_symbol_table";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";
 
 type Origin = { uri: TextDocumentIdentifier, match: TerminalNode };

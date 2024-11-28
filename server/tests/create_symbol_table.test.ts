@@ -1,7 +1,7 @@
 import {assert, expect} from "chai";
 
-import {createSymbolTable, DeclarationType} from "../src/tasks/create_symbol_table";
-import {parseProverif} from "../src/tasks/parse_proverif";
+import {createSymbolTable, DeclarationType} from "../src/proverif/symbol_table/create_symbol_table";
+import {parseProverif} from "../src/proverif/parse_proverif";
 
 describe('parser', function () {
     const getSymbolTable = (input: string) => {

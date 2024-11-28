@@ -1,8 +1,8 @@
 import {expect} from "chai";
 
 import {CharStreams, CommonTokenStream} from "antlr4ts";
-import {ProverifLexer} from "../src/parser-proverif/ProverifLexer";
-import {ProverifParser} from "../src/parser-proverif/ProverifParser";
+import {ProverifLexer} from "../src/proverif/parser/ProverifLexer";
+import {ProverifParser} from "../src/proverif/parser/ProverifParser";
 
 describe('parser', function () {
     const getParser = (input: string) => {

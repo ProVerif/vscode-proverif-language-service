@@ -2,8 +2,8 @@ import {Hover, MarkupContent, MarkupKind, Position, TextDocumentIdentifier} from
 import {DocumentManagerInterface} from "./document_manager";
 import {getDefinitionSymbolFromPosition} from "./go_to_definition";
 import {ParseTree} from "antlr4ts/tree";
-import {getRange} from "./parseTree/get_range";
-import {DeclarationType, ProverifSymbol, ProverifSymbolParameter} from "./tasks/create_symbol_table";
+import {DeclarationType, ProverifSymbol, ProverifSymbolParameter} from "./proverif/symbol_table/create_symbol_table";
+import {getRange} from "./utils/parse_tree";
 
 export const getHover = async (identifier: TextDocumentIdentifier, position: Position, documentManager: DocumentManagerInterface): Promise<Hover | undefined> => {
     const definitionSymbol = await getDefinitionSymbolFromPosition(identifier, position, documentManager);

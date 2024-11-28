@@ -17,11 +17,11 @@ import {
     TreducContext,
     TypeidContext,
     TypeidseqContext
-} from "../parser-proverif/ProverifParser";
+} from "../parser/ProverifParser";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";
 import {ParseTree} from "antlr4ts/tree/ParseTree";
 import {ParserRuleContext} from "antlr4ts/ParserRuleContext";
-import {nonNullable} from "../utils/array";
+import {nonNullable} from "../../utils/array";
 
 export type TypedTerminal = {
     terminal: TerminalNode

@@ -1,9 +1,9 @@
 import {TextDocument} from "vscode-languageserver-textdocument";
-import {parseLibraryDependencies, ParseLibraryDependenciesResult} from "./tasks/parse_library_dependencies";
+import {parseLibraryDependencies, ParseLibraryDependenciesResult} from "./proverif/parse_library_dependencies";
 import {getDocumentSettings, ProVerifSettings} from "./utils/settings";
-import {invokeProverif, InvokeProverifResult} from "./tasks/invoke_proverif";
-import {parseProverif, ParseProverifResult} from "./tasks/parse_proverif";
-import {createSymbolTable, CreateSymbolTableResult} from "./tasks/create_symbol_table";
+import {invokeProverif, InvokeProverifResult} from "./proverif/invoke_proverif";
+import {parseProverif, ParseProverifResult} from "./proverif/parse_proverif";
+import {createSymbolTable, CreateSymbolTableResult} from "./proverif/symbol_table/create_symbol_table";
 import {TextDocumentIdentifier} from "vscode-languageserver";
 import {Connection} from "vscode-languageserver/node";
 import {fileURLToPath, pathToFileURL} from 'url';

@@ -1,6 +1,9 @@
-import {TextDocument} from "vscode-languageserver-textdocument";
-import {parseLibraryDependencies, ParseLibraryDependenciesResult} from "./parse_library_dependencies";
-import {getDocumentSettings, ProVerifSettings} from "../utils/settings";
+import {
+    LibraryDependencyToken,
+    parseLibraryDependencies,
+    ParseLibraryDependenciesResult
+} from "./parse_library_dependencies";
+import {Settings} from "../utils/settings";
 import {invokeProverif, InvokeProverifResult} from "./invoke_proverif";
 import {parseProverif, ParseProverifResult} from "./parse_proverif";
 import {createSymbolTable, CreateSymbolTableResult} from "./symbol_table/create_symbol_table";
@@ -9,14 +12,17 @@ import {Connection} from "vscode-languageserver/node";
 import {fileURLToPath, pathToFileURL} from 'url';
 import {dirname, sep} from 'path';
 import {readdir} from 'fs/promises';
-import {readFile} from "../utils/files";
+import {joinOptionalLists} from "../utils/array";
+import {logMessages} from "../utils/log";
+import {sendDiagnostics} from "../utils/diagnostics";
+
+export type ProverifDocument = Partial<ParseProverifResult> & Partial<CreateSymbolTableResult> & {
+    identifier: TextDocumentIdentifier
+    dependencyTokens: LibraryDependencyToken[]
+};
 
 type DocumentCache = {
-    settings?: ProVerifSettings,
-
     identifier: TextDocumentIdentifier,
-    document?: TextDocument,
-    filesystemContent?: string,
 
     parseLibraryDependenciesResult?: ParseLibraryDependenciesResult,
     consumers?: TextDocumentIdentifier[],
@@ -32,15 +38,12 @@ export class DocumentManager {
 
     constructor(
         private connection: Connection,
-        private hasConfigurationCapability: boolean) {
+        private getText: (identifier: TextDocumentIdentifier) => Promise<string>,
+        private getSettings: (identifier: TextDocumentIdentifier) => Promise<Settings>) {
     }
 
     public supports = (document: TextDocumentIdentifier) => {
         return isProverifFile(document.uri);
-    };
-
-    public allDocuments = (): TextDocumentIdentifier[] => {
-        return Array.from(this.documentCache.keys()).map(key => ({uri: key}));
     };
 
     public forget = (document: TextDocumentIdentifier) => {
@@ -48,27 +51,27 @@ export class DocumentManager {
     };
 
     public markSettingsChanged = (identifier: TextDocumentIdentifier) => {
-        const cache = this.documentCache.get(identifier.uri) ?? {identifier};
-        cache.settings = undefined;
-        this.documentCache.set(identifier.uri, cache);
-
         this.folderCache = new Set<string>;
+        return this.checkProverifParsingErrors(identifier);
     };
 
-    public markDocumentChanged = (identifier: TextDocumentIdentifier, document?: TextDocument) => {
+    public markDocumentChanged = (identifier: TextDocumentIdentifier) => {
         const cache = this.documentCache.get(identifier.uri) ?? {identifier};
-        cache.document = document;
         cache.parseLibraryDependenciesResult = undefined;
         cache.invokeProverifResult = undefined;
         cache.parseProverifResult = undefined;
         cache.createSymbolTableResult = undefined;
         this.documentCache.set(identifier.uri, cache);
+
+        return this.checkProverifParsingErrors(identifier);
     };
 
     public markDocumentDependencyChanged = (identifier: TextDocumentIdentifier) => {
         const cache = this.documentCache.get(identifier.uri) ?? {identifier};
         cache.invokeProverifResult = undefined;
         this.documentCache.set(identifier.uri, cache);
+
+        return this.checkProverifParsingErrors(identifier);
     };
 
     public findDependingDocuments = (documentIdentifier: TextDocumentIdentifier): TextDocumentIdentifier[] => {
@@ -79,10 +82,18 @@ export class DocumentManager {
             .map(consumer => ({uri: consumer}));
     };
 
+    public getProverifDocument = async (identifier: TextDocumentIdentifier): Promise<ProverifDocument | undefined> => {
+        const {parser, parserTree} = await this.parse(identifier);
+        const {symbolTable} = await this.createSymbolTable(identifier);
+        const {libraryDependencyTokens} = await this.parseLibraryDependencies(identifier);
+
+        return {identifier, parser, parserTree, symbolTable, dependencyTokens: libraryDependencyTokens};
+    };
+
     public invoke = async (identifier: TextDocumentIdentifier) => {
         const {selfIsLibrary, libraryDependencyTokens} = await this.parseLibraryDependencies(identifier);
-        const {proverifBinary} = await this.readSettings(identifier);
-        const {text} = await this.getDocumentText(identifier);
+        const {proverifBinary} = await this.getSettings(identifier);
+        const text = await this.getText(identifier);
 
         const cache = this.documentCache.get(identifier.uri) ?? {identifier};
 
@@ -97,7 +108,7 @@ export class DocumentManager {
 
     public parse = async (identifier: TextDocumentIdentifier) => {
         const {selfIsLibrary} = await this.parseLibraryDependencies(identifier);
-        const {text} = await this.getDocumentText(identifier);
+        const text = await this.getText(identifier);
 
         const cache = this.documentCache.get(identifier.uri) ?? {identifier};
 
@@ -129,7 +140,7 @@ export class DocumentManager {
 
     public parseLibraryDependencies = async (identifier: TextDocumentIdentifier) => {
         const selfIsLibrary = identifier.uri.endsWith('.pvl');
-        const {text} = await this.getDocumentText(identifier);
+        const text = await this.getText(identifier);
 
         const cache = this.documentCache.get(identifier.uri) ?? {identifier};
 
@@ -154,7 +165,7 @@ export class DocumentManager {
         const path = fileURLToPath(identifier.uri);
         const folder = dirname(path);
         if (!this.folderCache.has(folder)) {
-            const {parentFolderDiscoveryLimit} = await this.readSettings(identifier);
+            const {parentFolderDiscoveryLimit} = await this.getSettings(identifier);
 
             await this.discoverFolder(folder, parentFolderDiscoveryLimit);
             this.folderCache.add(folder);
@@ -164,34 +175,15 @@ export class DocumentManager {
         return cache.consumers ?? [];
     };
 
-    private readSettings = async (identifier: TextDocumentIdentifier) => {
-        const cache = this.documentCache.get(identifier.uri) ?? {identifier};
+    private checkProverifParsingErrors = async (identifier: TextDocumentIdentifier) => {
+        const parseLibraryDependenciesResult = await this.parseLibraryDependencies(identifier);
+        const invokeProverifResult = await this.invoke(identifier);
 
-        if (!cache.settings) {
-            cache.settings = await getDocumentSettings(this.connection, this.hasConfigurationCapability, identifier);
-        }
+        const messages = joinOptionalLists(parseLibraryDependenciesResult?.messages, invokeProverifResult?.messages);
+        logMessages(this.connection, messages);
 
-        this.documentCache.set(identifier.uri, cache);
-
-        return {...cache.settings};
-    };
-
-    private getDocumentText = async (identifier: TextDocumentIdentifier) => {
-        const cache = this.documentCache.get(identifier.uri) ?? {identifier};
-
-        let text = cache.document?.getText();
-        if (text === undefined) {
-            if (!cache.filesystemContent) {
-                const path = fileURLToPath(identifier.uri);
-                cache.filesystemContent = await readFile(path);
-            }
-
-            text = cache.filesystemContent;
-        }
-
-        this.documentCache.set(identifier.uri, cache);
-
-        return {text};
+        const diagnostics = joinOptionalLists(parseLibraryDependenciesResult?.diagnostics, invokeProverifResult?.diagnostics);
+        await sendDiagnostics(this.connection, identifier, diagnostics);
     };
 
     private discoveredFolders: Set<string> = new Set();
@@ -213,13 +205,13 @@ export class DocumentManager {
             }
 
             if (!this.discoveredFolders.has(currentFolder)) {
-                const entries = await readdir(currentFolder, { withFileTypes: true });
+                const entries = await readdir(currentFolder, {withFileTypes: true});
                 console.log("Discovering " + entries.length + " files in " + currentFolder);
                 const fileUrls = entries
                     .filter(entry => entry.isFile())
                     .filter(entry => isProverifFile(entry.name))
                     .map(file => pathToFileURL(currentFolder + sep + file.name));
-                await Promise.all(fileUrls.map(fileUrl => this.parseLibraryDependencies({ uri: fileUrl.toString()})));
+                await Promise.all(fileUrls.map(fileUrl => this.parseLibraryDependencies({uri: fileUrl.toString()})));
 
                 this.discoveredFolders.add(currentFolder);
             }

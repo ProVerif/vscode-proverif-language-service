@@ -1,18 +1,18 @@
 import {TextDocument} from "vscode-languageserver-textdocument";
-import {LibraryDependencyToken} from "../proverif/parse_library_dependencies";
-import {logMessages} from "../utils/log";
-import {sendDiagnostics} from "../utils/diagnostics";
-import {ParseProverifResult} from "../proverif/parse_proverif";
-import {CreateSymbolTableResult} from "../proverif/symbol_table/create_symbol_table";
 import {TextDocumentIdentifier} from "vscode-languageserver";
 import {Connection} from "vscode-languageserver/node";
-import {joinOptionalLists} from "../utils/array";
-import {DocumentManager as ProverifDocumentManager} from "../proverif/document_manager";
+import {DocumentManager as ProverifDocumentManager, ProverifDocument} from "../proverif/document_manager";
+import {fileURLToPath} from "url";
+import {readFile} from "../utils/files";
+import {getDocumentSettings, Settings} from "../utils/settings";
 
-export type ProverifDocument = Partial<ParseProverifResult> & Partial<CreateSymbolTableResult> & {
-    identifier: TextDocumentIdentifier
-    dependencyTokens: LibraryDependencyToken[]
-};
+type DocumentCache = {
+    identifier: TextDocumentIdentifier,
+
+    settings?: Settings,
+    document?: TextDocument,
+    filesystemText?: string,
+}
 
 export interface DocumentManagerInterface {
     markSettingsChanged(): Promise<void>;
@@ -23,63 +23,73 @@ export interface DocumentManagerInterface {
 
     markFilesystemDocumentContentChanged(document: TextDocument): Promise<void>;
 
-    getProverifDocument(identifier: TextDocumentIdentifier): Promise<ProverifDocument|undefined>;
+    getProverifDocument(identifier: TextDocumentIdentifier): Promise<ProverifDocument | undefined>;
 
     getConsumers(identifier: TextDocumentIdentifier): Promise<TextDocumentIdentifier[]>;
 }
 
 export class DocumentManager implements DocumentManagerInterface {
+    private documentCache: Map<string, DocumentCache> = new Map();
     private proverifDocumentManager: ProverifDocumentManager;
 
-    constructor(private connection: Connection, hasConfigurationCapability: boolean) {
-        this.proverifDocumentManager = new ProverifDocumentManager(connection, hasConfigurationCapability);
+    constructor(private connection: Connection, private hasConfigurationCapability: boolean) {
+        this.proverifDocumentManager = new ProverifDocumentManager(connection, this.getDocumentText, this.getDocumentSettings);
     }
 
     public markSettingsChanged = async () => {
-        // possible improvement: check what setting has changed, and which documents are impacted
-        const processingDocuments = this.proverifDocumentManager.allDocuments()
-            .map(document => {
-                this.proverifDocumentManager.markSettingsChanged(document);
-                return this.checkProverifParsingErrors(document);
+        const processingDocuments = Array.from(this.documentCache.keys())
+            .map(key => ({uri: key}))
+            .map(async document => {
+                const cache: DocumentCache = this.documentCache.get(document.uri) ?? {identifier: document};
+                cache.settings = undefined;
+                this.documentCache.set(document.uri, cache);
+
+                if (this.proverifDocumentManager.supports(document)) {
+                    await this.proverifDocumentManager.markSettingsChanged(document);
+                }
             });
         await Promise.all(processingDocuments);
     };
 
-    public closeDocument = (identifier: TextDocumentIdentifier) => {
-        if (this.proverifDocumentManager.supports(identifier)) {
-            this.proverifDocumentManager.forget(identifier);
+    public closeDocument = (document: TextDocumentIdentifier) => {
+        this.documentCache.delete(document.uri);
+
+        if (this.proverifDocumentManager.supports(document)) {
+            this.proverifDocumentManager.forget(document);
         }
     };
 
     public markDocumentContentChanged = async (document: TextDocument) => {
+        const cache: DocumentCache = this.documentCache.get(document.uri) ?? {identifier: document};
+        cache.document = document;
+        this.documentCache.set(document.uri, cache);
+
         if (this.proverifDocumentManager.supports(document)) {
-            this.proverifDocumentManager.markDocumentChanged(document, document);
-            await this.checkProverifParsingErrors(document);
+            await this.proverifDocumentManager.markDocumentChanged(document);
         }
     };
 
     public markFilesystemDocumentContentChanged = async (document: TextDocument) => {
+        const cache: DocumentCache = this.documentCache.get(document.uri) ?? {identifier: document};
+        cache.document = document;
+        cache.filesystemText = undefined;
+        this.documentCache.set(document.uri, cache);
+
+        // we do not need to update out cache, as if it saved on the file system, then it is also open in VSCode (hence markDocumentContentChanged called)
         if (this.proverifDocumentManager.supports(document)) {
             const dependingDocuments = this.proverifDocumentManager.findDependingDocuments(document);
-            const tasks = dependingDocuments.map(dependingDocument => {
-                this.proverifDocumentManager.markDocumentDependencyChanged(dependingDocument);
-                return this.checkProverifParsingErrors(dependingDocument);
-            });
+            const tasks = dependingDocuments.map(dependingDocument => this.proverifDocumentManager.markDocumentDependencyChanged(dependingDocument));
 
             await Promise.all(tasks);
         }
     };
 
-    public getProverifDocument = async (identifier: TextDocumentIdentifier): Promise<ProverifDocument|undefined> => {
-        if (!this.proverifDocumentManager.supports(identifier)) {
-            return;
+    public getProverifDocument = async (identifier: TextDocumentIdentifier): Promise<ProverifDocument | undefined> => {
+        if (this.proverifDocumentManager.supports(identifier)) {
+            return this.proverifDocumentManager.getProverifDocument(identifier);
         }
 
-        const {parser, parserTree} = await this.proverifDocumentManager.parse(identifier);
-        const {symbolTable} = await this.proverifDocumentManager.createSymbolTable(identifier);
-        const {libraryDependencyTokens} = await this.proverifDocumentManager.parseLibraryDependencies(identifier);
-
-        return {identifier, parser, parserTree, symbolTable, dependencyTokens: libraryDependencyTokens};
+        return undefined;
     };
 
     public getConsumers = async (identifier: TextDocumentIdentifier): Promise<TextDocumentIdentifier[]> => {
@@ -90,14 +100,33 @@ export class DocumentManager implements DocumentManagerInterface {
         return [];
     };
 
-    private checkProverifParsingErrors = async (identifier: TextDocumentIdentifier) => {
-        const parseLibraryDependenciesResult = await this.proverifDocumentManager.parseLibraryDependencies(identifier);
-        const invokeProverifResult = await this.proverifDocumentManager.invoke(identifier);
+    private getDocumentText = async (identifier: TextDocumentIdentifier) => {
+        const cache = this.documentCache.get(identifier.uri) ?? {identifier};
 
-        const messages = joinOptionalLists(parseLibraryDependenciesResult?.messages, invokeProverifResult?.messages);
-        logMessages(this.connection, messages);
+        let text = cache.document?.getText();
+        if (text === undefined) {
+            if (!cache.filesystemText) {
+                const path = fileURLToPath(identifier.uri);
+                cache.filesystemText = await readFile(path);
+            }
 
-        const diagnostics = joinOptionalLists(parseLibraryDependenciesResult?.diagnostics, invokeProverifResult?.diagnostics);
-        await sendDiagnostics(this.connection, identifier, diagnostics);
+            text = cache.filesystemText;
+        }
+
+        this.documentCache.set(identifier.uri, cache);
+
+        return text;
+    };
+
+    private getDocumentSettings = async (identifier: TextDocumentIdentifier) => {
+        const cache = this.documentCache.get(identifier.uri) ?? {identifier};
+
+        if (!cache.settings) {
+            cache.settings = await getDocumentSettings(this.connection, this.hasConfigurationCapability, identifier);
+        }
+
+        this.documentCache.set(identifier.uri, cache);
+
+        return {...cache.settings};
     };
 }

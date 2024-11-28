@@ -1,18 +1,18 @@
 import {Connection} from "vscode-languageserver/node";
 import {TextDocumentIdentifier} from "vscode-languageserver";
 
-export type ProVerifSettings = {
+export type Settings = {
     proverifBinary: string;
     parentFolderDiscoveryLimit: number
 }
 
-type RawProVerifSettings = {
+type RawSettings = {
     proverifPath?: string;
     parentFolderDiscoveryLimit: number
 }
 
-const defaultSettings: ProVerifSettings = {proverifBinary: 'proverif', parentFolderDiscoveryLimit: 1};
-export const getDocumentSettings = async (connection: Connection, hasConfigurationCapability: boolean, document: TextDocumentIdentifier): Promise<ProVerifSettings> => {
+const defaultSettings: Settings = {proverifBinary: 'proverif', parentFolderDiscoveryLimit: 1};
+export const getDocumentSettings = async (connection: Connection, hasConfigurationCapability: boolean, document: TextDocumentIdentifier): Promise<Settings> => {
     if (!hasConfigurationCapability) {
         return defaultSettings;
     }
@@ -20,7 +20,7 @@ export const getDocumentSettings = async (connection: Connection, hasConfigurati
     const config = await connection.workspace.getConfiguration({
         scopeUri: document.uri,
         section: 'proverif'
-    }) as RawProVerifSettings;
+    }) as RawSettings;
 
     return {
         proverifBinary: config.proverifPath ?? defaultSettings.proverifBinary,

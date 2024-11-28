@@ -1,12 +1,12 @@
 import {TextDocument} from "vscode-languageserver-textdocument";
-import {LibraryDependencyToken} from "./proverif/parse_library_dependencies";
-import {logMessages} from "./utils/log";
-import {sendDiagnostics} from "./utils/diagnostics";
-import {ParseProverifResult} from "./proverif/parse_proverif";
-import {CreateSymbolTableResult} from "./proverif/symbol_table/create_symbol_table";
+import {LibraryDependencyToken} from "../proverif/parse_library_dependencies";
+import {logMessages} from "../utils/log";
+import {sendDiagnostics} from "../utils/diagnostics";
+import {ParseProverifResult} from "../proverif/parse_proverif";
+import {CreateSymbolTableResult} from "../proverif/symbol_table/create_symbol_table";
 import {TextDocumentIdentifier} from "vscode-languageserver";
 import {Connection} from "vscode-languageserver/node";
-import {joinOptionalLists} from "./utils/array";
+import {joinOptionalLists} from "../utils/array";
 import {CachedTaskExecutor} from "./cached_task_executor";
 
 export type ParseResult = Partial<ParseProverifResult> & Partial<CreateSymbolTableResult> & {

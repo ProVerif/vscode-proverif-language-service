@@ -2,7 +2,7 @@ import {assert, expect, should} from "chai";
 
 import {Position} from "vscode-languageserver";
 import {MockDocumentManager} from "./mocks/mock_document_manager";
-import {getCompletion} from "../src/completion";
+import {getCompletion} from "../src/capabilities/completion";
 
 describe('completion', function () {
     const getCompletionsFrom = async (code: string, completionInvoked: Position) => {

@@ -9,15 +9,15 @@ import {
     TextDocumentSyncKind
 } from 'vscode-languageserver/node';
 import {TextDocument} from 'vscode-languageserver-textdocument';
-import {DocumentManager, DocumentManagerInterface,} from "./document_manager";
-import {getDefinitionLocations} from "./go_to_definition";
-import {rename} from "./rename";
-import {getReferences} from "./references";
-import {getSemanticTokens, tokenModifier, tokenTypes} from './semantic_token_provider';
-import {getDocumentLinks} from "./document_links";
-import {getSignatureHelp} from "./signature_help";
-import {getHover} from "./hover";
-import {getCompletion} from "./completion";
+import {DocumentManager, DocumentManagerInterface,} from "./document_manager/document_manager";
+import {getDefinitionLocations} from "./capabilities/go_to_definition";
+import {rename} from "./capabilities/rename";
+import {getReferences} from "./capabilities/references";
+import {getSemanticTokens, tokenModifier, tokenTypes} from './capabilities/semantic_token_provider';
+import {getDocumentLinks} from "./capabilities/document_links";
+import {getSignatureHelp} from "./capabilities/signature_help";
+import {getHover} from "./capabilities/hover";
+import {getCompletion} from "./capabilities/completion";
 
 const connection = createConnection(ProposedFeatures.all);
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);

@@ -1,9 +1,9 @@
 import {SemanticTokensBuilder, TextDocumentIdentifier} from 'vscode-languageserver';
-import {DocumentManagerInterface} from './document_manager';
-import {collectIdentTerminals} from "./proverif/collect_ident_terminals";
+import {DocumentManagerInterface} from '../document_manager/document_manager';
+import {collectIdentTerminals} from "../proverif/collect_ident_terminals";
 import {getDefinitionSymbolFromMatch} from "./go_to_definition";
-import {nonNullable} from "./utils/array";
-import {DeclarationType} from "./proverif/symbol_table/create_symbol_table";
+import {nonNullable} from "../utils/array";
+import {DeclarationType} from "../proverif/symbol_table/create_symbol_table";
 
 // It is unclear why an empty entry as first entry of tokenTypes is required, and why +1 for the index of the tokenModifiers needs to be added.
 export const tokenModifier = ['readonly'];

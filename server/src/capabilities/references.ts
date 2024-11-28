@@ -1,5 +1,5 @@
 import {Location, Position, TextDocumentIdentifier} from "vscode-languageserver";
-import {DocumentManagerInterface} from "./document_manager";
+import {DocumentManagerInterface} from "../document_manager/document_manager";
 import {
     DefinitionSymbol,
     definitionSymbolsEqual,
@@ -7,9 +7,9 @@ import {
     getDefinitionSymbolFromPosition
 } from "./go_to_definition";
 import {ParseTree} from "antlr4ts/tree";
-import {nonNullable} from "./utils/array";
+import {nonNullable} from "../utils/array";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";
-import {collectMatchingTerminals, getRange} from "./utils/parse_tree";
+import {collectMatchingTerminals, getRange} from "../utils/parse_tree";
 
 type Reference = {
     uri: TextDocumentIdentifier,

@@ -1,6 +1,6 @@
 import {assert, expect} from "chai";
 
-import {getDefinitionLocations} from "../src/go_to_definition";
+import {getDefinitionLocations} from "../src/capabilities/go_to_definition";
 import {Position} from "vscode-languageserver";
 import {DefinitionLink} from "vscode-languageserver-protocol";
 import {MockDocumentManager} from "./mocks/mock_document_manager";

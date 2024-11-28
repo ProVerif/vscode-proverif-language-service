@@ -88,15 +88,7 @@ connection.onCompletion(async params => getCompletion(params.textDocument, param
 connection.onRenameRequest(async params => rename(params.textDocument, params.position, params.newName, documentManager));
 connection.onReferences(async params => getReferences(params.textDocument, params.position, documentManager));
 
-connection.languages.semanticTokens.on(async params => {
-    const semanticTokens = await getSemanticTokens(params.textDocument, documentManager);
-    if (!semanticTokens) {
-        connection.console.error("Retrieving semantic tokens failed.");
-        return new ResponseError(3, 'Semantic tokens extraction failed', undefined);
-    }
-
-    return semanticTokens;
-});
+connection.languages.semanticTokens.on(async params => getSemanticTokens(params.textDocument, documentManager));
 
 documents.listen(connection);
 connection.listen();

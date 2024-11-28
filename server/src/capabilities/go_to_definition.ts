@@ -1,9 +1,11 @@
-import {DocumentManagerInterface, ProverifDocument} from "../document_manager/document_manager";
+import {DocumentManagerInterface} from "../document_manager/document_manager";
 import {LocationLink, Position, TextDocumentIdentifier} from "vscode-languageserver";
 import {getMatchingParseTree, getRange} from "../utils/parse_tree";
 import {ParseTree} from "antlr4ts/tree";
 import {DeclarationType, ProverifSymbol} from "../proverif/symbol_table/create_symbol_table";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";
+import {DocumentParser} from "../proverif_log/document_parser";
+import {ProverifDocument} from "../proverif/document_manager";
 
 type Origin = { uri: TextDocumentIdentifier, match: TerminalNode };
 export type DefinitionSymbol = { uri: TextDocumentIdentifier, symbol: ProverifSymbol, origin: Origin }

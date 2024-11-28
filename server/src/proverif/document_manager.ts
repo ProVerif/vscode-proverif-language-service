@@ -37,7 +37,7 @@ export class DocumentManager {
 
     public supports = (document: TextDocumentIdentifier) => {
         return isProverifFile(document.uri);
-    }
+    };
 
     public allDocuments = (): TextDocumentIdentifier[] => {
         return Array.from(this.documentCache.keys()).map(key => ({uri: key}));

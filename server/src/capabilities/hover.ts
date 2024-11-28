@@ -1,9 +1,9 @@
 import {Hover, MarkupContent, MarkupKind, Position, TextDocumentIdentifier} from "vscode-languageserver";
-import {DocumentManagerInterface} from "../document_manager/document_manager";
-import {getDefinitionSymbolFromPosition} from "./go_to_definition";
+import {DocumentManagerInterface} from "../document_manager";
 import {ParseTree} from "antlr4ts/tree";
 import {DeclarationType, ProverifSymbol, ProverifSymbolParameter} from "../proverif/symbol_table/create_symbol_table";
 import {getRange} from "../utils/parse_tree";
+import {getDefinitionSymbolFromPosition} from "../proverif/definition_symbol";
 
 export const getHover = async (identifier: TextDocumentIdentifier, position: Position, documentManager: DocumentManagerInterface): Promise<Hover | undefined> => {
     const definitionSymbol = await getDefinitionSymbolFromPosition(identifier, position, documentManager);

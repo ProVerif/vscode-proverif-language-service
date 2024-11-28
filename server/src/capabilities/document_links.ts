@@ -1,4 +1,4 @@
-import {DocumentManagerInterface} from "../document_manager/document_manager";
+import {DocumentManagerInterface} from "../document_manager";
 import {DocumentLink, TextDocumentIdentifier} from "vscode-languageserver";
 
 export const getDocumentLinks = async (identifier: TextDocumentIdentifier, documentManager: DocumentManagerInterface): Promise<DocumentLink[]|undefined> => {

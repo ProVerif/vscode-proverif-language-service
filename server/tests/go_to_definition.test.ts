@@ -40,7 +40,7 @@ describe('go to definition', function () {
         const uri = 'main.pv';
 
         const documentManager = new MockDocumentManager();
-        documentManager.parse(uri, code);
+        documentManager.addProverifDocument(uri, code);
         const definitionLink = await getDefinitionLocations({uri}, click, documentManager);
 
         assertDefinitionPointsToTarget(definitionLink, uri, target, targetCharacterLength, click);
@@ -199,10 +199,31 @@ process System`;
         const target = {line: 0, character: 8};
 
         const documentManager = new MockDocumentManager();
-        documentManager.parse(uri, code, dependencyUri);
-        documentManager.parse(dependencyUri, dependencyCode);
+        documentManager.addProverifDocument(uri, code, dependencyUri);
+        documentManager.addProverifDocument(dependencyUri, dependencyCode);
         const definitionLink = await getDefinitionLocations({uri}, click, documentManager);
 
         assertDefinitionPointsToTarget(definitionLink, dependencyUri, target, 1, click);
+    });
+
+    it("supports proverif logs", async () => {
+        const uri = 'main.pv.log';
+        const content = `{1}!
+{2}new e_id[]: election_id;
+{3}new sk_EL[]: secret_key_t;
+(...)
+
+5. The message (...) input {2}.
+The (...) be received at input {3}.
+table2((...),(...)).
+(...)`;
+        const click = {line: 5, character: 32};
+        const target = {line: 1, character: 0};
+
+        const documentManager = new MockDocumentManager();
+        documentManager.addProverifLogDocument(uri, content);
+        const definitionLink = await getDefinitionLocations({uri}, click, documentManager);
+
+        assertDefinitionPointsToTarget(definitionLink, uri, target, 3, click);
     });
 });

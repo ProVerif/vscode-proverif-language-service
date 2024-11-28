@@ -9,7 +9,7 @@ describe('completion', function () {
         const uri = 'main.pv';
 
         const documentManager = new MockDocumentManager(true);
-        documentManager.parse(uri, code);
+        documentManager.addProverifDocument(uri, code);
         return await getCompletion({uri}, completionInvoked, documentManager);
     }
 

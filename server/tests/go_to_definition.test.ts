@@ -209,7 +209,7 @@ process System`;
     it("supports proverif logs", async () => {
         const uri = 'main.pv.log';
         const content = `{1}!
-{2}new e_id[]: election_id;
+    {2}new e_id[]: election_id;
 {3}new sk_EL[]: secret_key_t;
 (...)
 
@@ -218,7 +218,7 @@ The (...) be received at input {3}.
 table2((...),(...)).
 (...)`;
         const click = {line: 5, character: 29};
-        const target = {line: 1, character: 0};
+        const target = {line: 1, character: 4};
 
         const documentManager = new MockDocumentManager();
         documentManager.addProverifLogDocument(uri, content);

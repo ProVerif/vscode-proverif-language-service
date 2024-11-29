@@ -380,7 +380,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         while (docCandidate) {
             if (docCandidate.type === ProverifLexer.DelimitedComment) {
                 // check doccomment: (** **)
-                if (docCandidate.text?.startsWith("(**") && docCandidate.text.endsWith("**)") && docCandidate.text.length > 6) {
+                if (docCandidate.text?.startsWith("(** ") && docCandidate.text.endsWith("**)")) {
                     break;
                 }
             }

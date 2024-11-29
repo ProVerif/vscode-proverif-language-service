@@ -3,7 +3,7 @@
 	"description": "Language support for the ProVerif language - client",
 	"author": "ProVerif",
 	"license": "MIT",
-	"version": "1.7.1",
+	"version": "1.8.0",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/ProVerif/vscode-proverif-language-service"

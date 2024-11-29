@@ -1,6 +1,7 @@
 import {LocationLink, Position, TextDocumentIdentifier} from "vscode-languageserver";
 import {Range} from "vscode-languageserver/node";
 import {DocumentManagerInterface} from "../document_manager";
+import {findFirstOccurrenceInDocument} from "./scanner";
 
 const PROCESS_REFERENCE = /(\{\d+\})/;
 
@@ -14,7 +15,6 @@ export const getReferenceLocationLink = async (identifier: TextDocumentIdentifie
     const safePositionStart: Position = { line: position.line, character: Math.max(position.character-offset, 0) };
     const safePositionEnd: Position = { line: position.line, character: position.character+offset };
     const textAroundPosition = document.document.getText(Range.create(safePositionStart, safePositionEnd));
-
     const processReferenceMatch = textAroundPosition.match(PROCESS_REFERENCE);
     if (!processReferenceMatch?.index) {
         return undefined;
@@ -29,24 +29,7 @@ export const getReferenceLocationLink = async (identifier: TextDocumentIdentifie
     }
 
     // find target range from the start of the file
-    let targetStart: Position|undefined = undefined;
-    let currentLine = 0;
-    const linesPerIteration = 100;
-    while (currentLine < document.document.lineCount) {
-        const currentStart = { line: currentLine, character: 0};
-        const text = document.document.getText(Range.create(currentStart, {line: currentStart.line+linesPerIteration, character: 0}));
-
-        const targetMatch = text.indexOf(processReferenceMatch[1]);
-        if (targetMatch >= 0) {
-            const startOffset = document.document.offsetAt(currentStart);
-            targetStart = document.document.positionAt(startOffset + targetMatch);
-
-            break;
-        }
-
-        currentLine += linesPerIteration;
-    }
-
+    const targetStart = findFirstOccurrenceInDocument(document.document, processReferenceMatch[1]);
     if (!targetStart) {
         return undefined;
     }

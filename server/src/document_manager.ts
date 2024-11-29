@@ -45,7 +45,7 @@ export class DocumentManager implements DocumentManagerInterface {
 
     constructor(private connection: Connection, private hasConfigurationCapability: boolean) {
         this.proverifDocumentManager = new ProverifDocumentManager(connection, this.getDocumentText, this.getDocumentSettings);
-        this.proverifLogDocumentManager = new ProverifLogDocumentManager();
+        this.proverifLogDocumentManager = new ProverifLogDocumentManager(connection);
     }
 
     public markSettingsChanged = async () => {
@@ -70,6 +70,10 @@ export class DocumentManager implements DocumentManagerInterface {
 
         if (this.proverifDocumentManager.supports(document)) {
             await this.proverifDocumentManager.markDocumentChanged(document);
+        }
+
+        if (this.proverifLogDocumentManager.supports(document)) {
+            await this.proverifLogDocumentManager.markDocumentChanged(document);
         }
     };
 

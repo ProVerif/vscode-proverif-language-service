@@ -11,7 +11,7 @@ export const getReferenceLocationLink = async (identifier: TextDocumentIdentifie
     }
 
     const offset = 6; // supports tokens with 4 numbers; e.g. {3121}
-    const safePositionStart: Position = { line: position.line, character: position.character-offset };
+    const safePositionStart: Position = { line: position.line, character: Math.max(position.character-offset, 0) };
     const safePositionEnd: Position = { line: position.line, character: position.character+offset };
     const textAroundPosition = document.document.getText(Range.create(safePositionStart, safePositionEnd));
 

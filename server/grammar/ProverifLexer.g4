@@ -5,11 +5,6 @@ lexer grammar ProverifLexer;
 /**
 whitespace & comments
 */
-DelimitedDocComment
-    : '(**' ( DelimitedComment | . )*? '**)'
-      -> channel(HIDDEN)
-    ;
-
 DelimitedComment
     : '(*' ( DelimitedComment | . )*? '*)'
       -> channel(HIDDEN)

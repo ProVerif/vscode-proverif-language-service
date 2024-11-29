@@ -378,8 +378,11 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         const docCandidates = this.tokenStream.getHiddenTokensToLeft(root.symbol.tokenIndex);
         let docCandidate = docCandidates.pop();
         while (docCandidate) {
-            if (docCandidate.type === ProverifLexer.DelimitedDocComment) {
-                break;
+            if (docCandidate.type === ProverifLexer.DelimitedComment) {
+                // check doccomment: (** **)
+                if (docCandidate.text?.startsWith("(**") && docCandidate.text.endsWith("**)") && docCandidate.text.length > 6) {
+                    break;
+                }
             }
 
             if (docCandidate.type !== ProverifLexer.WS) {

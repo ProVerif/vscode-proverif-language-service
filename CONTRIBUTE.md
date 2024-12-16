@@ -66,35 +66,23 @@ You can manage members of the ProVerif organization [here](https://marketplace.v
 
 ## Development path
 
-To make the extension more powerful, following features should be considered:
+There is always things to do, and contributions are very welcome! Feel free to create a PR, e.g. addressing the following topics:
 
-Execute ProVerif:
-- [x] Parse ProVerif output and show it to the user.
-- [x] Add support for libraries (.pvl).
-- [x] Add [custom task](https://code.visualstudio.com/api/extension-guides/task-provider) to automatically include libraries when invoking proverif.
-- [x] Introduce proper caching / cache invalidation
-- [x] Use `-parse-only` flag if available
+Known issues:
+- [ ] Fix highlighted argument in functions when using commas (e.g. `chan(diff[a, a'], diff[m, m'])`)
+- [ ] Add `parseLemmaOnly` highlight
+- [ ] Fix scope of local variables of noselect statements (and possibly others) 
+- [ ] Ensure renaming a file properly sets the "exists" flag in the dependency tokens
+- [ ] Fix highlighting of `else` and `else if` in `letfun` statements
 
-Go to definition:
-- [x] PoC of how to implement grammar
-- [x] Implement grammar, symbol table, over libraries 
-- [x] Add go to definition functionality; see https://tomassetti.me/integrating-code-completion-in-visual-studio-code/
-- [x] Invalidate cache of consumers when library stored
-- [x] Support additional ways of declaring variables (e.g. in REDUCTION lib)
+New functionality for `.pv`:
 - [ ] Properly implement macro resolution (see TODOs in corresponding unit test)
-- [ ] Improve performance by considering previous resolutions
-
-Support writing ProVerif:
-- [x] Configure language
-- [x] Add syntax highlighting
-- [x] Add semantic tokens (`connection.languages.semanticTokens`)
+- [ ] Improve performance of go-to-definition by considering previous resolutions
 - [ ] Support syntactical autocomplete (`connection.onCompletion`)
 - [ ] Support semantical autocomplete (see https://tomassetti.me/code-completion-with-antlr4-c3/#chapter12)
 - [ ] Detect blocking private channels (`in(c_private, mess)` where `mess` is of a format that is never sent)
-
-Refactorings:
-- [ ] Introduce refactoring for free c: channel to replace with channel c
-- [x] Introduce rename refactorings
-
-Integrate Testing output:
 - [ ] Integrate with [VSCode testing](https://code.visualstudio.com/api/extension-guides/testing) to show output of proverif nicely.
+
+New functionality for `.pv.log`:
+- Navigate to numbers (e.g. clicking on 32 in phrase ending with "by 32" should navigate to step 32)
+- Highlight all symbols (the symbols are resolved for the corresponding `.pv` file)

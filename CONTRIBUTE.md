@@ -82,6 +82,7 @@ New functionality for `.pv`:
 - [ ] Support semantical autocomplete (see https://tomassetti.me/code-completion-with-antlr4-c3/#chapter12)
 - [ ] Detect blocking private channels (`in(c_private, mess)` where `mess` is of a format that is never sent)
 - [ ] Integrate with [VSCode testing](https://code.visualstudio.com/api/extension-guides/testing) to show output of proverif nicely.
+- [ ] Detailed grammar scopes for `[data]` and `[typeConverter]` to adjust color scheme
 
 New functionality for `.pv.log`:
 - Navigate to numbers (e.g. clicking on 32 in phrase ending with "by 32" should navigate to step 32)

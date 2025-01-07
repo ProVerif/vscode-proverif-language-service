@@ -13,11 +13,6 @@ describe('completion', function () {
         return await getCompletion({uri}, completionInvoked, documentManager);
     }
 
-    const setCompletions = [
-        'verboseClauses',
-        'verboseLemmas'
-    ]
-
     const assertSomeCompletionsFound = async (code: string, completionInvoked: Position, expectedCompletionsCount: number) => {
         const completions = await getCompletionsFrom(code, completionInvoked)
 

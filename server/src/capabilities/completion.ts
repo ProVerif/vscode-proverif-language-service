@@ -53,6 +53,7 @@ const setRules: { [key in string]: string[] } = {
     inductionLemmas: ["false", "true"],
     saturationApplication: ["instantiate", "full", "none", "discard"],
     verificationApplication: ["full", "none", "discard", "instantiate"],
+    proveLemmaOnly: ["false", "true"],
 
     /* Precision, performance, and termination settings */
     preciseActions: ["false", "true", "trueWithoutArgsInNames"],

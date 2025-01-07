@@ -1,5 +1,5 @@
-import {DiagnosticSeverity, LocationLink, Position} from "vscode-languageserver";
-import {Diagnostic, Range} from "vscode-languageserver/node";
+import {DiagnosticSeverity} from "vscode-languageserver";
+import {Diagnostic} from "vscode-languageserver/node";
 import {TextDocument} from "vscode-languageserver-textdocument";
 import {findAllOccurrencesInDocument} from "./scanner";
 

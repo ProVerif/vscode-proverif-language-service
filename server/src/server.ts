@@ -4,7 +4,6 @@ import {
     InitializeParams,
     InitializeResult,
     ProposedFeatures,
-    ResponseError,
     TextDocuments,
     TextDocumentSyncKind
 } from 'vscode-languageserver/node';

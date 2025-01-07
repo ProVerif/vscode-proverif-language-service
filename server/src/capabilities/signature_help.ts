@@ -7,7 +7,7 @@ import {
 } from "vscode-languageserver";
 import {DocumentManagerInterface} from "../document_manager";
 import {getSignaturePosition} from "../proverif/get_signature_position";
-import {getDefinitionSymbolFromPosition, DefinitionSymbol} from "../proverif/definition_symbol";
+import {DefinitionSymbol, getDefinitionSymbolFromPosition} from "../proverif/definition_symbol";
 
 export const getSignatureHelp = async (identifier: TextDocumentIdentifier, position: Position, documentManager: DocumentManagerInterface): Promise<SignatureHelp | undefined> => {
     const proverifDocument = await documentManager.getProverifDocument(identifier);

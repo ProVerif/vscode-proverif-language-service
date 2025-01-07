@@ -69,12 +69,12 @@ You can manage members of the ProVerif organization [here](https://marketplace.v
 There is always things to do, and contributions are very welcome! Feel free to create a PR, e.g. addressing the following topics:
 
 Known issues:
-- [ ] Fix highlighted argument in functions when using commas (e.g. `chan(diff[a, a'], diff[m, m'])`)
 - [x] Add `proveLemmaOnly` highlight
-- [ ] Fix scope of local variables of noselect statements (and possibly others) 
-- [ ] Ensure renaming a file properly sets the "exists" flag in the dependency tokens
 - [x] Fix highlighting of `else` and `else if` in `letfun` statements
 - [x] Fix highlighting of `[precise]` after `get` table statements
+- [ ] Fix highlighted argument in functions when using commas (e.g. `chan(diff[a, a'], diff[m, m'])`)
+- [ ] Fix scope of local variables of noselect statements (and possibly others)
+- [ ] Ensure renaming a file properly sets the "exists" flag in the dependency tokens
 
 New functionality for `.pv`:
 - [ ] Add custom scope for `data converters` and `type converters`

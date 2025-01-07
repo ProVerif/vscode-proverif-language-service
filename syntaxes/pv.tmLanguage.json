@@ -542,7 +542,8 @@
           "patterns": [
             { "include": "#pterm" }
           ]
-        }
+        },
+        { "include": "#options" }
       ]
     },
     "gterm": {

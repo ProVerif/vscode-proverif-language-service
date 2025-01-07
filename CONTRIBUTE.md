@@ -70,7 +70,7 @@ There is always things to do, and contributions are very welcome! Feel free to c
 
 Known issues:
 - [ ] Fix highlighted argument in functions when using commas (e.g. `chan(diff[a, a'], diff[m, m'])`)
-- [ ] Add `parseLemmaOnly` highlight
+- [x] Add `proveLemmaOnly` highlight
 - [ ] Fix scope of local variables of noselect statements (and possibly others) 
 - [ ] Ensure renaming a file properly sets the "exists" flag in the dependency tokens
 - [x] Fix highlighting of `else` and `else if` in `letfun` statements

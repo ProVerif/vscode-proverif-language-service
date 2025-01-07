@@ -77,7 +77,7 @@ Known issues:
 - [ ] Ensure renaming a file properly sets the "exists" flag in the dependency tokens
 
 New functionality for `.pv`:
-- [ ] Add custom scope for `data converters` and `type converters`
+- [x] Add custom scope for `data converters` and `type converters`
 - [ ] Properly implement macro resolution (see TODOs in corresponding unit test)
 - [ ] Improve performance of go-to-definition by considering previous resolutions
 - [ ] Support syntactical autocomplete (`connection.onCompletion`)

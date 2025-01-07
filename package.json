@@ -76,6 +76,24 @@
 			{
 				"type": "ProVerif"
 			}
+		],
+		"semanticTokenModifiers": [
+			{
+				"id": "dataConverter",
+				"description": "Annotates a symbol that represents a data converter"
+			},
+			{
+				"id": "typeConverter",
+				"description": "Annotates a symbol that represents a type converter"
+			}
+		],
+		"semanticTokenScopes": [
+			{
+				"scopes": {
+					"function.dataConverter": ["entity.name.function.preprocessor"],
+					"function.typeConverter": ["entity.name.function.preprocessor"]
+				}
+			}
 		]
 	},
 	"scripts": {

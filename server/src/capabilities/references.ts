@@ -5,8 +5,10 @@ import {nonNullable} from "../utils/array";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";
 import {collectMatchingTerminals, getRange} from "../utils/parse_tree";
 import {
+    DefinitionSymbol,
+    definitionSymbolsEqual,
     getDefinitionSymbolFromMatch,
-    getDefinitionSymbolFromPosition, DefinitionSymbol, definitionSymbolsEqual
+    getDefinitionSymbolFromPosition
 } from "../proverif/definition_symbol";
 
 type Reference = {

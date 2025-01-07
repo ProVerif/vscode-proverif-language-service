@@ -27,6 +27,7 @@ import {
     collectNeidentseq,
     collectNemayfailvartypeseq,
     collectNevartype,
+    collectOptions,
     collectSingleIdentifiers,
     collectTPattern,
     collectTPatternSeq,
@@ -90,7 +91,8 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             if (ctx.CONST() || ctx.FREE()) {
                 const declarationType = ctx.CONST() ? DeclarationType.Const : DeclarationType.Free;
                 const terminalNodes = collectNeidentseq(() => ctx.neidentseq());
-                this.registerTerminals(terminalNodes, declarationType, getType(() => ctx.typeid()));
+                const type = getType(() => ctx.typeid());
+                this.registerTerminals(terminalNodes, declarationType, type);
             } else if (ctx.CHANNEL()) {
                 const terminalNodes = collectNeidentseq(() => ctx.neidentseq());
                 this.registerTerminals(terminalNodes, DeclarationType.Channel);
@@ -100,7 +102,9 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             } else if (ctx.FUN()) {
                 const parameters = collectTypeidseq(() => ctx.typeidseq());
                 const identifier = collectIdentifier(() => ctx.IDENT());
-                this.registerTerminalWithParameters(ctx.FUN(), identifier, DeclarationType.Fun, parameters, getType(() => ctx.typeid()));
+                const type = getType(() => ctx.typeid());
+                const options = collectOptions(() => ctx.options_());
+                this.registerTerminalWithParameters(ctx.FUN(), identifier, DeclarationType.Fun, parameters, type, options);
                 this.withContext(ctx, () => this.visitInner(() => ctx.treducmayfail()));
             } else if (ctx.EVENT() || ctx.PREDICATE() || ctx.TABLE()) {
                 const identifier = collectIdentifier(() => ctx.IDENT());
@@ -335,7 +339,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         });
     }
 
-    private registerTerminalWithParameters(root: TerminalNode | undefined, identifier: TerminalNode | undefined, declaration: DeclarationType, parameters: (ParseTree | undefined)[], type?: ParseTree) {
+    private registerTerminalWithParameters(root: TerminalNode | undefined, identifier: TerminalNode | undefined, declaration: DeclarationType, parameters: (ParseTree | undefined)[], type?: ParseTree, options?: string[]) {
         if (!identifier) {
             return;
         }
@@ -345,6 +349,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             node: identifier,
             declaration,
             type,
+            options,
             parameters: parameters.map(parameter => parameter ? ({node: parameter}) : undefined),
             docComment,
             context: this.context
@@ -426,6 +431,7 @@ export type ProverifSymbol = {
     node: TerminalNode
     declaration: DeclarationType
     type?: ParseTree
+    options?: string[],
     parameters?: (ProverifSymbolParameter | undefined)[]
     docComment?: string
     context?: ParseTree

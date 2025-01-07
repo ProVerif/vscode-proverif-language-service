@@ -2,18 +2,22 @@ import {SemanticTokens, SemanticTokensBuilder, TextDocumentIdentifier} from 'vsc
 import {DocumentManagerInterface} from '../document_manager';
 import {collectIdentTerminals} from "../proverif/collect_ident_terminals";
 import {nonNullable} from "../utils/array";
-import {DeclarationType} from "../proverif/symbol_table/create_symbol_table";
+import {DeclarationType, ProverifSymbol} from "../proverif/symbol_table/create_symbol_table";
 import {getDefinitionSymbolFromMatch} from "../proverif/definition_symbol";
 
 // It is unclear why an empty entry as first entry of tokenTypes is required, and why +1 for the index of the tokenModifiers needs to be added.
-export const tokenModifier = ['readonly'];
+export const tokenModifier = ['readonly', 'dataConverter', 'typeConverter'];
 export const tokenTypes = ['', 'function', 'variable', 'parameter', 'type'];
 
 export const getSemanticTokens = async (identifier: TextDocumentIdentifier, documentManager: DocumentManagerInterface): Promise<SemanticTokens> => {
+    const semanticTokensBuilder = await buildSemanticTokens(identifier, documentManager);
+    return semanticTokensBuilder.build();
+};
+
+export const buildSemanticTokens = async (identifier: TextDocumentIdentifier, documentManager: DocumentManagerInterface): Promise<SemanticTokensBuilder> => {
     const proverifDocument = await documentManager.getProverifDocument(identifier);
     if (!proverifDocument || !proverifDocument.parserTree) {
-        const tokensBuilder = new SemanticTokensBuilder();
-        return tokensBuilder.build();
+        return new SemanticTokensBuilder();
     }
 
     // collect references
@@ -30,22 +34,31 @@ export const getSemanticTokens = async (identifier: TextDocumentIdentifier, docu
                 const line = terminalDefinition.origin.match.symbol.line - 1;
                 const char = terminalDefinition.origin.match.symbol.charPositionInLine;
                 const length = terminalDefinition.origin.match.symbol.stopIndex - terminalDefinition.origin.match.symbol.startIndex + 1;
-                const tokenModifier = getTokenModifier(terminalDefinition.symbol.declaration);
+                const tokenModifier = getTokenModifier(terminalDefinition.symbol);
                 tokensBuilder.push(line, char, length, tokenType, tokenModifier);
             }
         });
 
-    return tokensBuilder.build();
+    return tokensBuilder;
 };
 
-const getTokenModifier = (declarationType: DeclarationType): number => {
-    switch (declarationType) {
+const getTokenModifier = (symbol: ProverifSymbol): number => {
+    switch (symbol.declaration) {
         case DeclarationType.Channel:
         case DeclarationType.Free:
         case DeclarationType.Const:
         case DeclarationType.DefineParameter:
         case DeclarationType.ExpandParameter:
-            return tokenModifier.indexOf("readonly") + 1;
+            return 1 << tokenModifier.indexOf("readonly");
+    }
+
+    if (symbol.declaration === DeclarationType.Fun) {
+        if (symbol.options?.includes('data')) {
+            return 1 << tokenModifier.indexOf("dataConverter");
+        }
+        if (symbol.options?.includes('typeConverter')) {
+            return 1 << tokenModifier.indexOf("typeConverter");
+        }
     }
 
     return 0;

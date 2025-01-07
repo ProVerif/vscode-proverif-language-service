@@ -12,6 +12,9 @@ import {
     NetypeidseqContext,
     NevartypeContext,
     OnevartypeContext,
+    Options_Context,
+    OptionseqContext,
+    SingleoptionContext,
     TpatternContext,
     TpatternseqContext,
     TreducContext,
@@ -239,6 +242,28 @@ export const collectIdentifiers = (getIdentifer: () => TerminalNode[]): Terminal
 
 const createTypedTerminals = (identifiers: TerminalNode[], getTypeId: () => TypeidContext | undefined) => {
     return identifiers.map(identifier => ({terminal: identifier, type: getType(getTypeId)}));
+};
+
+
+export const collectOptions = (getOptionsContext: () => Options_Context | undefined): string[] => {
+    const ctx = tryGetContext(getOptionsContext);
+    if (!ctx) {
+        return [];
+    }
+
+    const optionSeqs = collectOptionsSeq(() => ctx.optionseq());
+    return optionSeqs.map(seq => seq.text);
+};
+
+
+export const collectOptionsSeq = (getOptionsContext: () => OptionseqContext | undefined): SingleoptionContext[] => {
+    const ctx = tryGetContext(getOptionsContext);
+    if (!ctx) {
+        return [];
+    }
+
+    const options = collectOptionsSeq(() => ctx.optionseq());
+    return [ctx.singleoption(), ...options];
 };
 
 /**

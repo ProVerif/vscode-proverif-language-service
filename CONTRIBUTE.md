@@ -74,8 +74,10 @@ Known issues:
 - [ ] Fix scope of local variables of noselect statements (and possibly others) 
 - [ ] Ensure renaming a file properly sets the "exists" flag in the dependency tokens
 - [ ] Fix highlighting of `else` and `else if` in `letfun` statements
+- [ ] Fix highlighting of `[precise]` after `get` table statements
 
 New functionality for `.pv`:
+- [ ] Add custom scope for `data converters` and `type converters`
 - [ ] Properly implement macro resolution (see TODOs in corresponding unit test)
 - [ ] Improve performance of go-to-definition by considering previous resolutions
 - [ ] Support syntactical autocomplete (`connection.onCompletion`)

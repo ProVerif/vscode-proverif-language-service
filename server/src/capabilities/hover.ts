@@ -44,8 +44,9 @@ const getFullName = (definitionSymbol: ProverifSymbol): string => {
     const name = definitionSymbol.node.text;
     const parametersString = getParametersString(definitionSymbol.parameters);
     const typeSuffix = getTypeSuffix(definitionSymbol.type);
+    const optionsSuffix = getOptionsSuffix(definitionSymbol.options);
 
-    return declarationPrefix + name + parametersString + typeSuffix;
+    return declarationPrefix + name + parametersString + typeSuffix + optionsSuffix;
 };
 
 const getDeclarationPrefix = (declarationType: DeclarationType): string => {
@@ -75,4 +76,8 @@ const getParametersString = (parameters?: (ProverifSymbolParameter | undefined)[
 
 const getTypeSuffix = (type?: ParseTree) => {
     return type ? ": " + type.text : "";
+};
+
+const getOptionsSuffix = (options?: string[]) => {
+    return options ? " [" + options.join(", ") + "]" : "";
 };

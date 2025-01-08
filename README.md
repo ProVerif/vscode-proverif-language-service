@@ -26,6 +26,8 @@ Settings:
 - `Proverif Path`: Custom path to the proverif binary (else taken from `$PATH`).
 - `Parent Folder Discovery Limit`: Parent folders to read until discovery stops (e.g. to find references).
 
+For advanced configuration, see the hits in [CUSTOMIZATION.md](./CUSTOMIZATION.md).
+
 ## Libraries (.pvl)
 
 If your `.pv` or `.pvl` file depends on libraries, include a corresponding comment `(* -lib {library_path}.pvl *)`:

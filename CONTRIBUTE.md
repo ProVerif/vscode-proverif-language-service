@@ -69,16 +69,12 @@ You can manage members of the ProVerif organization [here](https://marketplace.v
 There is always things to do, and contributions are very welcome! Feel free to create a PR, e.g. addressing the following topics:
 
 Known issues:
-- [x] Add `proveLemmaOnly` highlight
-- [x] Fix highlighting of `else` and `else if` in `letfun` statements
-- [x] Fix highlighting of `[precise]` after `get` table statements
 - [ ] Fix highlighted argument in functions when using commas (see test `signature help > ignores inner scopes`)
 - [ ] Add reduc statements to symbol table (see test `parser > collects reduc`)
 - [ ] Fix scope of local variables of noselect statements and others (see test `go to definition > ignore previous noselect values`)
 - [ ] Ensure renaming a file properly sets the "exists" flag in the dependency tokens
 
 New functionality for `.pv`:
-- [x] Add custom scope for `data converters` and `type converters`
 - [ ] Properly implement macro resolution (see TODOs in corresponding unit test)
 - [ ] Improve performance of go-to-definition by considering previous resolutions
 - [ ] Support syntactical autocomplete (`connection.onCompletion`)

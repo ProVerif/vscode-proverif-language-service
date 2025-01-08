@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.8.2
+
+Add custom grammar scope for `data converters` and `type converters` to improve syntax highlighting.  
+Fix highlighting bugs for `[precise]` and `else if`.  
+Add `proveLemmaOnly` to completion.
+
+
 ## v1.8.1
 
 Improve navigation and doccomment detection.  

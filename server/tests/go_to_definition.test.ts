@@ -181,6 +181,13 @@ process System`;
         await assertSingleFileNavigation(code, click, undefined, 5);
     });
 
+    it.skip("ignore previous noselect values", async () => {
+        const code = `noselect b: bitstring; att(b).\nnoselect c: bitstring; att(b).\nprocess 0`;
+        const click = {line: 1, character: 27};
+
+        await assertSingleFileNavigation(code, click, undefined, 1);
+    });
+
     it("consider clauses", async () => {
         const code = `pred p1.\nclauses forall entry: bitstring;\np1(entry).\nprocess 0`;
         const click = {line: 2, character: 4};

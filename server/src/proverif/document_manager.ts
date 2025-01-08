@@ -15,6 +15,7 @@ import {readdir} from 'fs/promises';
 import {joinOptionalLists} from "../utils/array";
 import {logMessages} from "../utils/log";
 import {sendDiagnostics} from "../utils/diagnostics";
+import {existsSync} from "fs";
 
 export type ProverifDocument = Partial<ParseProverifResult> & Partial<CreateSymbolTableResult> & {
     identifier: TextDocumentIdentifier
@@ -48,6 +49,20 @@ export class DocumentManager {
 
     public forget = (document: TextDocumentIdentifier) => {
         this.documentCache.delete(document.uri);
+
+        const path = fileURLToPath(document.uri);
+        const exists = existsSync(path);
+
+        if (!exists) {
+            Array.from(this.documentCache.keys())
+                .forEach(possibleConsumer => {
+                    const token = this.documentCache.get(possibleConsumer)?.parseLibraryDependenciesResult?.libraryDependencyTokens
+                        .find(token => token.uri === document.uri)
+                    if (token) {
+                        token.exists = false;
+                    }
+                });
+        }
     };
 
     public markSettingsChanged = (identifier: TextDocumentIdentifier) => {

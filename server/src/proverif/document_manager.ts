@@ -57,7 +57,7 @@ export class DocumentManager {
             Array.from(this.documentCache.keys())
                 .forEach(possibleConsumer => {
                     const token = this.documentCache.get(possibleConsumer)?.parseLibraryDependenciesResult?.libraryDependencyTokens
-                        .find(token => token.uri === document.uri)
+                        .find(token => token.uri === document.uri);
                     if (token) {
                         token.exists = false;
                     }

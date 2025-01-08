@@ -26,7 +26,7 @@ Settings:
 - `Proverif Path`: Custom path to the proverif binary (else taken from `$PATH`).
 - `Parent Folder Discovery Limit`: Parent folders to read until discovery stops (e.g. to find references).
 
-For advanced configuration, see the hits in [CUSTOMIZATION.md](./CUSTOMIZATION.md).
+You might want to further customize how the extension affects VSCode, see [CUSTOMIZATION.md](./CUSTOMIZATION.md).
 
 ## Libraries (.pvl)
 

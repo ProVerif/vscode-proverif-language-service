@@ -9,7 +9,7 @@ For the `typeConverter` and `data` functions, there is no clear equivalent in ot
 
 ```json
 {
-	"workbench.colorTheme": "Default Light+",
+    "workbench.colorTheme": "Default Light+",
     "editor.tokenColorCustomizations": {
         "[Default Light+]": {
             "textMateRules": [

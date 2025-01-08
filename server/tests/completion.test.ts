@@ -30,7 +30,7 @@ describe('completion', function () {
         const code = `set `;
         const completionInvoked = {line: 0, character: 4};
 
-        await assertSomeCompletionsFound(code, completionInvoked, 59);
+        await assertSomeCompletionsFound(code, completionInvoked, 60);
     });
 
     it("completes set values", async () => {

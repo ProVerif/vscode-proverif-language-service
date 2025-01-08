@@ -72,7 +72,8 @@ Known issues:
 - [x] Add `proveLemmaOnly` highlight
 - [x] Fix highlighting of `else` and `else if` in `letfun` statements
 - [x] Fix highlighting of `[precise]` after `get` table statements
-- [ ] Fix highlighted argument in functions when using commas (e.g. `chan(diff[a, a'], diff[m, m'])`)
+- [ ] Fix highlighted argument in functions when using commas (see test `signature help > ignores inner scopes`)
+- [ ] Add reduc statements to symbol table (see test `parser > collects reduc`)
 - [ ] Fix scope of local variables of noselect statements (and possibly others)
 - [ ] Ensure renaming a file properly sets the "exists" flag in the dependency tokens
 

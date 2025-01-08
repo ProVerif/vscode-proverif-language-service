@@ -10,6 +10,7 @@ describe('signature help', function () {
 
         const documentManager = new MockDocumentManager();
         documentManager.addProverifDocument(uri, code);
+
         return await getSignatureHelp({uri}, signatureInvoked, documentManager);
     }
 
@@ -61,6 +62,13 @@ describe('signature help', function () {
     it("finds second argument position", async () => {
         const code = `let P(arg: nat, arg2:nat) = 0.\nprocess \nP(0,`;
         const signatureInvoked = {line: 2, character: 4};
+
+        await assertSignatureDefinitionFound(code, signatureInvoked, 'P', ['arg: nat', 'arg2: nat'], 1);
+    });
+
+    it.skip("ignores inner scopes", async () => {
+        const code = `let P(arg: nat, arg2:nat) = 0.\nprocess \nP(diff[0,1],`;
+        const signatureInvoked = {line: 2, character: 12};
 
         await assertSignatureDefinitionFound(code, signatureInvoked, 'P', ['arg: nat', 'arg2: nat'], 1);
     });

@@ -90,8 +90,8 @@
 		"semanticTokenScopes": [
 			{
 				"scopes": {
-					"function.dataConverter": ["entity.name.function.preprocessor"],
-					"function.typeConverter": ["entity.name.function.preprocessor"]
+					"function.dataConverter": ["entity.name.function.dataconverter"],
+					"function.typeConverter": ["entity.name.function.preprocessor.typeconverter"]
 				}
 			}
 		]

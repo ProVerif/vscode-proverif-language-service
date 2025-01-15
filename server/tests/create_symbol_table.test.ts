@@ -32,6 +32,18 @@ describe('parser', function () {
         expect(variables.filter(v => v.declaration === DeclarationType.Reduc).length).to.equal(1);
     });
 
+    it.skip("collects type of data converter variable", async () => {
+        const code = `fun reverse(bitstring): bitstring [data].\nchannel c.\nprocess\nnew var: bitstring;\nlet var2 = reverse(var) in\nlet reverse(var3) = var2 in\n0`;
+        const  {symbolTable } = getSymbolTable(code);
+
+        const variables = symbolTable.getSymbols();
+        const var2Symbol = variables.find(v => v.node.text === 'var2');
+        expect(var2Symbol.type?.text).to.equal('bitstring');
+
+        const var3Symbol = variables.find(v => v.node.text === 'var3');
+        expect(var3Symbol.type?.text).to.equal('bitstring');
+    });
+
     it("collects declaration & process symbols", () => {
         const code = `channel c. process new c: channel; out(c, c)`;
 

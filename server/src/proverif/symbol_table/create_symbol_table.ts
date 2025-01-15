@@ -269,24 +269,29 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
     };
 
     private collectProcessStyleTerms = <Variant extends boolean>(ctx: (Variant extends true ? TprocessContext : PtermContext), isTProcess: Variant) => {
-        if (ctx.LET()) {
+        if (ctx.LET() && ctx.EQUAL()) {
+            // TODO: derive type from pterm
+            // TODO: refactor from collecting identifiers to instead structurally parsing & resolving references
             const typedTerminals = collectTPattern(() => ctx.tpattern());
             this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);
-
-            const nevartypeTerminals = collectNevartype(() => ctx.nevartype());
-            this.registerTypedTerminals(nevartypeTerminals, DeclarationType.Variable);
         } else if (ctx.GET()) {
+            // TODO: derive type depending on argument position of TPattern in table reference
+            // TODO: refactor from collecting identifiers to instead structurally parsing & resolving references
             const typedTerminals = collectTPatternSeq(() => ctx.tpatternseq());
             this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);
+        } else if (ctx.LEFTARROW()) {
+            // TODO: see above, slightly easier case (see grammar)
+            const typedTerminals = collectBasicpattern(() => ctx.basicpattern());
+            this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);
+        } else if (ctx.LET() && ctx.SUCHTHAT()) {
+            const nevartypeTerminals = collectNevartype(() => ctx.nevartype());
+            this.registerTypedTerminals(nevartypeTerminals, DeclarationType.Variable);
         } else if (ctx.NEW() || ctx.RANDOM()) {
             const identifiers = isTProcess ?
                 collectIdentifiers(() => (ctx as TprocessContext).IDENT()) :
                 collectSingleIdentifiers(() => (ctx as PtermContext).IDENT());
             const type = getType(() => ctx.typeid());
             this.registerTerminals(identifiers, DeclarationType.Variable, type);
-        } else if (ctx.LEFTARROW()) {
-            const typedTerminals = collectBasicpattern(() => ctx.basicpattern());
-            this.registerTypedTerminals(typedTerminals, DeclarationType.Variable);
         }
     };
 

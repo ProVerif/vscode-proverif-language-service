@@ -70,7 +70,7 @@ const matchAroundPosition = (document: ProverifLogDocument, position: Position, 
     const safePositionStart: Position = {line: position.line, character: Math.max(position.character - offset, 0)};
     const safePositionEnd: Position = {line: position.line, character: position.character + offset};
     const textAroundPosition = document.document.getText(Range.create(safePositionStart, safePositionEnd));
-    const processReferenceMatch = textAroundPosition.match(STEP_REFERENCE);
+    const processReferenceMatch = textAroundPosition.match(match);
     if (!processReferenceMatch?.index) {
         return undefined;
     }

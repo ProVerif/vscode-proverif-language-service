@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.8.3
+
+In `.pv.log` files, add navigation to attack trace step.  
+In `.pv.log` files, improve syntax highlighting.
+
+
 ## v1.8.2
 
 Add custom grammar scope for `data converters` and `type converters` to improve syntax highlighting.  

@@ -5,7 +5,7 @@ import {findFirstOccurrenceInDocument, findFirstLineStartInDocumentBackwards} fr
 import {ProverifLogDocument} from "./document_manager";
 
 const PROCESS_REFERENCE = /(\{\d+\})/;
-const STEP_REFERENCE = /(by \d+)/;
+const STEP_REFERENCE = /([By]y \d+)/;
 
 export const getReferenceLocationLink = async (identifier: TextDocumentIdentifier, position: Position, documentManager: DocumentManagerInterface)=> {
     const document = await documentManager.getProverifLogDocument(identifier);
@@ -71,13 +71,13 @@ const matchAroundPosition = (document: ProverifLogDocument, position: Position, 
     const safePositionEnd: Position = {line: position.line, character: position.character + offset};
     const textAroundPosition = document.document.getText(Range.create(safePositionStart, safePositionEnd));
     const processReferenceMatch = textAroundPosition.match(match);
-    if (!processReferenceMatch?.index) {
+    if (processReferenceMatch?.index === undefined) {
         return undefined;
     }
 
     // find origin selection range
-    const matchStart: Position = {        line: safePositionStart.line, character: safePositionStart.character + processReferenceMatch.index};
-    const matchEnd: Position = {        line: matchStart.line, character: matchStart.character + processReferenceMatch[1].length };
+    const matchStart: Position = {line: safePositionStart.line, character: safePositionStart.character + processReferenceMatch.index};
+    const matchEnd: Position = {line: matchStart.line, character: matchStart.character + processReferenceMatch[1].length};
     const selectionRange = Range.create(matchStart, matchEnd);
     if (matchStart > position || position > matchEnd) {
         return undefined;

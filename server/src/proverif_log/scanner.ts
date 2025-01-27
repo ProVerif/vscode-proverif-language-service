@@ -58,19 +58,23 @@ export const findFirstLineStartInDocumentBackwards = (document: TextDocument, ca
     let result: Position | undefined = undefined;
 
     scanDocumentBackwards(document, start, (text: string, currentStart: Position) => {
-        const targetMatch = text.lastIndexOf(candidate);
-        if (targetMatch === -1) {
-            return true;
-        }
+        let currentPosition = text.length;
+        while (true) {
+            const targetMatch = text.lastIndexOf(candidate, currentPosition - 1);
+            if (targetMatch === -1) {
+                return true;
+            }
 
-        const startOffset = document.offsetAt(currentStart);
-        const candidatePosition = document.positionAt(startOffset + targetMatch);
-        if (candidatePosition.character !== 0) {
-            return true;
-        }
+            const startOffset = document.offsetAt(currentStart);
+            const candidatePosition = document.positionAt(startOffset + targetMatch);
+            if (candidatePosition.character !== 0) {
+                currentPosition = targetMatch
+                continue;
+            }
 
-        result = candidatePosition;
-        return false;
+            result = candidatePosition;
+            return false;
+        }
     });
 
     return result;

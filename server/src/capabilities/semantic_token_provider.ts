@@ -78,6 +78,7 @@ const getTokenType = (declarationType: DeclarationType): number | undefined => {
         case DeclarationType.Event:
         case DeclarationType.Table:
         case DeclarationType.Predicate:
+        case DeclarationType.Reduc:
             return tokenTypes.indexOf('function');
         case DeclarationType.Parameter:
         case DeclarationType.DefineParameter:

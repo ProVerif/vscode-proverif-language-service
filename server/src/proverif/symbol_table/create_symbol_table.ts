@@ -31,6 +31,7 @@ import {
     collectSingleIdentifiers,
     collectTPattern,
     collectTPatternSeq,
+    collectTreducEquations,
     collectTypeidseq,
     getType,
     TypedTerminal
@@ -64,6 +65,7 @@ export enum DeclarationType {
     Table = 'table',
     Let = 'let',
     LetFun = 'letfun',
+    Reduc = 'reduc',
     Define = 'define',
     DefineParameter = 'define-parameter',
     Expand = 'expand',
@@ -125,6 +127,11 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
                 });
             } else if (ctx.REDUCTION()) {
                 this.visitInner(() => ctx.treduc());
+                const equations = collectTreducEquations(() => ctx.treduc());
+                const options = collectOptions(() => ctx.options_());
+                equations.forEach(equation => {
+                    this.registerTerminalWithParameters(ctx.FUN(), equation.terminal, DeclarationType.Reduc, equation.parameters, equation.type, options);
+                })
             } else if (ctx.EQUATION()) {
                 this.visitInner(() => ctx.eqlist());
             } else if (ctx.NOUNIF() || ctx.SELECT()) {

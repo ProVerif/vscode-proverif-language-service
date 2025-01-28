@@ -23,12 +23,12 @@ describe('parser', function () {
         expect(variables.filter(v => v.declaration === DeclarationType.Channel).length).to.equal(2);
     });
 
-    it.skip("collects reduc", async () => {
+    it("collects reduc", async () => {
         const code = `reduc forall M:bitstring; unpack(M) = M.\nprocess 0`;
-        const  {symbolTable } = getSymbolTable(code);
+        const  {symbolTable} = getSymbolTable(code);
 
         const variables = symbolTable.getSymbols();
-        expect(variables.length).to.equal(1);
+        expect(variables.length).to.equal(2);
         expect(variables.filter(v => v.declaration === DeclarationType.Reduc).length).to.equal(1);
     });
 

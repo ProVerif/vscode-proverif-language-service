@@ -1,6 +1,5 @@
 import {
     BasicpatternContext,
-    EqlistContext,
     Extended_equationContext,
     ForallmayfailvartypeContext,
     ForallvartypeContext,
@@ -9,12 +8,15 @@ import {
     NeidentseqContext,
     NemayfailvartypeseqContext,
     NepatternseqContext,
+    NetermseqContext,
     NetypeidseqContext,
     NevartypeContext,
     OnevartypeContext,
     Options_Context,
     OptionseqContext,
     SingleoptionContext,
+    TermContext,
+    TermseqContext,
     TpatternContext,
     TpatternseqContext,
     TreducContext,
@@ -28,6 +30,12 @@ import {nonNullable} from "../../utils/array";
 
 export type TypedTerminal = {
     terminal: TerminalNode
+    type?: ParseTree
+}
+
+export type TypedParameterTerminal = {
+    terminal: TerminalNode
+    parameters: (ParseTree | undefined)[]
     type?: ParseTree
 }
 
@@ -181,50 +189,61 @@ export const collectForallmayfailvartype = (getContext: () => Forallmayfailvarty
     return collectNemayfailvartypeseq(() => getContext()?.nemayfailvartypeseq());
 };
 
-export const collectExtendedEquation = (getContext: () => Extended_equationContext | undefined): TypedTerminal[] => {
+const collectNetermSeqToTerms = (getContext: () => NetermseqContext | undefined): (TermContext | undefined)[] => {
     const ctx = tryGetContext(getContext);
     if (!ctx) {
         return [];
     }
 
-    let terminal: TypedTerminal | undefined = undefined;
-    const identifier = tryGetTerminal(() => ctx.IDENT());
-    if (identifier) {
-        // this does not infer types, although it would be nice!
-        const term = tryGetContext(() => ctx.term());
-        terminal = {terminal: identifier, type: term};
-    }
-
-    return [
-        terminal,
-        ...collectExtendedEquation(() => ctx.extended_equation())
-    ].filter(nonNullable);
+    const term = tryGetContext(() => ctx.term());
+    return [term, ...collectNetermSeqToTerms(() => ctx.netermseq())];
 };
 
-export const collectTreduc = (getContext: () => TreducContext | undefined): TypedTerminal[] => {
+const collectTermSeqToTerms = (getContext: () => TermseqContext | undefined): (TermContext | undefined)[] => {
     const ctx = tryGetContext(getContext);
     if (!ctx) {
         return [];
     }
 
-    return [
-        ...collectForallvartype(() => ctx.forallvartype()),
-        ...collectExtendedEquation(() => ctx.extended_equation()),
-        ...collectTreduc(() => ctx.treduc())
-    ];
+    return collectNetermSeqToTerms(() => ctx.netermseq());
 };
 
-export const collectEqlist = (getContext: () => EqlistContext | undefined): TypedTerminal[] => {
+export const collectExtendedEquation = (getContext: () => Extended_equationContext | undefined): TypedParameterTerminal[] => {
     const ctx = tryGetContext(getContext);
     if (!ctx) {
         return [];
     }
 
-    return [
-        ...collectForallvartype(() => ctx.forallvartype()),
-        ...collectExtendedEquation(() => ctx.extended_equation()),
-        ...collectEqlist(() => ctx.eqlist())
-    ];
+    const equations = collectExtendedEquation(() => ctx.extended_equation());
+    const term = tryGetContext(() => ctx.term());
+    if (!term) {
+        return equations;
+    }
+
+    // must be of structure func(someargs) = result
+    // hence (IDENT LPAREN termseq RPAREN) EQUAL term
+    if (!term.EQUAL()) {
+        return equations;
+    }
+
+    const leftAndRightTerm = tryGetContexts(() => term.term());
+    const leftTerm = leftAndRightTerm[0];
+    const rightTerm = leftAndRightTerm[1];
+    if (!leftTerm || !rightTerm) {
+        return equations;
+    }
+
+    // check left side is a function definition, else result nonsense
+    let ident = leftTerm.IDENT();
+    if (!ident || !leftTerm.LPAREN() || !leftTerm.RPAREN()) {
+        return equations;
+    }
+
+    // this does not infer types (notably of the right term), although it would be nice!
+    const terms = collectTermSeqToTerms(() => leftTerm.termseq());
+    const terminal: TypedParameterTerminal = {terminal: ident, parameters: terms, type: rightTerm};
+
+    return [terminal, ...equations];
 };
 
 export const collectIdentifier = (getIdentifer: () => TerminalNode | undefined): TerminalNode | undefined => {
@@ -264,6 +283,17 @@ export const collectOptionsSeq = (getOptionsContext: () => OptionseqContext | un
 
     const options = collectOptionsSeq(() => ctx.optionseq());
     return [ctx.singleoption(), ...options];
+};
+
+export const collectTreducEquations = (getTreducContext: () => TreducContext | undefined): TypedParameterTerminal[] => {
+    const ctx = tryGetContext(getTreducContext);
+    if (!ctx) {
+        return [];
+    }
+
+    const extendedEquations = collectExtendedEquation(() => ctx.extended_equation());
+    const treducEquations = collectTreducEquations(() => ctx.treduc());
+    return [...extendedEquations, ...treducEquations]
 };
 
 /**

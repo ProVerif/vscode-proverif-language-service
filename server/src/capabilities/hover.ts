@@ -79,5 +79,5 @@ const getTypeSuffix = (type?: ParseTree) => {
 };
 
 const getOptionsSuffix = (options?: string[]) => {
-    return options ? " [" + options.join(", ") + "]" : "";
+    return options?.length ? " [" + options.join(", ") + "]" : "";
 };

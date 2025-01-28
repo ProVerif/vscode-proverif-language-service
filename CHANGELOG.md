@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.8.4
+
+Add equations declared with `reduc` to symbol table to allow navigation and renames.  
+Hide options from rendered function declaration if empty (e.g. on hover).  
+In `.pv.log` files, improve navigation to attack trace step.
+
+
 ## v1.8.3
 
 In `.pv.log` files, add navigation to attack trace step.  

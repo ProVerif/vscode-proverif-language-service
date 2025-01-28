@@ -5,9 +5,11 @@ server/**
 !server/out/server.js
 
 # exclude all other folders, except img (linked in package.json) & except docs (linked in README.md)
+.idea
 .github/**
 .vscode/**
 .vscode-test/**
+gen
 node_modules/**
 scripts/**
 
@@ -16,6 +18,7 @@ scripts/**
 .eslintrc
 .gitignore
 .vscodeignore
+docs
 CONTRIBUTE.md
 tsconfig.json
 *.vsix

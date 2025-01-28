@@ -131,7 +131,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
                 const options = collectOptions(() => ctx.options_());
                 equations.forEach(equation => {
                     this.registerTerminalWithParameters(ctx.FUN(), equation.terminal, DeclarationType.Reduc, equation.parameters, equation.type, options);
-                })
+                });
             } else if (ctx.EQUATION()) {
                 this.visitInner(() => ctx.eqlist());
             } else if (ctx.NOUNIF() || ctx.SELECT()) {

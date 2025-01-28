@@ -234,7 +234,7 @@ export const collectExtendedEquation = (getContext: () => Extended_equationConte
     }
 
     // check left side is a function definition, else result nonsense
-    let ident = leftTerm.IDENT();
+    const ident = leftTerm.IDENT();
     if (!ident || !leftTerm.LPAREN() || !leftTerm.RPAREN()) {
         return equations;
     }
@@ -293,7 +293,7 @@ export const collectTreducEquations = (getTreducContext: () => TreducContext | u
 
     const extendedEquations = collectExtendedEquation(() => ctx.extended_equation());
     const treducEquations = collectTreducEquations(() => ctx.treduc());
-    return [...extendedEquations, ...treducEquations]
+    return [...extendedEquations, ...treducEquations];
 };
 
 /**

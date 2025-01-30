@@ -116,7 +116,7 @@ process System`;
 
         // SystemInterface defined inside macro
         const click2 = {line: 2, character: 8};
-        const target2 = {line: 2, character: 8};
+        const target2 = {line: 1, character: 26};
         await assertSingleFileNavigation(code, click2, target2, 'SystemInterface'.length);
 
         // ProcImplementation defined outside, hence definition inside macro signature

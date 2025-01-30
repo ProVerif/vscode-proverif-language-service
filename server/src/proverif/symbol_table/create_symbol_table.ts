@@ -167,21 +167,17 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
                 this.visitInner(() => ctx.tclauses());
             });
         } else if (ctx.DEFINE()) {
+            const identifier = collectIdentifier(() => ctx.IDENT());
+            const declarationType = DeclarationType.Define;
+            const parameters = collectTypeidseq(() => ctx.typeidseq());
+            this.registerTerminalWithParameters(ctx.DEFINE(), identifier, declarationType, parameters);
+
             this.withContext(ctx, () => {
-                const identifier = collectIdentifier(() => ctx.IDENT());
-                const declarationType = DeclarationType.Define;
-                const parameters = collectTypeidseq(() => ctx.typeidseq());
-                this.registerTerminalWithParameters(ctx.DEFINE(), identifier, declarationType, parameters);
-
-                this.withContext(ctx, () => {
-                    this.registerTerminals(parameters, DeclarationType.DefineParameter);
-                    return libs.length > 0 ? this.visit(libs[0]) : this.defaultResult();
-                });
-
-                return libs.length > 1 ? this.visit(libs[1]) : this.defaultResult();
+                this.registerTerminals(parameters, DeclarationType.DefineParameter);
+                return libs.length > 0 ? this.visit(libs[0]) : this.defaultResult();
             });
 
-            return this.defaultResult();
+            return libs.length > 1 ? this.visit(libs[1]) : this.defaultResult();
         } else if (ctx.EXPAND()) {
             const parameters = collectTypeidseq(() => ctx.typeidseq());
             this.registerTerminals(parameters, DeclarationType.ExpandParameter);
@@ -486,9 +482,9 @@ export class ProverifSymbolTable {
             return this.findClosestSymbol(name, undefined);
         }
 
-        // if in tprocess, check whether defined in global context
-        if (context instanceof LibContext) {
-            return this.findClosestSymbol(name, undefined);
+        // skip all LibContext, unless macro
+        while (context instanceof LibContext && !(context.parent instanceof LibContext && context.parent.DEFINE())) {
+            context = context.parent;
         }
 
         // if in OTHERWISE, then jump directly to the real parent, not the previous clauses

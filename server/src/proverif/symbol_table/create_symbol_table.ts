@@ -477,31 +477,35 @@ export class ProverifSymbolTable {
             return matchingSymbol;
         }
 
-        // if in tprocess, check whether defined in global context
-        if (context instanceof TprocessContext && context.parent instanceof AllContext) {
-            return this.findClosestSymbol(name, undefined);
-        }
-
-        // skip all LibContext, unless macro
-        while (context instanceof LibContext && !(context.parent instanceof LibContext && context.parent.DEFINE())) {
-            context = context.parent;
-        }
-
-        // if in OTHERWISE, then jump directly to the real parent, not the previous clauses
-        if (context instanceof TreducotherwiseContext) {
-            let realParent = context.parent;
-            while (realParent instanceof TreducotherwiseContext || realParent instanceof TreducmayfailContext) {
-                realParent = realParent.parent;
-            }
-
-            return this.findClosestSymbol(name, realParent);
-        }
-
         if (!context) {
             return undefined;
         }
 
-        return this.findClosestSymbol(name, context.parent);
+        // if in tprocess, check whether defined in global context
+        if (context instanceof TprocessContext && context.parent instanceof AllContext) {
+            context = context.parent.parent;
+
+        // skip all LibContext, unless macro
+        } else if (context instanceof LibContext) {
+            context = context.parent;
+
+            while (context instanceof LibContext && !context.DEFINE()) {
+                context = context.parent;
+            }
+
+        // if in OTHERWISE, then jump directly to the real parent, not the previous clauses
+        // TODO check whether this is sufficiently generic
+        } else if (context instanceof TreducotherwiseContext) {
+            context = context.parent;
+
+            while (context instanceof TreducotherwiseContext || context instanceof TreducmayfailContext) {
+                context = context.parent;
+            }
+        } else {
+            context = context.parent;
+        }
+
+        return this.findClosestSymbol(name, context);
     }
 }
 

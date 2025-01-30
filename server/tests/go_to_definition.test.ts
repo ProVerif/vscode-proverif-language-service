@@ -181,7 +181,7 @@ process System`;
         await assertSingleFileNavigation(code, click, undefined, 5);
     });
 
-    it.skip("ignore previous noselect values", async () => {
+    it("ignore previous noselect values", async () => {
         const code = `noselect b: bitstring; att(b).\nnoselect c: bitstring; att(b).\nprocess 0`;
         const click = {line: 1, character: 27};
 

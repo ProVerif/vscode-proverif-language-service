@@ -85,77 +85,89 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
     }
 
     public visitLib = (ctx: LibContext) => {
-        this.symbolTable.setPublicContext(ctx);
+        const libs = ctx.lib();
 
-        return this.withContext(ctx, () => {
-            const libs = ctx.lib();
-
-            if (ctx.CONST() || ctx.FREE()) {
-                const declarationType = ctx.CONST() ? DeclarationType.Const : DeclarationType.Free;
-                const terminalNodes = collectNeidentseq(() => ctx.neidentseq());
-                const type = getType(() => ctx.typeid());
-                this.registerTerminals(terminalNodes, declarationType, type);
-            } else if (ctx.CHANNEL()) {
-                const terminalNodes = collectNeidentseq(() => ctx.neidentseq());
-                this.registerTerminals(terminalNodes, DeclarationType.Channel);
-            } else if (ctx.TYPE()) {
-                const identifiers = collectSingleIdentifiers(() => ctx.IDENT());
-                this.registerTerminals(identifiers, DeclarationType.Type);
-            } else if (ctx.FUN()) {
-                const parameters = collectTypeidseq(() => ctx.typeidseq());
-                const identifier = collectIdentifier(() => ctx.IDENT());
-                const type = getType(() => ctx.typeid());
-                const options = collectOptions(() => ctx.options_());
-                this.registerTerminalWithParameters(ctx.FUN(), identifier, DeclarationType.Fun, parameters, type, options);
-                this.withContext(ctx, () => this.visitInner(() => ctx.treducmayfail()));
-            } else if (ctx.EVENT() || ctx.PREDICATE() || ctx.TABLE()) {
-                const identifier = collectIdentifier(() => ctx.IDENT());
-                const declarationType =
-                    ctx.EVENT() ? DeclarationType.Event :
-                        (ctx.PREDICATE() ? DeclarationType.Predicate : DeclarationType.Table);
-                const parameters = collectTypeidseq(() => ctx.typeidseq());
-                this.registerTerminalWithParameters(ctx.EVENT() || ctx.PREDICATE() || ctx.TABLE(), identifier, declarationType, parameters);
-            } else if (ctx.LET() || ctx.LETFUN()) {
-                const declarationType = ctx.LET() ? DeclarationType.Let : DeclarationType.LetFun;
-                const parameters = collecMayfailvartypeseq(() => ctx.mayfailvartypeseq());
-                const identifier = collectIdentifier(() => ctx.IDENT());
-                this.registerTerminalWithNamedParameters(ctx.LET() || ctx.LETFUN(), identifier, declarationType, parameters);
-                this.withContext(ctx, () => {
-                    this.registerTypedTerminals(parameters, DeclarationType.Parameter);
-                    const inner = ctx.LET() ? () => ctx.tprocess() : () => ctx.pterm();
-                    return this.visitInner(inner);
-                });
-            } else if (ctx.REDUCTION()) {
-                this.visitInner(() => ctx.treduc());
-                const equations = collectTreducEquations(() => ctx.treduc());
-                const options = collectOptions(() => ctx.options_());
-                equations.forEach(equation => {
-                    this.registerTerminalWithParameters(ctx.FUN(), equation.terminal, DeclarationType.Reduc, equation.parameters, equation.type, options);
-                });
-            } else if (ctx.EQUATION()) {
-                this.visitInner(() => ctx.eqlist());
-            } else if (ctx.NOUNIF() || ctx.SELECT()) {
+        if (ctx.CONST() || ctx.FREE()) {
+            const declarationType = ctx.CONST() ? DeclarationType.Const : DeclarationType.Free;
+            const terminalNodes = collectNeidentseq(() => ctx.neidentseq());
+            const type = getType(() => ctx.typeid());
+            this.registerTerminals(terminalNodes, declarationType, type);
+        } else if (ctx.CHANNEL()) {
+            const terminalNodes = collectNeidentseq(() => ctx.neidentseq());
+            this.registerTerminals(terminalNodes, DeclarationType.Channel);
+        } else if (ctx.TYPE()) {
+            const identifiers = collectSingleIdentifiers(() => ctx.IDENT());
+            this.registerTerminals(identifiers, DeclarationType.Type);
+        } else if (ctx.FUN()) {
+            const parameters = collectTypeidseq(() => ctx.typeidseq());
+            const identifier = collectIdentifier(() => ctx.IDENT());
+            const type = getType(() => ctx.typeid());
+            const options = collectOptions(() => ctx.options_());
+            this.registerTerminalWithParameters(ctx.FUN(), identifier, DeclarationType.Fun, parameters, type, options);
+            this.withContext(ctx, () => this.visitInner(() => ctx.treducmayfail()));
+        } else if (ctx.EVENT() || ctx.PREDICATE() || ctx.TABLE()) {
+            const identifier = collectIdentifier(() => ctx.IDENT());
+            const declarationType =
+                ctx.EVENT() ? DeclarationType.Event :
+                    (ctx.PREDICATE() ? DeclarationType.Predicate : DeclarationType.Table);
+            const parameters = collectTypeidseq(() => ctx.typeidseq());
+            this.registerTerminalWithParameters(ctx.EVENT() || ctx.PREDICATE() || ctx.TABLE(), identifier, declarationType, parameters);
+        } else if (ctx.LET() || ctx.LETFUN()) {
+            const declarationType = ctx.LET() ? DeclarationType.Let : DeclarationType.LetFun;
+            const parameters = collecMayfailvartypeseq(() => ctx.mayfailvartypeseq());
+            const identifier = collectIdentifier(() => ctx.IDENT());
+            this.registerTerminalWithNamedParameters(ctx.LET() || ctx.LETFUN(), identifier, declarationType, parameters);
+            this.withContext(ctx, () => {
+                this.registerTypedTerminals(parameters, DeclarationType.Parameter);
+                const inner = ctx.LET() ? () => ctx.tprocess() : () => ctx.pterm();
+                return this.visitInner(inner);
+            });
+        } else if (ctx.REDUCTION()) {
+            this.visitInner(() => ctx.treduc());
+            const equations = collectTreducEquations(() => ctx.treduc());
+            const options = collectOptions(() => ctx.options_());
+            equations.forEach(equation => {
+                this.registerTerminalWithParameters(ctx.FUN(), equation.terminal, DeclarationType.Reduc, equation.parameters, equation.type, options);
+            });
+        } else if (ctx.EQUATION()) {
+            this.visitInner(() => ctx.eqlist());
+        } else if (ctx.NOUNIF() || ctx.SELECT()) {
+            this.withContext(ctx, () => {
                 this.registerNevartypeParameters(() => ctx.nevartype());
                 this.visitInner(() => ctx.tfnebindingseq());
-            } else if (ctx.QUERY()) {
+            });
+        } else if (ctx.QUERY()) {
+            this.withContext(ctx, () => {
                 this.registerNevartypeParameters(() => ctx.nevartype());
                 this.visitInner(() => ctx.tqueryseq());
-            } else if (ctx.NONINTERF()) {
+            });
+        } else if (ctx.NONINTERF()) {
+            this.withContext(ctx, () => {
                 this.registerNevartypeParameters(() => ctx.nevartype());
                 this.visitInner(() => ctx.niseq());
-            } else if (ctx.NOT()) {
+            });
+        } else if (ctx.NOT()) {
+            this.withContext(ctx, () => {
                 this.registerNevartypeParameters(() => ctx.nevartype());
                 this.visitInner(() => ctx.gterm());
-            } else if (ctx.lemma()) {
+            });
+        } else if (ctx.lemma()) {
+            this.withContext(ctx, () => {
                 this.registerNevartypeParameters(() => ctx.nevartype());
                 this.visitInner(() => ctx.tlemmaseq());
-            } else if (ctx.ELIMTRUE()) {
+            });
+        } else if (ctx.ELIMTRUE()) {
+            this.withContext(ctx, () => {
                 const typedTerminals = collectNemayfailvartypeseq(() => ctx.nemayfailvartypeseq());
                 this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
                 this.visitInner(() => ctx.term());
-            }   else if (ctx.CLAUSES()) {
+            });
+        } else if (ctx.CLAUSES()) {
+            this.withContext(ctx, () => {
                 this.visitInner(() => ctx.tclauses());
-            } else if (ctx.DEFINE()) {
+            });
+        } else if (ctx.DEFINE()) {
+            this.withContext(ctx, () => {
                 const identifier = collectIdentifier(() => ctx.IDENT());
                 const declarationType = DeclarationType.Define;
                 const parameters = collectTypeidseq(() => ctx.typeidseq());
@@ -167,13 +179,15 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
                 });
 
                 return libs.length > 1 ? this.visit(libs[1]) : this.defaultResult();
-            } else if (ctx.EXPAND()) {
-                const parameters = collectTypeidseq(() => ctx.typeidseq());
-                this.registerTerminals(parameters, DeclarationType.ExpandParameter);
-            }
+            });
 
-            return libs.length > 0 ? this.visit(libs[0]) : this.defaultResult();
-        });
+            return this.defaultResult();
+        } else if (ctx.EXPAND()) {
+            const parameters = collectTypeidseq(() => ctx.typeidseq());
+            this.registerTerminals(parameters, DeclarationType.ExpandParameter);
+        }
+
+        return libs.length > 0 ? this.visit(libs[0]) : this.defaultResult();
     };
 
     public visitTclauses = (ctx: TclausesContext) => {
@@ -451,38 +465,30 @@ export type ProverifSymbol = {
 
 export class ProverifSymbolTable {
     private symbols: ProverifSymbol[] = [];
-    private publicContext: LibContext | undefined;
 
     public addSymbol(symbol: ProverifSymbol) {
         this.symbols.push(symbol);
-    }
-
-    public setPublicContext(publicContext: LibContext) {
-        this.publicContext = publicContext;
-    }
-
-    public findClosestSymbol(text: string, context: ParseTree|undefined): ProverifSymbol | undefined {
-        return this.findClosestSymbolInternal(text, context ?? this.publicContext);
     }
 
     public getSymbols(): ProverifSymbol[] {
         return this.symbols;
     }
 
-    private findClosestSymbolInternal(name: string, context: ParseTree|undefined): ProverifSymbol | undefined {
-        if (!context) {
-            return undefined;
-        }
-
+    public findClosestSymbol(name: string, context: ParseTree | undefined): ProverifSymbol | undefined {
         const symbolsOfContext = this.symbols.filter(symbol => symbol.context === context);
         const matchingSymbol = symbolsOfContext.find(symbol => symbol.node.text === name);
         if (matchingSymbol) {
             return matchingSymbol;
         }
 
-        // if in tprocess, check whether defined in library
+        // if in tprocess, check whether defined in global context
         if (context instanceof TprocessContext && context.parent instanceof AllContext) {
-            return this.findClosestSymbolInternal(name, this.publicContext);
+            return this.findClosestSymbol(name, undefined);
+        }
+
+        // if in tprocess, check whether defined in global context
+        if (context instanceof LibContext) {
+            return this.findClosestSymbol(name, undefined);
         }
 
         // if in OTHERWISE, then jump directly to the real parent, not the previous clauses
@@ -492,10 +498,14 @@ export class ProverifSymbolTable {
                 realParent = realParent.parent;
             }
 
-            return this.findClosestSymbolInternal(name, realParent);
+            return this.findClosestSymbol(name, realParent);
         }
 
-        return this.findClosestSymbolInternal(name, context.parent);
+        if (!context) {
+            return undefined;
+        }
+
+        return this.findClosestSymbol(name, context.parent);
     }
 }
 

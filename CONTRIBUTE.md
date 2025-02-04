@@ -70,7 +70,6 @@ There is always things to do, and contributions are very welcome! Feel free to c
 
 Known issues:
 - [ ] Fix highlighted argument in functions when using commas (see test `signature help > ignores inner scopes`)
-- [ ] Fix scope of local variables of noselect statements and others (see test `go to definition > ignore previous noselect values`)
 - [ ] Ensure renaming a file properly sets the "exists" flag in the dependency tokens
 
 New functionality for `.pv`:

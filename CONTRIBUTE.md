@@ -74,6 +74,7 @@ Known issues:
 
 New functionality for `.pv`:
 - [ ] Properly implement macro resolution (see TODOs in corresponding unit test)
+- [ ] Implement type derivation with data converters (see test `parser -> collects type of data converter variable`)
 - [ ] Improve performance of go-to-definition by considering previous resolutions
 - [ ] Support syntactical autocomplete (`connection.onCompletion`)
 - [ ] Support semantical autocomplete (see https://tomassetti.me/code-completion-with-antlr4-c3/#chapter12)

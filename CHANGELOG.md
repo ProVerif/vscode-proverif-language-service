@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.8.5
+
+Improve variable scoping, notably of lemma parameters.
+
+
 ## v1.8.4
 
 Add equations declared with `reduc` to symbol table to allow navigation and renames.  

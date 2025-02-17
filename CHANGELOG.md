@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.8.6
+
+In `.pv.log`, fix navigation to attack trace step.
+
+
 ## v1.8.5
 
 Improve variable scoping, notably of lemma parameters.

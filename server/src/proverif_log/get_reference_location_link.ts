@@ -5,7 +5,7 @@ import {findFirstOccurrenceInDocument, findFirstLineStartInDocumentBackwards} fr
 import {ProverifLogDocument} from "./document_manager";
 
 const PROCESS_REFERENCE = /(\{\d+\})/;
-const STEP_REFERENCE = /([By]y \d+)/;
+const STEP_REFERENCE = /([Bb]y \d+)/;
 
 export const getReferenceLocationLink = async (identifier: TextDocumentIdentifier, position: Position, documentManager: DocumentManagerInterface)=> {
     const document = await documentManager.getProverifLogDocument(identifier);

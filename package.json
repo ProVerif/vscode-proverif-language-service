@@ -56,7 +56,7 @@
 				"scopeName": "source.pv.log",
 				"path": "./syntaxes/pv.log.tmLanguage.json"
 			}
-        ],
+		],
 		"configuration": {
 			"title": "ProVerif",
 			"properties": {
@@ -90,8 +90,12 @@
 		"semanticTokenScopes": [
 			{
 				"scopes": {
-					"function.dataConverter": ["entity.name.function.dataconverter"],
-					"function.typeConverter": ["entity.name.function.preprocessor.typeconverter"]
+					"function.dataConverter": [
+						"entity.name.function.dataconverter"
+					],
+					"function.typeConverter": [
+						"entity.name.function.preprocessor.typeconverter"
+					]
 				}
 			}
 		]
@@ -112,7 +116,7 @@
 		"@typescript-eslint/eslint-plugin": "^5.54.0",
 		"@typescript-eslint/parser": "^5.54.0",
 		"@vscode/vsce": "^2.22.0",
-		"esbuild": "^0.19.5",
+		"esbuild": "^0.25.0",
 		"eslint": "^8.35.0",
 		"mocha": "^10",
 		"ovsx": "^0.8.3",

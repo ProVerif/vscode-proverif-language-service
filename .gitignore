@@ -5,3 +5,4 @@ client/server
 .vscode-test
 *.vsix
 .idea
+tsconfig.tsbuildinfo

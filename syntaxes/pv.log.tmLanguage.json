@@ -43,19 +43,10 @@
       }
     },
     {
-      "//comment" : "Equalities",
-      "match": "(@?[\\(\\)\\(\\],a-zA-Z'0-9_]+) (=|≠) (@?[\\(\\)\\(\\],a-zA-Z'0-9_]+)\\b",
+      "//comment": "Declaration of equalities",
+      "match" : "(We have) (.+)",
       "captures": {
-        "1": { 
-          "patterns": [
-            { "include": "#fact"}
-          ]
-        },
-        "3": { 
-          "patterns": [
-            { "include": "#fact"}
-          ]
-        }
+        "2": {"patterns": [{ "include": "#equality"}] }
       }
     },
     {
@@ -64,17 +55,6 @@
       "end": "\\)",
       "beginCaptures": {
         "1": { "name": "keyword.control.proverif" }
-      },
-      "patterns": [
-        { "include": "#fact"}
-      ]
-    },
-    {
-      "//comment": "Declaration of inequalities",
-      "begin" : "(@[a-zA-Z'0-9_]+) ≠",
-      "end": "&&",
-      "beginCaptures": {
-        "1": { "name": "variable.parameter.proverif" }
       },
       "patterns": [
         { "include": "#fact"}
@@ -128,6 +108,21 @@
           "name": "variable.other.constant.proverif"
         }
       ]
+    },
+    "equality": {
+      "match": "(@?[\\(\\)\\[\\],a-zA-Z'0-9_]+) (=|≠) (@?[\\(\\)\\[\\],a-zA-Z'0-9_]+)\\b",
+      "captures": {
+        "1": {
+          "patterns": [
+            { "include": "#fact"}
+          ]
+        },
+        "3": {
+          "patterns": [
+            { "include": "#fact"}
+          ]
+        }
+      }
     },
     "highlights": {
       "patterns": [

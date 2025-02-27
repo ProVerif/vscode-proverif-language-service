@@ -2,7 +2,7 @@
 
 ## v1.8.7
 
-In `.pv.log` files, improve syntax coloring of equalities.
+In `.pv.log` files, improve syntax coloring of equalities.  
 In `.pv.log` files, improve detection of error results.
 
 

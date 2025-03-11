@@ -37,7 +37,7 @@
     },
     {
       "//comment": "Declaration of inline text facts",
-      "match" : "([Tt]he (message|entry|function|event)|on channel|resp\\.( (event|message))?|initially knows|creates the new name|tests whether|may know|may obtain|has some term) ([^ ]+)",
+      "match" : "([Tt]he (message|entry|function|event)|on channel|resp\\.( (event|message))?|initially knows|creates the new name|tests whether|may know|may obtain|has some term) (([^ ]| \\+ )+)",
       "captures": {
         "5": {"patterns": [{ "include": "#fact"}] }
       }

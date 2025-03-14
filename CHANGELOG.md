@@ -1,5 +1,12 @@
 # Changelog
 
+## next
+
+Introduce `.pvtest` files with syntax coloring.  
+In `.pv.log` files, improve syntax coloring of lemmas, axioms and restrictions.  
+In `.pv.log` files, improve syntax coloring of counters.  
+
+
 ## v1.8.7
 
 In `.pv.log` files, improve syntax coloring of equalities.  

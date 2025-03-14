@@ -14,28 +14,6 @@
       }
     },
     {
-      "//comment": "Declaration of facts or events",
-      "begin" : "\\b(attacker2|mess2|table2|b-event2|event2|attacker|mess|table|b-event|event)\\(",
-      "end": "\\)",
-      "beginCaptures": {
-        "1": { "name": "keyword.control.proverif" }
-      },
-      "patterns": [
-        { "include": "#fact"}
-      ]
-    },
-    {
-      "//comment": "Declaration of built-in functions",
-      "begin" : "\\b(is_nat|is_not_nat|neq|geq|equal)\\(",
-      "end": "\\)",
-      "beginCaptures": {
-        "1": { "name": "keyword.control.proverif" }
-      },
-      "patterns": [
-        { "include": "#fact"}
-      ]
-    },
-    {
       "//comment": "Declaration of inline text facts",
       "match" : "([Tt]he (message|entry|function|event)|on channel|resp\\.( (event|message))?|initially knows|creates the new name|tests whether|may know|may obtain|has some term) (([^ ]| \\+ )+)",
       "captures": {
@@ -60,9 +38,56 @@
         { "include": "#fact"}
       ]
     },
+    {
+      "//comment": "Declaration of axioms, lemmas and restrictions",
+      "match" : "([Rr]estriction|[Aa]xiom|[Ll]emma)( not)* (([^ ]| && | \\|\\| | = | ≠ | ==> )+)( encoded as( not)* (([^ ]| && | \\|\\| | = | ≠ | ==> )+))*",
+      "captures": {
+        "3": {"patterns": [{ "include": "#lemma"}] },
+        "7": {"patterns": [{ "include": "#lemma"}] }
+      }
+    },
+    { "include": "#fact_declaration" },
     { "include": "#highlights" }
   ],
   "repository": {
+    "lemma": {
+      "patterns": [
+        {
+          "//comment" : "Lemma of the form a = b && b = c ==> d = f",
+          "match" : "([^ \\|\\&=>]+)(( = | ≠ )([^ ]+))*",
+          "captures": {
+            "1": {"patterns": [{ "include": "#fact_declaration"}, { "include": "#fact"}] },
+            "4": {"patterns": [{ "include": "#fact_declaration"}, { "include": "#fact"}] }
+          }
+        }
+      ]
+    },
+    "fact_declaration": {
+      "patterns":[
+        {
+          "//comment": "Declaration of facts or events",
+          "begin" : "\\b(attacker2|mess2|table2|b-event2|event2|attacker|mess|table|b-event|event)\\(",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.control.proverif" }
+          },
+          "patterns": [
+            { "include": "#fact"}
+          ]
+        },
+        {
+          "//comment": "Declaration of built-in functions",
+          "begin" : "\\b(is_nat|is_not_nat|neq|geq|equal)\\(",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.control.proverif" }
+          },
+          "patterns": [
+            { "include": "#fact"}
+          ]
+        }
+      ]
+    },
     "fact": {
       "patterns":[
         {

@@ -73,6 +73,7 @@ Known issues:
 - [ ] Ensure renaming a file properly sets the "exists" flag in the dependency tokens
 
 New functionality for `.pv`:
+- [ ] Detect warnings, even when model is valid as a whole
 - [ ] Properly implement macro resolution (see TODOs in corresponding unit test)
 - [ ] Implement type derivation with data converters (see test `parser -> collects type of data converter variable`)
 - [ ] Improve performance of go-to-definition by considering previous resolutions

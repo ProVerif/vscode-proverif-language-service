@@ -1,4 +1,4 @@
-# taken from commit ebbc776a8cfe521d21801f85e72f3670693152a1
+# taken from commit 3e9e6af76b782cb52547bdb59ebaaa456787491e (not (yet) in master; proposal to make grammar more permissible)
 %{
 
 open Parsing_helper
@@ -207,10 +207,10 @@ lib:
       { (List.map (fun x -> TConstDecl(x, $4, $5)) $2) @ $7 }
   |	EQUATION eqlist options DOT lib
       { (TEquation($2, $3)) :: $5 }
-  | EVENT IDENT options DOT lib
-      { (TEventDecl($2, [],$3)) :: $5 }
-  | EVENT IDENT LPAREN typeidseq RPAREN options DOT lib
-      { (TEventDecl($2, $4, $6)) :: $8 }
+  | EVENT IDENT DOT lib
+      { (TEventDecl($2, [])) :: $4 }
+  | EVENT IDENT LPAREN typeidseq RPAREN DOT lib
+      { (TEventDecl($2, $4)) :: $7 }
   | PREDICATE IDENT LPAREN typeidseq RPAREN options DOT lib
       { (TPredDecl($2, $4, $6)) :: $8 }
   | PREDICATE IDENT options DOT lib
@@ -221,12 +221,20 @@ lib:
       { (TPDef($2,[],$4)) :: $6 }
   | LET IDENT LPAREN mayfailvartypeseq RPAREN EQUAL tprocess DOT lib
       { (TPDef($2,$4,$7)) :: $9 }
+  | LETFUN IDENT EQUAL pterm SEMI DOT lib
+      { (TLetFun($2,[],$4)) :: $7 }
   | LETFUN IDENT EQUAL pterm DOT lib
       { (TLetFun($2,[],$4)) :: $6 }
+  | LETFUN IDENT LPAREN mayfailvartypeseq RPAREN EQUAL pterm SEMI DOT lib
+      { (TLetFun($2,$4,$7)) :: $10 }
   | LETFUN IDENT LPAREN mayfailvartypeseq RPAREN EQUAL pterm DOT lib
       { (TLetFun($2,$4,$7)) :: $9 }
-  | SET IDENT EQUAL settings DOT lib
-      { (TSet($2,$4)) :: $6 }
+  | SET IDENT EQUAL IDENT DOT lib
+      { (TSet($2,S $4)) :: $6 }
+  | SET IDENT EQUAL STRING DOT lib
+      { (TSet($2,S $4)) :: $6 }
+  | SET IDENT EQUAL INT DOT lib
+      { (TSet($2,I $4)) :: $6 }
   | NOUNIF nevartype SEMI tfnebindingseq nounif_value options DOT lib
       { (TNoUnif ($2, $4, $5, $6)) :: $8 }
   | NOUNIF tfnebindingseq nounif_value options DOT lib
@@ -288,16 +296,6 @@ lib:
       { (TLemma($1,[],$2,$3)) :: $5 }
   |
       { [] }
-
-settings:
-  | IDENT 
-      { S $1 }
-  | STRING
-      { S $1 }
-  | INT
-      { I $1 }
-  | INT MINUS INT
-      { Inter($1,$3) }
 
 lemma:
     LEMMA
@@ -739,6 +737,8 @@ opt_publivars_ror:
 tlemmaseq:
     gterm opt_publivars_ror SEMI tlemmaseq
       { let (ror,pubvars) = $2 in ($1,ror,pubvars) :: $4 }
+  | gterm opt_publivars_ror SEMI
+      { let (ror,pubvars) = $2 in [$1,ror,pubvars] }
   | gterm opt_publivars_ror
       { let (ror,pubvars) = $2 in [$1,ror,pubvars] }
 
@@ -747,6 +747,8 @@ tlemmaseq:
 tqueryseq:
     tquery SEMI tqueryseq
     { $1 :: $3 }
+|   tquery SEMI
+    { [$1] }
 |   tquery
     { [$1] }
 
@@ -1159,6 +1161,8 @@ tprocess:
 opttprocess:
         SEMI tprocess
         { $2 }
+|       SEMI
+        { PNil, parse_extent() }
 |
         { PNil, parse_extent() }
 

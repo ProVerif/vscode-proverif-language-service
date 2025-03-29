@@ -10,16 +10,20 @@ lib
     | REDUCTION treduc options_ DOT lib
     | CONST neidentseq COLON typeid options_ DOT lib
     | EQUATION eqlist options_ DOT lib
-    | EVENT IDENT options_ DOT lib
-    | EVENT IDENT LPAREN typeidseq RPAREN options_ DOT lib
+    | EVENT IDENT DOT lib
+    | EVENT IDENT LPAREN typeidseq RPAREN DOT lib
     | PREDICATE IDENT LPAREN typeidseq RPAREN options_ DOT lib
     | PREDICATE IDENT options_ DOT lib
     | TABLE IDENT LPAREN typeidseq RPAREN DOT lib
     | LET IDENT EQUAL tprocess DOT lib
     | LET IDENT LPAREN mayfailvartypeseq RPAREN EQUAL tprocess DOT lib
+    | LETFUN IDENT EQUAL pterm SEMI DOT lib
     | LETFUN IDENT EQUAL pterm DOT lib
+    | LETFUN IDENT LPAREN mayfailvartypeseq RPAREN EQUAL pterm SEMI DOT lib
     | LETFUN IDENT LPAREN mayfailvartypeseq RPAREN EQUAL pterm DOT lib
-    | SET IDENT EQUAL settings DOT lib
+    | SET IDENT EQUAL IDENT DOT lib
+    | SET IDENT EQUAL STRING DOT lib
+    | SET IDENT EQUAL INT DOT lib
     | NOUNIF nevartype SEMI tfnebindingseq nounif_value options_ DOT lib
     | NOUNIF tfnebindingseq nounif_value options_ DOT lib
     | SELECT nevartype SEMI tfnebindingseq select_value options_ DOT lib
@@ -46,13 +50,6 @@ lib
     | lemma nevartype SEMI tlemmaseq options_ DOT lib
     | lemma tlemmaseq options_ DOT lib
     | 
-    ;
-
-settings
-    : IDENT
-    | STRING
-    | INT
-    | INT MINUS INT
     ;
 
 lemma
@@ -346,11 +343,13 @@ opt_publivars_ror
 
 tlemmaseq
     : gterm opt_publivars_ror SEMI tlemmaseq
+    | gterm opt_publivars_ror SEMI
     | gterm opt_publivars_ror
     ;
 
 tqueryseq
     : tquery SEMI tqueryseq
+    | tquery SEMI
     | tquery
     ;
 
@@ -604,6 +603,7 @@ tprocess
 
 opttprocess
     : SEMI tprocess
+    | SEMI
     | 
     ;
 

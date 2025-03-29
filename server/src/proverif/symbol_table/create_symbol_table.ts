@@ -20,9 +20,9 @@ import {TerminalNode} from "antlr4ts/tree/TerminalNode";
 import {
     collecMayfailvartypeseq,
     collectBasicpattern,
+    collectFirstIdentifier,
     collectForallmayfailvartype,
     collectForallvartype,
-    collectIdentifier,
     collectIdentifiers,
     collectNeidentseq,
     collectNemayfailvartypeseq,
@@ -96,17 +96,17 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             const terminalNodes = collectNeidentseq(() => ctx.neidentseq());
             this.registerTerminals(terminalNodes, DeclarationType.Channel);
         } else if (ctx.TYPE()) {
-            const identifiers = collectSingleIdentifiers(() => ctx.IDENT());
+            const identifiers = collectIdentifiers(() => ctx.IDENT());
             this.registerTerminals(identifiers, DeclarationType.Type);
         } else if (ctx.FUN()) {
             const parameters = collectTypeidseq(() => ctx.typeidseq());
-            const identifier = collectIdentifier(() => ctx.IDENT());
+            const identifier = collectFirstIdentifier(() => ctx.IDENT());
             const type = getType(() => ctx.typeid());
             const options = collectOptions(() => ctx.options_());
             this.registerTerminalWithParameters(ctx.FUN(), identifier, DeclarationType.Fun, parameters, type, options);
             this.withContext(ctx, () => this.tryVisitInner(() => ctx.treducmayfail()));
         } else if (ctx.EVENT() || ctx.PREDICATE() || ctx.TABLE()) {
-            const identifier = collectIdentifier(() => ctx.IDENT());
+            const identifier = collectFirstIdentifier(() => ctx.IDENT());
             const declarationType =
                 ctx.EVENT() ? DeclarationType.Event :
                     (ctx.PREDICATE() ? DeclarationType.Predicate : DeclarationType.Table);
@@ -115,7 +115,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         } else if (ctx.LET() || ctx.LETFUN()) {
             const declarationType = ctx.LET() ? DeclarationType.Let : DeclarationType.LetFun;
             const parameters = collecMayfailvartypeseq(() => ctx.mayfailvartypeseq());
-            const identifier = collectIdentifier(() => ctx.IDENT());
+            const identifier = collectFirstIdentifier(() => ctx.IDENT());
             this.registerTerminalWithNamedParameters(ctx.LET() || ctx.LETFUN(), identifier, declarationType, parameters);
             this.withContext(ctx, () => {
                 this.registerTypedTerminals(parameters, DeclarationType.Parameter);
@@ -167,7 +167,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
                 this.tryVisitInner(() => ctx.tclauses());
             });
         } else if (ctx.DEFINE()) {
-            const identifier = collectIdentifier(() => ctx.IDENT());
+            const identifier = collectFirstIdentifier(() => ctx.IDENT());
             const declarationType = DeclarationType.Define;
             const parameters = collectTypeidseq(() => ctx.typeidseq());
             this.registerTerminalWithParameters(ctx.DEFINE(), identifier, declarationType, parameters);

@@ -4,7 +4,6 @@
 import { ParseTreeListener } from "antlr4ts/tree/ParseTreeListener";
 
 import { LibContext } from "./ProverifParser";
-import { SettingsContext } from "./ProverifParser";
 import { LemmaContext } from "./ProverifParser";
 import { AllContext } from "./ProverifParser";
 import { ProoftokenContext } from "./ProverifParser";
@@ -119,17 +118,6 @@ export interface ProverifParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitLib?: (ctx: LibContext) => void;
-
-	/**
-	 * Enter a parse tree produced by `ProverifParser.settings`.
-	 * @param ctx the parse tree
-	 */
-	enterSettings?: (ctx: SettingsContext) => void;
-	/**
-	 * Exit a parse tree produced by `ProverifParser.settings`.
-	 * @param ctx the parse tree
-	 */
-	exitSettings?: (ctx: SettingsContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `ProverifParser.lemma`.

@@ -4,7 +4,6 @@
 import { ParseTreeVisitor } from "antlr4ts/tree/ParseTreeVisitor";
 
 import { LibContext } from "./ProverifParser";
-import { SettingsContext } from "./ProverifParser";
 import { LemmaContext } from "./ProverifParser";
 import { AllContext } from "./ProverifParser";
 import { ProoftokenContext } from "./ProverifParser";
@@ -118,13 +117,6 @@ export interface ProverifParserVisitor<Result> extends ParseTreeVisitor<Result> 
 	 * @return the visitor result
 	 */
 	visitLib?: (ctx: LibContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `ProverifParser.settings`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitSettings?: (ctx: SettingsContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `ProverifParser.lemma`.

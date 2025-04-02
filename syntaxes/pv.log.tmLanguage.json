@@ -40,7 +40,7 @@
     },
     {
       "//comment": "Declaration of axioms, lemmas and restrictions",
-      "match" : "([Rr]estriction|[Aa]xiom|[Ll]emma)( not)* (([^ ]| && | \\|\\| | = | ≠ | ==> )+)( encoded as( not)* (([^ ]| && | \\|\\| | = | ≠ | ==> )+))*",
+      "match" : "([Rr]estriction|[Aa]xiom|[Ll]emma|Starting query)( not)* (([^ ]| && | \\|\\| | = | ≠ | ==> )+)( encoded as( not)* (([^ ]| && | \\|\\| | = | ≠ | ==> )+))*",
       "captures": {
         "3": {"patterns": [{ "include": "#lemma"}] },
         "7": {"patterns": [{ "include": "#lemma"}] }

@@ -84,3 +84,4 @@ New functionality for `.pv`:
 
 New functionality for `.pv.log`:
 - [ ] Highlight all symbols (the symbols are resolved for the corresponding `.pv` file)
+- [ ] Parse clauses (starting with Termination warning|goal reachable), refactor lemma/clause parsing to really parse (as addition with space destroys "easy" matching)

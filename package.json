@@ -45,13 +45,13 @@
 				"configuration": "./language-configuration.log.json"
 			},
 			{
-				"id": "pvtest",
+				"id": "test.pv",
 				"aliases": [
 					"ProVerif Test Definition",
-					".pvtest"
+					".test.pv"
 				],
 				"extensions": [
-					".pvtest"
+					".test.pv"
 				]
 			}
 		],
@@ -67,11 +67,12 @@
 				"path": "./syntaxes/pv.log.tmLanguage.json"
 			},
 			{
-				"language": "pvtest",
-				"scopeName": "source.pvtest",
-				"path": "./syntaxes/pvtest.tmLanguage.json",
+				"language": "test.pv",
+				"scopeName": "source.test.pv",
+				"path": "./syntaxes/test.pv.tmLanguage.json",
 				"embeddedLanguages": {
-					"meta.embedded.block.pv.log": "pv.log"
+					"meta.embedded.block.pv.log": "pv.log",
+					"meta.embedded.block.pv": "pv"
 				}
 			}
 		],

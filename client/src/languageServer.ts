@@ -22,7 +22,7 @@ export const startLanguageServer = async (context: ExtensionContext) => {
 	};
 
 	const clientOptions: LanguageClientOptions = {
-		documentSelector: [{ scheme: 'file', language: 'pv' }, { scheme: 'file', language: 'pv.log' }],
+		documentSelector: [{ scheme: 'file', language: 'pv' }, { scheme: 'file', language: 'pv.log' }, { scheme: 'file', language: 'test.pv' }],
 	};
 
 	client = new LanguageClient(

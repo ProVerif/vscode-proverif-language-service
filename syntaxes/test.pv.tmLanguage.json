@@ -1,0 +1,55 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "test.pv",
+  "scopeName": "source.test.pv",
+  "fileTypes": [
+    "test.pv"
+  ],
+  "patterns": [
+    {
+      "name": "comment.block",
+      "begin": "\\(\\*",
+      "end": "\\*\\)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.testpv"
+        }
+      },
+      "patterns": [
+        { "include": "#keywords"},
+        {
+          "name": "meta.embedded.block.pv.log",
+          "begin": "==(BEGIN VERIFICATION SUMMARY)==",
+          "end": "==(END VERIFICATION SUMMARY)==",
+          "beginCaptures": {
+            "1": { "name": "keyword.operator.pv" }
+          },
+          "patterns": [
+            { "include": "source.pv.log" }
+          ],
+          "endCaptures": {
+            "1": { "name": "keyword.operator.pv" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "meta.embedded.block.pv",
+      "begin": "",
+      "end": "",
+      "patterns": [
+        { "include": "source.pv" }
+      ]
+    }
+  ],
+  "repository": {
+    "keywords": {
+      "patterns": [
+        {
+          "match": "(FILE|PATCH|VERIFICATION TIME):",
+          "name": "keyword.operator.pv"
+        }
+      ]
+    }
+  }
+}

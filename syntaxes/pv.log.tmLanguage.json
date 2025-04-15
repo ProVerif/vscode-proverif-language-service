@@ -66,7 +66,7 @@
       "patterns":[
         {
           "//comment": "Declaration of facts or events",
-          "begin" : "\\b(attacker2|mess2|table2|b-event2|event2|attacker|mess|table|b-event|event)\\(",
+          "begin" : "\\b(attacker2|mess2|table2|b-event2|event2|attacker|mess|table|b-event|event|input|input2)\\(",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.control.proverif" }

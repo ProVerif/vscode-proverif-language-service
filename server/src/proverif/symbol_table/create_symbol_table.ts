@@ -104,7 +104,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             const type = getType(() => ctx.typeid());
             const options = collectOptions(() => ctx.options_());
             this.registerTerminalWithParameters(ctx.FUN(), identifier, DeclarationType.Fun, parameters, type, options);
-            this.withContext(ctx, () => this.visitInner(() => ctx.treducmayfail()));
+            this.withContext(ctx, () => this.tryVisitInner(() => ctx.treducmayfail()));
         } else if (ctx.EVENT() || ctx.PREDICATE() || ctx.TABLE()) {
             const identifier = collectIdentifier(() => ctx.IDENT());
             const declarationType =
@@ -120,51 +120,51 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             this.withContext(ctx, () => {
                 this.registerTypedTerminals(parameters, DeclarationType.Parameter);
                 const inner = ctx.LET() ? () => ctx.tprocess() : () => ctx.pterm();
-                return this.visitInner(inner);
+                return this.tryVisitInner(inner);
             });
         } else if (ctx.REDUCTION()) {
-            this.visitInner(() => ctx.treduc());
+            this.tryVisitInner(() => ctx.treduc());
             const equations = collectTreducEquations(() => ctx.treduc());
             const options = collectOptions(() => ctx.options_());
             equations.forEach(equation => {
                 this.registerTerminalWithParameters(ctx.FUN(), equation.terminal, DeclarationType.Reduc, equation.parameters, equation.type, options);
             });
         } else if (ctx.EQUATION()) {
-            this.visitInner(() => ctx.eqlist());
+            this.tryVisitInner(() => ctx.eqlist());
         } else if (ctx.NOUNIF() || ctx.SELECT()) {
             this.withContext(ctx, () => {
                 this.registerNevartypeParameters(() => ctx.nevartype());
-                this.visitInner(() => ctx.tfnebindingseq());
+                this.tryVisitInner(() => ctx.tfnebindingseq());
             });
         } else if (ctx.QUERY()) {
             this.withContext(ctx, () => {
                 this.registerNevartypeParameters(() => ctx.nevartype());
-                this.visitInner(() => ctx.tqueryseq());
+                this.tryVisitInner(() => ctx.tqueryseq());
             });
         } else if (ctx.NONINTERF()) {
             this.withContext(ctx, () => {
                 this.registerNevartypeParameters(() => ctx.nevartype());
-                this.visitInner(() => ctx.niseq());
+                this.tryVisitInner(() => ctx.niseq());
             });
         } else if (ctx.NOT()) {
             this.withContext(ctx, () => {
                 this.registerNevartypeParameters(() => ctx.nevartype());
-                this.visitInner(() => ctx.gterm());
+                this.tryVisitInner(() => ctx.gterm());
             });
         } else if (ctx.lemma()) {
             this.withContext(ctx, () => {
                 this.registerNevartypeParameters(() => ctx.nevartype());
-                this.visitInner(() => ctx.tlemmaseq());
+                this.tryVisitInner(() => ctx.tlemmaseq());
             });
         } else if (ctx.ELIMTRUE()) {
             this.withContext(ctx, () => {
                 const typedTerminals = collectNemayfailvartypeseq(() => ctx.nemayfailvartypeseq());
                 this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
-                this.visitInner(() => ctx.term());
+                this.tryVisitInner(() => ctx.term());
             });
         } else if (ctx.CLAUSES()) {
             this.withContext(ctx, () => {
-                this.visitInner(() => ctx.tclauses());
+                this.tryVisitInner(() => ctx.tclauses());
             });
         } else if (ctx.DEFINE()) {
             const identifier = collectIdentifier(() => ctx.IDENT());
@@ -191,10 +191,10 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             const typedTerminals = collectForallmayfailvartype(() => ctx.forallmayfailvartype());
             this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
 
-            return this.visit(ctx.tclause());
+            return this.tryVisitInner(() => ctx.tclause());
         });
 
-        return this.visitInner(() => ctx.tclauses());
+        return this.tryVisitInner(() => ctx.tclauses());
     };
 
     public visitTreducmayfail = (ctx: TreducmayfailContext) => {
@@ -210,22 +210,22 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             const typedTerminals = collectForallmayfailvartype(() => ctx.forallmayfailvartype());
             this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
 
-            return this.visit(ctx.extended_equation());
+            return this.tryVisitInner(() => ctx.extended_equation());
         });
 
-        return this.visitInner(() => ctx.treducotherwise());
+        return this.tryVisitInner(() => ctx.treducotherwise());
     };
 
     public visitTreduc = (ctx: TreducContext) => {
         this.collectExtendedEquation(ctx);
 
-        return this.visitInner(() => ctx.treduc());
+        return this.tryVisitInner(() => ctx.treduc());
     };
 
     public visitEqlist = (ctx: EqlistContext) => {
         this.collectExtendedEquation(ctx);
 
-        return this.visitInner(() => ctx.eqlist());
+        return this.tryVisitInner(() => ctx.eqlist());
     };
 
     private collectExtendedEquation = (ctx: TreducContext | EqlistContext) => {
@@ -233,7 +233,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             const typedTerminals = collectForallvartype(() => ctx.forallvartype());
             this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);
 
-            return this.visit(ctx.extended_equation());
+            return this.tryVisitInner(() => ctx.extended_equation());
         });
     };
 
@@ -266,9 +266,9 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             this.collectProcessStyleTerms(ctx, true);
 
             this.visitInners(() => ctx.tprocess());
-            this.visitInner(() => ctx.opttprocess());
-            this.visitInner(() => ctx.optinprocess());
-            this.visitInner(() => ctx.optelseprocess());
+            this.tryVisitInner(() => ctx.opttprocess());
+            this.tryVisitInner(() => ctx.optinprocess());
+            this.tryVisitInner(() => ctx.optelseprocess());
 
             return this.defaultResult();
         });
@@ -279,7 +279,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
             this.collectProcessStyleTerms(ctx, false);
 
             this.visitInners(() => ctx.pterm());
-            this.visitInner(() => ctx.optelseterm());
+            this.tryVisitInner(() => ctx.optelseterm());
 
             return this.defaultResult();
         });
@@ -433,9 +433,16 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         }
     }
 
-    private visitInner = (getInner: () => ParserRuleContext | undefined) => {
-        const inner = getInner();
-        return inner ? this.visit(inner) : this.defaultResult();
+    private tryVisitInner = (getInner: () => ParserRuleContext | undefined) => {
+        try {
+            const inner = getInner();
+            if (inner) {
+                return this.visit(inner)
+            }
+        } catch (e) {
+            // may crash in invalid syntax trees
+        }
+        this.defaultResult();
     };
 
     private visitInners = (getInner: () => ParserRuleContext[]) => {

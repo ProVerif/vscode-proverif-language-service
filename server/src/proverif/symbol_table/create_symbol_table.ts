@@ -442,7 +442,8 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         } catch (e) {
             // may crash in invalid syntax trees
         }
-        this.defaultResult();
+
+        return this.defaultResult();
     };
 
     private visitInners = (getInner: () => ParserRuleContext[]) => {

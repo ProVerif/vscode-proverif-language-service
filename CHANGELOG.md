@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.8.9
+
+Fix crash in `*.pvl` files with incomplete destructors.  
+
+
 ## v1.8.8
 
 Introduce `.test.pv` files with syntax coloring (experimental, subject to radical changes or removal).  

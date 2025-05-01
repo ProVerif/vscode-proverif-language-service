@@ -437,7 +437,7 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         try {
             const inner = getInner();
             if (inner) {
-                return this.visit(inner)
+                return this.visit(inner);
             }
         } catch (e) {
             // may crash in invalid syntax trees

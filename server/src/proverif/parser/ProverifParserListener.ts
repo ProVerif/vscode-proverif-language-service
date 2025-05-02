@@ -77,7 +77,6 @@ import { ForallmayfailvartypeContext } from "./ProverifParser";
 import { Extended_equationContext } from "./ProverifParser";
 import { TreducotherwiseContext } from "./ProverifParser";
 import { TreducmayfailContext } from "./ProverifParser";
-import { TreducContext } from "./ProverifParser";
 import { EqlistContext } from "./ProverifParser";
 import { TclauseContext } from "./ProverifParser";
 import { TclausesContext } from "./ProverifParser";
@@ -921,17 +920,6 @@ export interface ProverifParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitTreducmayfail?: (ctx: TreducmayfailContext) => void;
-
-	/**
-	 * Enter a parse tree produced by `ProverifParser.treduc`.
-	 * @param ctx the parse tree
-	 */
-	enterTreduc?: (ctx: TreducContext) => void;
-	/**
-	 * Exit a parse tree produced by `ProverifParser.treduc`.
-	 * @param ctx the parse tree
-	 */
-	exitTreduc?: (ctx: TreducContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `ProverifParser.eqlist`.

@@ -12,7 +12,6 @@ import {
     TclausesContext,
     TfnebindingseqContext,
     TprocessContext,
-    TreducContext,
     TreducmayfailContext,
     TreducotherwiseContext
 } from "../parser/ProverifParser";
@@ -31,7 +30,7 @@ import {
     collectSingleIdentifiers,
     collectTPattern,
     collectTPatternSeq,
-    collectTreducEquations,
+    collectEqlist,
     collectTypeidseq,
     getType,
     TypedTerminal
@@ -123,8 +122,8 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
                 return this.visitInner(inner);
             });
         } else if (ctx.REDUCTION()) {
-            this.visitInner(() => ctx.treduc());
-            const equations = collectTreducEquations(() => ctx.treduc());
+            this.visitInner(() => ctx.eqlist());
+            const equations = collectEqlist(() => ctx.eqlist());
             const options = collectOptions(() => ctx.options_());
             equations.forEach(equation => {
                 this.registerTerminalWithParameters(ctx.FUN(), equation.terminal, DeclarationType.Reduc, equation.parameters, equation.type, options);
@@ -216,19 +215,13 @@ class SymbolTableVisitor extends AbstractParseTreeVisitor<ProverifSymbolTable> i
         return this.visitInner(() => ctx.treducotherwise());
     };
 
-    public visitTreduc = (ctx: TreducContext) => {
-        this.collectExtendedEquation(ctx);
-
-        return this.visitInner(() => ctx.treduc());
-    };
-
     public visitEqlist = (ctx: EqlistContext) => {
         this.collectExtendedEquation(ctx);
 
         return this.visitInner(() => ctx.eqlist());
     };
 
-    private collectExtendedEquation = (ctx: TreducContext | EqlistContext) => {
+    private collectExtendedEquation = (ctx: EqlistContext) => {
         return this.withContext(ctx, () => {
             const typedTerminals = collectForallvartype(() => ctx.forallvartype());
             this.registerTypedTerminals(typedTerminals, DeclarationType.Parameter);

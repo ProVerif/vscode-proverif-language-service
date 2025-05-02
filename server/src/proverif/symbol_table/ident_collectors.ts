@@ -1,5 +1,6 @@
 import {
     BasicpatternContext,
+    EqlistContext,
     Extended_equationContext,
     ForallmayfailvartypeContext,
     ForallvartypeContext,
@@ -19,7 +20,6 @@ import {
     TermseqContext,
     TpatternContext,
     TpatternseqContext,
-    TreducContext,
     TypeidContext,
     TypeidseqContext
 } from "../parser/ProverifParser";
@@ -290,14 +290,14 @@ export const collectOptionsSeq = (getOptionsContext: () => OptionseqContext | un
     return [ctx.singleoption(), ...options];
 };
 
-export const collectTreducEquations = (getTreducContext: () => TreducContext | undefined): TypedParameterTerminal[] => {
+export const collectEqlist = (getTreducContext: () => EqlistContext | undefined): TypedParameterTerminal[] => {
     const ctx = tryGetContext(getTreducContext);
     if (!ctx) {
         return [];
     }
 
     const extendedEquations = collectExtendedEquation(() => ctx.extended_equation());
-    const treducEquations = collectTreducEquations(() => ctx.treduc());
+    const treducEquations = collectEqlist(() => ctx.eqlist());
     return [...extendedEquations, ...treducEquations];
 };
 

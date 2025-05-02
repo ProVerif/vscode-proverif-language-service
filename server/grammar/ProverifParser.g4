@@ -7,7 +7,7 @@ lib
     : TYPE IDENT options_ DOT lib
     | FUN IDENT LPAREN typeidseq RPAREN COLON typeid options_ DOT lib
     | FUN IDENT LPAREN typeidseq RPAREN COLON typeid REDUCTION treducmayfail options_ DOT lib
-    | REDUCTION treduc options_ DOT lib
+    | REDUCTION eqlist options_ DOT lib
     | CONST neidentseq COLON typeid options_ DOT lib
     | EQUATION eqlist options_ DOT lib
     | EVENT IDENT DOT lib
@@ -17,9 +17,7 @@ lib
     | TABLE IDENT LPAREN typeidseq RPAREN DOT lib
     | LET IDENT EQUAL tprocess DOT lib
     | LET IDENT LPAREN mayfailvartypeseq RPAREN EQUAL tprocess DOT lib
-    | LETFUN IDENT EQUAL pterm SEMI DOT lib
     | LETFUN IDENT EQUAL pterm DOT lib
-    | LETFUN IDENT LPAREN mayfailvartypeseq RPAREN EQUAL pterm SEMI DOT lib
     | LETFUN IDENT LPAREN mayfailvartypeseq RPAREN EQUAL pterm DOT lib
     | SET IDENT EQUAL IDENT DOT lib
     | SET IDENT EQUAL STRING DOT lib
@@ -60,7 +58,9 @@ lemma
 
 all
     : lib PROCESS tprocess EOF
+    | lib PROCESS tprocess DOT EOF
     | lib EQUIVALENCE tprocess tprocess EOF
+    | lib EQUIVALENCE tprocess tprocess DOT EOF
     ;
 
 prooftoken
@@ -84,11 +84,13 @@ proofcommand
 
 proof
     : proofcommand
+    | proofcommand SEMI
     | proofcommand SEMI proof
     ;
 
 impllist
     : impl
+    | impl SEMI
     | impl SEMI impllist
     ;
 
@@ -522,13 +524,9 @@ treducmayfail
     | forallmayfailvartype extended_equation
     ;
 
-treduc
-    : forallvartype extended_equation SEMI treduc
-    | forallvartype extended_equation
-    ;
-
 eqlist
     : forallvartype extended_equation
+    | forallvartype extended_equation SEMI
     | forallvartype extended_equation SEMI eqlist
     ;
 
@@ -541,6 +539,7 @@ tclause
 
 tclauses
     : forallmayfailvartype tclause SEMI tclauses
+    | forallmayfailvartype tclause SEMI DOT
     | forallmayfailvartype tclause DOT
     ;
 
@@ -603,7 +602,6 @@ tprocess
 
 opttprocess
     : SEMI tprocess
-    | SEMI
     | 
     ;
 

@@ -1,4 +1,4 @@
-# taken from commit 3e9e6af76b782cb52547bdb59ebaaa456787491e (not (yet) in master; proposal to make grammar more permissible)
+# taken from commit deeb55d8 (not (yet) in master; proposal to make grammar more permissible)
 %{
 
 open Parsing_helper
@@ -201,7 +201,7 @@ lib:
       { (TFunDecl($2, $4, $7, $8)) :: $10 }
   |	FUN IDENT LPAREN typeidseq RPAREN COLON typeid REDUCTION treducmayfail options DOT lib
       { (TReducFail($2,$4,$7,$9, $10)) :: $12 }
-  |	REDUCTION treduc options DOT lib
+  |	REDUCTION eqlist options DOT lib
       { (TReduc($2,$3)) :: $5 }
   | CONST neidentseq COLON typeid options DOT lib
       { (List.map (fun x -> TConstDecl(x, $4, $5)) $2) @ $7 }
@@ -221,12 +221,8 @@ lib:
       { (TPDef($2,[],$4)) :: $6 }
   | LET IDENT LPAREN mayfailvartypeseq RPAREN EQUAL tprocess DOT lib
       { (TPDef($2,$4,$7)) :: $9 }
-  | LETFUN IDENT EQUAL pterm SEMI DOT lib
-      { (TLetFun($2,[],$4)) :: $7 }
   | LETFUN IDENT EQUAL pterm DOT lib
       { (TLetFun($2,[],$4)) :: $6 }
-  | LETFUN IDENT LPAREN mayfailvartypeseq RPAREN EQUAL pterm SEMI DOT lib
-      { (TLetFun($2,$4,$7)) :: $10 }
   | LETFUN IDENT LPAREN mayfailvartypeseq RPAREN EQUAL pterm DOT lib
       { (TLetFun($2,$4,$7)) :: $9 }
   | SET IDENT EQUAL IDENT DOT lib
@@ -308,7 +304,11 @@ lemma:
 all:
 |       lib PROCESS tprocess EOF
 	{ $1, $3, None }
+|       lib PROCESS tprocess DOT EOF
+	{ $1, $3, None }
 |	lib EQUIVALENCE tprocess tprocess EOF
+	{ $1, $3, Some $4 }
+|	lib EQUIVALENCE tprocess tprocess DOT EOF
 	{ $1, $3, Some $4 }
 
 /* Proofs (for CryptoVerif compatibility only) */
@@ -346,6 +346,8 @@ proofcommand:
 proof:
         proofcommand
 	{ [$1] }
+|       proofcommand SEMI
+	{ [$1] }
 |       proofcommand SEMI proof
         { $1 :: $3 }
 
@@ -353,6 +355,8 @@ proof:
 
 impllist:
         impl
+        { [$1] }
+|       impl SEMI
         { [$1] }
 |       impl SEMI impllist
         { $1 :: $3 }
@@ -1008,16 +1012,12 @@ treducmayfail:
 |	forallmayfailvartype extended_equation
 	{ [$1,$2] }
 
-treduc:
-	forallvartype extended_equation SEMI treduc
-	{ ($1,$2) :: $4 }
-|	forallvartype extended_equation
-	{ [$1,$2] }
-
 /* Equations */
 
 eqlist:
     forallvartype extended_equation
+    { [($1, $2)] }
+|   forallvartype extended_equation SEMI
     { [($1, $2)] }
 |   forallvartype extended_equation SEMI eqlist
     { ($1, $2)::$4 }
@@ -1037,6 +1037,8 @@ tclause:
 tclauses:
 	forallmayfailvartype tclause SEMI tclauses
 	{ ($1,$2) :: $4 }
+|	forallmayfailvartype tclause SEMI DOT
+	{ [$1,$2] }
 |	forallmayfailvartype tclause DOT
 	{ [$1,$2] }
 
@@ -1161,8 +1163,6 @@ tprocess:
 opttprocess:
         SEMI tprocess
         { $2 }
-|       SEMI
-        { PNil, parse_extent() }
 |
         { PNil, parse_extent() }
 

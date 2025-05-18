@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.8.10
+
+Support more permissible grammar around dots and semicolons.  
+
+
 ## v1.8.9
 
 Fix crash in `*.pvl` files with incomplete destructors.  

@@ -57,10 +57,8 @@ lemma
     ;
 
 all
-    : lib PROCESS tprocess EOF
-    | lib PROCESS tprocess DOT EOF
-    | lib EQUIVALENCE tprocess tprocess EOF
-    | lib EQUIVALENCE tprocess tprocess DOT EOF
+    : lib PROCESS tprocess DOT? EOF
+    | lib EQUIVALENCE tprocess tprocess DOT? EOF
     ;
 
 prooftoken
@@ -83,14 +81,12 @@ proofcommand
     ;
 
 proof
-    : proofcommand
-    | proofcommand SEMI
+    : proofcommand SEMI?
     | proofcommand SEMI proof
     ;
 
 impllist
-    : impl
-    | impl SEMI
+    : impl SEMI?
     | impl SEMI impllist
     ;
 
@@ -345,14 +341,12 @@ opt_publivars_ror
 
 tlemmaseq
     : gterm opt_publivars_ror SEMI tlemmaseq
-    | gterm opt_publivars_ror SEMI
-    | gterm opt_publivars_ror
+    | gterm opt_publivars_ror SEMI?
     ;
 
 tqueryseq
     : tquery SEMI tqueryseq
-    | tquery SEMI
-    | tquery
+    | tquery SEMI?
     ;
 
 tquery
@@ -525,8 +519,7 @@ treducmayfail
     ;
 
 eqlist
-    : forallvartype extended_equation
-    | forallvartype extended_equation SEMI
+    : forallvartype extended_equation SEMI?
     | forallvartype extended_equation SEMI eqlist
     ;
 
@@ -539,8 +532,7 @@ tclause
 
 tclauses
     : forallmayfailvartype tclause SEMI tclauses
-    | forallmayfailvartype tclause SEMI DOT
-    | forallmayfailvartype tclause DOT
+    | forallmayfailvartype tclause SEMI? DOT
     ;
 
 programoptions

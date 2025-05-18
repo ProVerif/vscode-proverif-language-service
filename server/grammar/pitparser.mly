@@ -1,4 +1,4 @@
-# taken from commit deeb55d8 (not (yet) in master; proposal to make grammar more permissible)
+# taken from commit 0f06ae83 (in master; last in a series of commits to make grammar more permissible)
 %{
 
 open Parsing_helper
@@ -1183,7 +1183,7 @@ basicpattern:
     { PPatVar($1,None) }
 | IDENT COLON typeid
     { PPatVar($1, Some $3) }
-| UNDERSCORE 
+| UNDERSCORE
     { PPatAny ($1, None) }
 | UNDERSCORE COLON typeid
     { PPatAny ($1, Some $3) }

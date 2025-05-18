@@ -12,6 +12,64 @@ def get_rule_content(ruleContent):
         cleanedRuleContent.append(normalizedContent)
     return cleanedRuleContent
 
+def normalize_entries(entries):
+    normalized = []
+    for entry in entries:
+        normalized_entry = entry.strip("|").strip()
+        normalized_entry = normalized_entry.replace("  ", " ")
+        normalized_entry = normalized_entry.replace("  ", " ")
+        normalized_entry = normalized_entry.replace("  ", " ")
+
+        normalized.append(normalized_entry)
+
+
+    # try to subsume candidate by entry:
+    # if entry = lib EQUIVALENCE tprocess tprocess DOT EOF
+    # and candidate = lib EQUIVALENCE tprocess tprocess EOF
+    # then remove candidate from normalized
+    # and change generalized_entry to lib EQUIVALENCE tprocess tprocess ?DOT EOF
+    # only do transformation for words in uppercase
+    for index, entry in enumerate(normalized):
+        for candidate_index, candidate in enumerate(normalized):
+            if entry is None or candidate is None or candidate == entry:
+                continue
+
+            # split into words (see normalization first loop for why this should work)
+            entry_words = entry.split()
+            candidate_words = candidate.split()
+            if len(candidate_words) >= len(entry_words):
+                continue
+
+            # attempt transformation
+            candidate_offset = 0
+            subsumption_failed = False
+            for j in range(len(entry_words)):
+                candidate_in_bounds = len(candidate_words) > (j - candidate_offset)
+                candidate_word = candidate_words[j - candidate_offset] if candidate_in_bounds else None
+                entry_word = entry_words[j].strip('?')
+                if entry_word == candidate_word:
+                    continue
+
+                if entry_word not in ['SEMI', 'DOT']:
+                    subsumption_failed = True
+                    break
+
+                entry_words[j] = entry_word + "?"
+                candidate_offset += 1
+
+            if subsumption_failed:
+                continue
+
+            # prefer to replace rule that comes first
+            if candidate_index < index:
+                candidate_index, index = index, candidate_index
+
+            normalized[index] = " ".join(entry_words)
+            normalized[candidate_index] = None
+
+    return [x for x in normalized if x is not None]
+
+
 with open('pitparser.mly', 'r') as reader:
     content = reader.read()
 
@@ -78,12 +136,12 @@ with open('pitparser.mly', 'r') as reader:
             resultLines.append("")
             continue
         else:
-            for index, entry in enumerate(rules[rule]):
-                normalizedEntry = entry.strip("|").strip()
+            entries = normalize_entries(rules[rule])
+            for index, entry in enumerate(entries):
                 if index == 0:
-                    resultLines.append("    : " + normalizedEntry)
+                    resultLines.append("    : " + entry)
                 else:
-                    resultLines.append("    | " + normalizedEntry)
+                    resultLines.append("    | " + entry)
 
             resultLines.append("    ;")
             resultLines.append("")

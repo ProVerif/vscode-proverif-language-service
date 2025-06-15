@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.8.11
+
+Update dependencies.  
+
+
 ## v1.8.10
 
 Support more permissible grammar around dots and semicolons.  

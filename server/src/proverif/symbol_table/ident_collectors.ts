@@ -286,8 +286,9 @@ export const collectOptionsSeq = (getOptionsContext: () => OptionseqContext | un
         return [];
     }
 
+    const singleOption = tryGetContext(() => ctx.singleoption());
     const options = collectOptionsSeq(() => ctx.optionseq());
-    return [ctx.singleoption(), ...options];
+    return [singleOption, ...options].filter(nonNullable);
 };
 
 export const collectEqlist = (getTreducContext: () => EqlistContext | undefined): TypedParameterTerminal[] => {

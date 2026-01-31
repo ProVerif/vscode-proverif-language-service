@@ -59,7 +59,6 @@ export const findFirstLineStartInDocumentBackwards = (document: TextDocument, ca
 
     scanDocumentBackwards(document, start, (text: string, currentStart: Position) => {
         let currentPosition = text.length;
-        // eslint-disable-next-line no-constant-condition
         while (true) {
             const targetMatch = text.lastIndexOf(candidate, currentPosition - 1);
             if (targetMatch === -1) {

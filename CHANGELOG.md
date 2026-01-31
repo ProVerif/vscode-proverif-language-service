@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.8.14
+
+Update dependencies.  
+
+
 ## v1.8.13
 
 Fix crash on empty option structures in reduc.  

@@ -18,7 +18,7 @@
 	"activationEvents": [
 		"onCommand:workbench.action.tasks.runTask"
 	],
-	"main": "./client/out/extension",
+	"main": "./client/out/extension.js",
 	"contributes": {
 		"languages": [
 			{

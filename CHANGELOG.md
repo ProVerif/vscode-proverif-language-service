@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.8.17
+
+Fix start of extension.  
+
+
 ## v1.8.16
 
 Update dependencies.  

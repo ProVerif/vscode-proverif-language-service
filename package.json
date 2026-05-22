@@ -5,8 +5,7 @@
 	"author": "ProVerif",
 	"icon": "img/icon.png",
 	"license": "MIT",
-	"version": "1.8.16",
-	"type": "module",
+	"version": "1.8.17",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/ProVerif/vscode-proverif-language-service"
@@ -18,7 +17,7 @@
 	"activationEvents": [
 		"onCommand:workbench.action.tasks.runTask"
 	],
-	"main": "./client/out/extension.js",
+	"main": "./client/out/extension",
 	"contributes": {
 		"languages": [
 			{
